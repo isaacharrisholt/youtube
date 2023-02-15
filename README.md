@@ -7,6 +7,6 @@ run the code.
 
 ## Videos
 
-| Video                                                                           | Folder                           |
-|---------------------------------------------------------------------------------|----------------------------------|
-| [The Secret Weapon Every Software Engineer Needs](https://youtu.be/G0DB5fVqbeg) | [why-learn-sql](./why-learn-sql) |
+| Video                                                                           | Folder                               |
+|---------------------------------------------------------------------------------|--------------------------------------|
+| [The Secret Weapon Every Software Engineer Needs](https://youtu.be/G0DB5fVqbeg) | [why-learn-sql](./001-why-learn-sql) |
