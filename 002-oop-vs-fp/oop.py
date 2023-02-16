@@ -41,7 +41,7 @@ class Fish(Animal):
 
 class App:
     @staticmethod
-    def run():
+    def main():
         fido = Dog(name='Fido', logger=NamedLogger('Fido'))
         goldie = Fish(name='Goldie', logger=NamedLogger('Goldie'))
 
@@ -52,4 +52,4 @@ class App:
 
 
 if __name__ == '__main__':
-    App.run()
+    App.main()

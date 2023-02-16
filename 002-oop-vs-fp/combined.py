@@ -1,5 +1,5 @@
+import functools
 from dataclasses import dataclass
-from functools import partial
 from typing import Callable, Optional, Self
 
 Logger = Callable[[str], None]
@@ -16,7 +16,7 @@ class Animal:
 
     def __post_init__(self):
         if not self.log:
-            self.log = partial(named_log, name=self.name)
+            self.log = functools.partial(named_log, name=self.name)
 
     def speak(self) -> Self:
         self.log('Speaking')
