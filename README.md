@@ -10,3 +10,4 @@ run the code.
 | Video                                                                           | Folder                               |
 |---------------------------------------------------------------------------------|--------------------------------------|
 | [The Secret Weapon Every Software Engineer Needs](https://youtu.be/G0DB5fVqbeg) | [why-learn-sql](./001-why-learn-sql) |
+| [Python - To OOP or to FP?](https://youtu.be/lNRBF6l8Jh4)                       | [oop-vs-fp](./002-oop-vs-fp)         |
