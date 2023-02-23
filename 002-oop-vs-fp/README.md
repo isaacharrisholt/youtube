@@ -8,7 +8,7 @@ This directory contains four Python scripts. Three of them contain the same
 program written in an OOP, an FP and a combined style. The last is a real-world
 example of the combined style utilising Pydantic and FastAPI.
 
-For more information, watch the [video]([https://youtu.be/G0DB5fVqbeg](https://youtu.be/lNRBF6l8Jh4)).
+For more information, watch the [video](https://youtu.be/lNRBF6l8Jh4).
 
 ## Running the Code
 
