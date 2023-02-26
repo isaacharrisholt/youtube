@@ -16,7 +16,10 @@ def list_():
 
 
 @app.command()
-def add(username: str, password: str):
+def add(
+    username: str = typer.Option(..., prompt=True),
+    password: str = typer.Option(..., prompt=True, hide_input=True),
+):
     USERS[username] = password
     print(f"Added user {username}\n")
     list_()
