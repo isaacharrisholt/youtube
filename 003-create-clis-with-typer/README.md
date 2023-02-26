@@ -1,33 +1,25 @@
-# Python - To OOP or to FP?
+# Creating Rock Solid CLI Apps With Typer
 
-The debate between object-oriented programming and functional programming is one
-of the most hotly-contested debates in history. In this video, we investigate
-the differences and how you can combine the two paradigms in your Python code.
+Creating CLI apps is a great way to get started with Python, but creating truly
+great ones can be difficult if you're just using the standard library. In this
+video, we'll look at how to use [Typer](https://typer.tiangolo.com/) to create
+rock-solid CLI apps.
 
-This directory contains four Python scripts. Three of them contain the same
-program written in an OOP, an FP and a combined style. The last is a real-world
-example of the combined style utilising Pydantic and FastAPI.
-
-For more information, watch the [video]([https://youtu.be/G0DB5fVqbeg](https://youtu.be/lNRBF6l8Jh4)).
+For more information, watch the [video](https://youtu.be/8-i3U_3Gxko).
 
 ## Running the Code
 
 First, you'll need to install the dependencies:
 
 ```bash
-pip install -r requirements.txt
+pip install poetry
+poetry install
 ```
 
-To run `oop.py`, `fp.py` or `combined.py`, run:
+Once you've installed the dependencies, start a Poetry shell before attempting
+to run the CLI tool:
 
 ```bash
-python3 <file>
+poetry shell
+car --help
 ```
-
-To run the FastAPI example, run:
-
-```bash
-uvicorn real_world_example:app --reload --port 8000
-```
-
-Then, head to <http://localhost:8000/items/1>
