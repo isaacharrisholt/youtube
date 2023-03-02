@@ -1,0 +1,5 @@
+[metadata]
+template_description = "A template for creating a new FastAPI server."
+
+[variables]
+root_path_response = "Hello, world!"
