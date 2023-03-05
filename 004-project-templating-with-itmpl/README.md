@@ -8,7 +8,7 @@ It comes with a few built-in templates, which we'll use in this video. You can
 also create your own templates. The video shows you how to do that, and how to
 run arbitrary Python code in your templates.
 
-For more information, watch the [video](https://youtu.be/8-i3U_3Gxko).
+For more information, watch the [video](https://youtu.be/uRLT9wTdqLM).
 
 ## Following along
 
