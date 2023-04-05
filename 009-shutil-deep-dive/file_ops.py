@@ -53,14 +53,14 @@ def copy_odd_numbered_files(src: Path, dst: Path):
 
 
 def copy_even_numbered_trees(src: Path, dst: Path):
-    def is_odd(_, files: list[str]) -> list[str]:
+    def odd_files(_, files: list[str]) -> list[str]:
         return [
             file for file in files
             if DIGIT_PATTERN.search(file)
             and int(DIGIT_PATTERN.search(file).group(1)) % 2 == 1
         ]
 
-    shutil.copytree(src, dst, dirs_exist_ok=True, ignore=is_odd)
+    shutil.copytree(src, dst, dirs_exist_ok=True, ignore=odd_files)
 
 
 def clear_terminal():
