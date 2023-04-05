@@ -39,6 +39,20 @@ def non_destructive_copytree(src: Path, dst: Path):
             non_destructive_copytree(path, new_dir)
 
 
+def movetree(src: Path, dst: Path):
+    """Move a directory tree from one location to another without copying."""
+    for path in src.iterdir():
+        if path.is_file():
+            shutil.move(path, dst)
+        elif path.is_dir():
+            new_dir = dst / path.name
+            new_dir.mkdir(exist_ok=True)
+            movetree(path, new_dir)
+            print(path)
+            path.rmdir()
+            print(path.exists())
+
+
 def copy_even_numbered_trees(src: Path, dst: Path):
     def is_odd(_, files: list[str]) -> list[str]:
         return [
