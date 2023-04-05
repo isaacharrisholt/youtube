@@ -5,7 +5,7 @@ from pathlib import Path
 DIGIT_PATTERN = re.compile(r"(\d+)")
 
 
-def increment_numbers_in_string(string: str) -> str:
+def _increment_numbers_in_string(string: str) -> str:
     """Increment any numbers found in the given string."""
     return DIGIT_PATTERN.sub(lambda m: str(int(m.group(1)) + 1), string)
 
@@ -14,7 +14,7 @@ def increment_numbers_in_file_names(dir_path: Path):
     """Increment any numbers found in file names in the given directory."""
     for path in dir_path.iterdir():
         if path.is_file():
-            new_name = increment_numbers_in_string(path.name)
+            new_name = _increment_numbers_in_string(path.name)
             if new_name != path.name:
                 shutil.move(path, path.with_name(new_name))
 
