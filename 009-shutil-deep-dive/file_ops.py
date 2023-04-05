@@ -21,14 +21,6 @@ def increment_numbers_in_file_names(dir_path: Path):
             increment_numbers_in_file_names(path)
 
 
-def delete_odd_numbered_directories(dir_path: Path):
-    """Delete any directories with odd numbered names in the given directory."""
-    for path in dir_path.iterdir():
-        if path.is_dir():
-            if int(path.name) % 2 == 1:
-                shutil.rmtree(path)
-
-
 def movetree(src: Path, dst: Path):
     """Move a directory tree from one location to another without copying."""
     for path in src.iterdir():
@@ -38,9 +30,25 @@ def movetree(src: Path, dst: Path):
             new_dir = dst / path.name
             new_dir.mkdir(exist_ok=True)
             movetree(path, new_dir)
-            print(path)
             path.rmdir()
-            print(path.exists())
+
+
+def delete_odd_numbered_directories(dir_path: Path):
+    """Delete any directories with odd numbered names in the given directory."""
+    for path in dir_path.iterdir():
+        if path.is_dir():
+            if int(path.name) % 2 == 1:
+                shutil.rmtree(path)
+
+
+def copy_odd_numbered_files(src: Path, dst: Path):
+    for path in src.iterdir():
+        if (
+            path.is_file()
+            and DIGIT_PATTERN.search(path.name)
+            and int(DIGIT_PATTERN.search(path.name).group(1)) % 2 == 1
+        ):
+            shutil.copy(path, dst)
 
 
 def copy_even_numbered_trees(src: Path, dst: Path):
