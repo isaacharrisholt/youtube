@@ -17,6 +17,8 @@ def increment_numbers_in_file_names(dir_path: Path):
             new_name = _increment_numbers_in_string(path.name)
             if new_name != path.name:
                 shutil.move(path, path.with_name(new_name))
+        elif path.is_dir():
+            increment_numbers_in_file_names(path)
 
 
 def delete_odd_numbered_directories(dir_path: Path):
