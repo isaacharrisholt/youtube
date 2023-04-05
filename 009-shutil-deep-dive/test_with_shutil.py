@@ -3,7 +3,6 @@ import tempfile
 from pathlib import Path
 
 from file_ops import (
-    delete_odd_numbered_directories,
     increment_numbers_in_file_names,
     movetree,
 )
@@ -51,17 +50,3 @@ def test_movetree():
             assert not (Path(tempdir) / "2").exists()
             assert not (Path(tempdir) / "3").exists()
             assert not (Path(tempdir) / "4").exists()
-
-
-def test_delete_odd_numbered_directories():
-    with tempfile.TemporaryDirectory() as tempdir:
-        shutil.copytree("my-test-dir", tempdir, dirs_exist_ok=True)
-        delete_odd_numbered_directories(Path(tempdir))
-
-        # Test directories are present with new names
-        assert (Path(tempdir) / "2").exists()
-        assert (Path(tempdir) / "4").exists()
-
-        # Test directories are not present with old names
-        assert not (Path(tempdir) / "1").exists()
-        assert not (Path(tempdir) / "3").exists()

@@ -33,12 +33,13 @@ def movetree(src: Path, dst: Path):
             path.rmdir()
 
 
-def delete_odd_numbered_directories(dir_path: Path):
-    """Delete any directories with odd numbered names in the given directory."""
+def delete_large_directories(dir_path: Path, max_size: int = 1e6):
+    """Delete any directories in the given directory that are larger than the
+    given size in bytes.
+    """
     for path in dir_path.iterdir():
-        if path.is_dir():
-            if int(path.name) % 2 == 1:
-                shutil.rmtree(path)
+        if path.is_dir() and shutil.disk_usage(path).total > max_size:
+            shutil.rmtree(path)
 
 
 def copy_odd_numbered_files(src: Path, dst: Path):
@@ -48,7 +49,7 @@ def copy_odd_numbered_files(src: Path, dst: Path):
             and DIGIT_PATTERN.search(path.name)
             and int(DIGIT_PATTERN.search(path.name).group(1)) % 2 == 1
         ):
-            shutil.copy(path, dst)
+            shutil.copy2(path, dst)
 
 
 def copy_even_numbered_trees(src: Path, dst: Path):
