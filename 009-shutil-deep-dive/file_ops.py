@@ -29,18 +29,6 @@ def delete_odd_numbered_directories(dir_path: Path):
                 shutil.rmtree(path)
 
 
-def non_destructive_copytree(src: Path, dst: Path):
-    """Copy the contents of the given source directory to the given destination
-    directory."""
-    for path in src.iterdir():
-        if path.is_file():
-            shutil.copy2(path, dst)
-        elif path.is_dir():
-            new_dir = dst / path.name
-            new_dir.mkdir()
-            non_destructive_copytree(path, new_dir)
-
-
 def movetree(src: Path, dst: Path):
     """Move a directory tree from one location to another without copying."""
     for path in src.iterdir():
