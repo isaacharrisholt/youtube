@@ -14,3 +14,4 @@ run the code.
 | [Creating Rock-Solid CLI Apps With Typer](https://youtu.be/8-i3U_3Gxko)                 | [create-clis-with-typer](./003-create-clis-with-typer)                 |
 | [Start A New Project In Seconds With iTmpl](https://youtu.be/uRLT9wTdqLM)               | [project-templating-with-itmpl](./004-project-templating-with-itmpl)   |
 | [The Strategy Pattern Will Make Your Python Code CLEANER](https://youtu.be/hVLb3-OE3pM) | [the-strategy-pattern-in-python](./008-the-strategy-pattern-in-python) |
+| [Easily Copy MILLIONS of Files With shutil!](https://youtu.be/NmWXJHLMhaQ)              | [shutil-deep-dive](./009-shutil-deep-dive)                             |
