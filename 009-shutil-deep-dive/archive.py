@@ -15,7 +15,7 @@ def main():
         f"Enter the archive type. Options are {', '.join(opts)}: "
     )
 
-    if archive_type not in opts:
+    if archive_type.strip() not in opts:
         print(f"Invalid archive type: {archive_type}")
         sys.exit(1)
 

@@ -42,12 +42,12 @@ def delete_large_directories(dir_path: Path, max_size: int = 1e6):
             shutil.rmtree(path)
 
 
-def copy_odd_numbered_files(src: Path, dst: Path):
+def copy_even_numbered_files(src: Path, dst: Path):
     for path in src.iterdir():
         if (
             path.is_file()
             and DIGIT_PATTERN.search(path.name)
-            and int(DIGIT_PATTERN.search(path.name).group(1)) % 2 == 1
+            and int(DIGIT_PATTERN.search(path.name).group(1)) % 2 == 0
         ):
             shutil.copy2(path, dst)
 
