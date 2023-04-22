@@ -2,7 +2,7 @@ use pyo3::prelude::*;
 
 /// Calculate the nth Fibonacci number.
 #[pyfunction]
-fn fib(n: u64) -> u64 {
+fn fib(n: u32) -> u32 {
     if n <= 1 {
         return n;
     }

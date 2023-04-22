@@ -3,7 +3,6 @@ from timeit import timeit
 
 import fibbers
 
-
 RUNS = 100
 
 
