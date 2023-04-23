@@ -16,3 +16,4 @@ run the code.
 | [The Strategy Pattern Will Make Your Python Code CLEANER](https://youtu.be/hVLb3-OE3pM) | [the-strategy-pattern-in-python](./008-the-strategy-pattern-in-python)         |
 | [Easily Copy MILLIONS of Files With shutil!](https://youtu.be/NmWXJHLMhaQ)              | [shutil-deep-dive](./009-shutil-deep-dive)                                     |
 | [How To Make Your Python Packages Really Fast With RUST](https://youtu.be/jlWhnrk8go0)  | [creating-python-packages-with-rust](./010-creating-python-packages-with-rust) |
+| [Randomized Testing In Python With Hypothesis](https://youtu.be/dsBitCcWWf4)            | [fuzzy-testing-with-hypothesis](./011-fuzzy-testing-with-hypothesis)           |
