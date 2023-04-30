@@ -1,4 +1,4 @@
-# Randomized Testing In Python With Hypothesis
+# Test Every Possible Outcome With Hypothesis
 
 Property-based testing, or fuzzy testing, is a testing method that allows you
 to test your code with massively varying data, all without having to write any
