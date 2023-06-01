@@ -24,7 +24,7 @@ impl CSVSum {
             return Err(PyValueError::new_err("Can't return a list of more files than are available"));
         }
 
-        self.files.sort_by(|a, b| a.total.partial_cmp(&b.total).unwrap());
+        self.files.sort_by(|a, b| b.total.partial_cmp(&a.total).unwrap());
 
         Ok(self.files[0..n].to_vec())
     }
