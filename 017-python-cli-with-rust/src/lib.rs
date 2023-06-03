@@ -3,6 +3,7 @@ use std::fs::File;
 use csv;
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
+use rayon::prelude::*;
 
 #[derive(Clone)]
 #[pyclass(module = "csv_sum", get_all)]
@@ -44,7 +45,7 @@ fn sum_column(mut rdr: csv::Reader<File>, idx: usize) -> f64 {
 #[pyfunction]
 fn sum_by_header(paths: Vec<&str>, header: &str) -> PyResult<CSVSum> {
     let totals: Vec<FileTotal> = paths
-        .iter()
+        .par_iter()
         .map(|&p| {
             let mut rdr = csv::Reader::from_path(p).expect("Unable to read file");
 
@@ -79,7 +80,7 @@ fn sum_by_header(paths: Vec<&str>, header: &str) -> PyResult<CSVSum> {
 #[pyfunction]
 fn sum_by_index(paths: Vec<&str>, idx: usize) -> PyResult<CSVSum> {
     let totals: Vec<FileTotal> = paths
-        .iter()
+        .par_iter()
         .map(|&p| {
             let rdr = csv::ReaderBuilder::new()
                 .has_headers(false)
