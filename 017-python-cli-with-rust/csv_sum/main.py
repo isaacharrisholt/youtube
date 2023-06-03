@@ -4,7 +4,7 @@ import typer
 from rich import print
 from rich.table import Table
 
-from csv_sum import _csv_sum
+from csv_sum import rust
 
 app = typer.Typer()
 
@@ -25,9 +25,9 @@ def main(
     paths = [str(p.resolve()) for p in Path.cwd().rglob(pattern)]
 
     if header is not None:
-        csv_sum_obj = _csv_sum.sum_by_header(paths, header)
+        csv_sum_obj = rust.sum_by_header(paths, header)
     else:
-        csv_sum_obj = _csv_sum.sum_by_index(paths, index)
+        csv_sum_obj = rust.sum_by_index(paths, index)
 
     print(csv_sum_obj.total)
 

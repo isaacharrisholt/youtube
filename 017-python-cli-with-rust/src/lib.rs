@@ -108,7 +108,7 @@ fn sum_by_index(paths: Vec<&str>, idx: usize) -> PyResult<CSVSum> {
 
 /// A Python module implemented in Rust.
 #[pymodule]
-fn _csv_sum(_py: Python, m: &PyModule) -> PyResult<()> {
+fn rust(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(sum_by_header, m)?)?;
     m.add_function(wrap_pyfunction!(sum_by_index, m)?)?;
     m.add_class::<CSVSum>()?;

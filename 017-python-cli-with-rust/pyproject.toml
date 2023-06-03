@@ -20,4 +20,4 @@ csvsum = "csv_sum.main:app"
 
 [tool.maturin]
 features = ["pyo3/extension-module"]
-module-name = "csv_sum._csv_sum"
+module-name = "csv_sum.rust"
