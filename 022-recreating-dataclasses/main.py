@@ -28,6 +28,7 @@ def parse_fields(cls: type) -> dict[str, Field]:
 
 def create_parameters(fields: dict[str, Field], class_name: str) -> str:
     params = []
+    defaults_started = False
     for field in fields.values():
         if not isinstance(field.default, NoDefault):
             default = f" = None"
