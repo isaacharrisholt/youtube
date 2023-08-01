@@ -1,9 +1,12 @@
+from typing import Any
+
+
 class NoDefault:
     pass
 
 
 class Field:
-    def __init__(self, name: str, type_: type, default=NoDefault()):
+    def __init__(self, name: str, type_: type, default: Any = NoDefault()):
         self.name = name
         self.type_ = type_
         self.default = default
