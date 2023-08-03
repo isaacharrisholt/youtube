@@ -1,12 +1,12 @@
 from typing import Any
 
 
-class NoDefault:
+class DefaultSentinel:
     pass
 
 
 class Field:
-    def __init__(self, name: str, type_: type, default: Any = NoDefault()):
+    def __init__(self, name: str, type_: type, default: Any = DefaultSentinel()):
         self.name = name
         self.type_ = type_
         self.default = default
@@ -18,10 +18,9 @@ def parse_fields(cls: type) -> dict[str, Field]:
     fields = {}
     for name, value in annotations.items():
         if name in class_dict:
-            default = class_dict[name]
+            fields[name] = Field(name, value, class_dict[name])
         else:
-            default = None
-        fields[name] = Field(name, value, default)
+            fields[name] = Field(name, value)
 
     return fields
 
@@ -30,16 +29,16 @@ def create_parameters(fields: dict[str, Field], class_name: str) -> str:
     params = []
     defaults_started = False
     for field in fields.values():
-        if not isinstance(field.default, NoDefault):
-            default = f" = None"
-            defaults_started = True
-        else:
+        if isinstance(field.default, DefaultSentinel):
             default = ""
             if defaults_started:
                 raise TypeError(
                     "Non-default argument follows default argument"
                     f"for {class_name}.{field.name}"
                 )
+        else:
+            default = f" = DefaultSentinel()"
+            defaults_started = True
         params.append(f"{field.name}: {field.type_.__name__}{default}")
 
     return ", ".join(params)
@@ -51,8 +50,8 @@ def create_assignments(cls: type) -> str:
     for name in annotations:
         assignments.append(
             f"""
-    if not isinstance(self._FIELDS["{name}"].default, NoDefault):
-        self.{name} = {name} or copy.deepcopy(self._FIELDS["{name}"].default)
+    if isinstance({name}, DefaultSentinel):
+        self.{name} = copy.deepcopy(self._FIELDS["{name}"].default)
     else:
         self.{name} = {name}
         """.strip(
@@ -95,7 +94,7 @@ class Person:
     friends: list[str] = ["John", "Jane"]
 
     def __post_init__(self):
-        print("Hello from post init")
+        print(f"Hello from {self.name}'s post init")
 
     def greet(self):
         print(f"Hello {self.name}")
@@ -106,6 +105,7 @@ def main():
     john.greet()
     john.friends.append("Hugo")
     print(john.friends)
+    print()
 
     mary = Person("Mary", 30)
     print(mary.friends)
