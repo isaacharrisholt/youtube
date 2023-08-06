@@ -8,7 +8,7 @@ run the code.
 ## Videos
 
 | Video                                                                                   | Folder                                                                         |
-|-----------------------------------------------------------------------------------------|--------------------------------------------------------------------------------|
+| --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
 | [The Secret Weapon Every Software Engineer Needs](https://youtu.be/G0DB5fVqbeg)         | [why-learn-sql](./001-why-learn-sql)                                           |
 | [Python - To OOP or to FP?](https://youtu.be/lNRBF6l8Jh4)                               | [oop-vs-fp](./002-oop-vs-fp)                                                   |
 | [Creating Rock-Solid CLI Apps With Typer](https://youtu.be/8-i3U_3Gxko)                 | [create-clis-with-typer](./003-create-clis-with-typer)                         |
@@ -20,3 +20,4 @@ run the code.
 | [Why You SHOULDN'T Be Writing Raw SQL In 2023](https://youtu.be/Cp3bXHYp-bY)            | [why-you-shouldnt-write-sql](./012-why-you-shouldnt-write-sql)                 |
 | [Python, Rust and Why You No Longer Need C](https://youtu.be/YSUYjuMqHpE)               | [python-rust-and-c](./015-python-rust-and-c)                                   |
 | [Advanced PyO3: Creating A Python CLI With RUST](https://youtu.be/8yGR3xjTzDw)          | [python-cli-with-rust](./017-python-cli-with-rust)                             |
+| [Metaprogramming in Python With Class Decorators](https://youtu.be/9ofxaIWoF3I)         | [recreating-dataclasses](./022-recreating-dataclasses)                         |
