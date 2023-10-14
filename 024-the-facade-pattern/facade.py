@@ -1,12 +1,12 @@
 from typing import Self
 
 from database import Database
-from stripe import StripePaymentProcessorFacade
+from payment import PaymentProcessorFacade
 
 
 class OrderProcessor:
     def __init__(self: Self):
-        self._stripe = StripePaymentProcessorFacade(
+        self._payment_processor = PaymentProcessorFacade(
             "API_KEY"
         )  # Get API key from config/env
         self._database = Database("order")
@@ -16,7 +16,7 @@ class OrderProcessor:
         self._database.insert(order_data)
 
         # Process payment
-        paid = self._stripe.pay(order_data["amount"])
+        paid = self._payment_processor.pay(order_data["amount"])
 
         if not paid:
             raise Exception(f"Payment for order {order_data['id']} was not successful")
