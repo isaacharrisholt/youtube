@@ -22,3 +22,4 @@ run the code.
 | [Advanced PyO3: Creating A Python CLI With RUST](https://youtu.be/8yGR3xjTzDw)          | [python-cli-with-rust](./017-python-cli-with-rust)                             |
 | [Metaprogramming in Python With Class Decorators](https://youtu.be/9ofxaIWoF3I)         | [recreating-dataclasses](./022-recreating-dataclasses)                         |
 | [SIMPLIFYING Your Python Code With The Facade Pattern](https://youtu.be/tCzmda1VCUQ)    | [the-facade-pattern](./024-the-facade-pattern)                                 |
+| [Use THIS Language to Speed Up Your Python Code](https://youtu.be/Bo7lXrqaaIc)          | [speed-up-python-code-with-nim](./028-speed-up-python-code-with-nim)           |
