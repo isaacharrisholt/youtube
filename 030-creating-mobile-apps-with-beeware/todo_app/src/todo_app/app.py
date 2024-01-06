@@ -1,16 +1,14 @@
 """
 My first application
 """
-
 from typing import Any
 
 import toga
-from toga.style.pack import COLUMN, ROW, Pack
+from toga.style import Pack
+from toga.style.pack import COLUMN, ROW
 
 
-class HelloWorld(toga.App):
-    todos: toga.Box
-
+class TodoApp(toga.App):
     def startup(self):
         """
         Construct and show the Toga application.
@@ -33,7 +31,7 @@ class HelloWorld(toga.App):
 
         button = toga.Button(
             "Add todo",
-            on_press=lambda widget, **kwargs: self.add_todo_item(self.todo_input.value),
+            on_press=self.add_todo_item,
             style=Pack(padding=5),
         )
 
@@ -47,7 +45,8 @@ class HelloWorld(toga.App):
         self.main_window.content = main_box
         self.main_window.show()
 
-    def add_todo_item(self, todo: str):
+    def add_todo_item(self, *_: Any, **__: Any):
+        todo = self.todo_input.value.strip()
         if not todo:
             return
         todo_label = toga.Label(todo, style=Pack(padding=(0, 5), flex=1))
@@ -60,22 +59,13 @@ class HelloWorld(toga.App):
         todo_box.add(todo_label)
         todo_box.add(todo_button)
         self.todos.add(todo_box)
+        self.todo_input.value = ""
 
-    def delete_todo_item(self, widget: Any):
+    def delete_todo_item(self, widget: toga.Button, **_: Any):
+        if widget.parent is None:
+            return
         self.todos.remove(widget.parent)
-
-    # def update_todos(self):
-    #     self.todos_box.remove(*self.todos_box.children)
-    #     for todo in self.todos:
-    #         self.todos_box.add(todo)
-
-
-def greeting(name: str) -> str:
-    if name:
-        return f"Hello, {name}"
-
-    return "Hello, stranger"
 
 
 def main():
-    return HelloWorld()
+    return TodoApp()
