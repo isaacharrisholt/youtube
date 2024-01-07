@@ -23,3 +23,4 @@ run the code.
 | [Metaprogramming in Python With Class Decorators](https://youtu.be/9ofxaIWoF3I)         | [recreating-dataclasses](./022-recreating-dataclasses)                         |
 | [SIMPLIFYING Your Python Code With The Facade Pattern](https://youtu.be/tCzmda1VCUQ)    | [the-facade-pattern](./024-the-facade-pattern)                                 |
 | [Use THIS Language to Speed Up Your Python Code](https://youtu.be/Bo7lXrqaaIc)          | [speed-up-python-code-with-nim](./028-speed-up-python-code-with-nim)           |
+| [How to Create Mobile Apps with Python: BeeWare Tutorial](https://youtu.be/CvjepVlYR2M) | [creating-mobile-apps-with-beeware](./030-creating-mobile-apps-with-beeware)   |
