@@ -1,4 +1,5 @@
 import math
+import os
 from random import randint
 from timeit import timeit
 from typing import Callable
@@ -43,6 +44,12 @@ def main():
         ("Rust", distance_rs.calculate_distance),
         ("Nim", distance_nim.calculateDistance),
     ]
+
+    if not os.getenv("SKIP_JULIA"):
+        from julia import Main
+
+        Main.include("distance_julia.jl")
+        tests.append(("Julia", Main.calculate_distance))
 
     results = [benchmark_distance_function(lang, func, points) for lang, func in tests]
 
