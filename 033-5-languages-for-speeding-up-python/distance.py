@@ -4,6 +4,7 @@ from timeit import timeit
 from typing import Callable
 
 import distance_c
+import distance_nim
 import distance_rs
 
 
@@ -16,7 +17,7 @@ def benchmark_distance_function(
     func: Callable[[list[tuple[int, int]]], float],
     points: list[tuple[int, int]],
     times: int = 1000,
-) -> (str, float):
+) -> tuple[str, float]:
     print(f"{lang} implementation: ", end="", flush=True)
     time = timeit(lambda: func(points), number=times) / times
     print(f"{time:.6f} seconds")
@@ -40,6 +41,7 @@ def main():
         ("Python", calculate_distance),
         ("C", distance_c.calculate_distance),
         ("Rust", distance_rs.calculate_distance),
+        ("Nim", distance_nim.calculateDistance),
     ]
 
     results = [benchmark_distance_function(lang, func, points) for lang, func in tests]
