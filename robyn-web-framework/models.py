@@ -1,21 +1,18 @@
-from sqlalchem.orm import Boolean, Column, Integer, String
-from sqlalchemy import create_engine
+from sqlalchemy import Column, Integer, String, create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
 Base = declarative_base()
 
-engine = create_engine("sqlite+pysqlite:///:memory:", echo=True)
+engine = create_engine("sqlite+pysqlite:///db.sql", echo=True)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
-class User(Base):
-    __tablename__ = "users"
+class Note(Base):
+    __tablename__ = "notes"
 
     id = Column(Integer, primary_key=True, index=True)
-    username = Column(String, unique=True, index=True)
-    hashed_password = Column(String)
-    is_active = Column(Boolean, default=True)
-    is_superuser = Column(Boolean, default=False)
+    title = Column(String, index=True)
+    content = Column(String)
 
 
 if __name__ == "__main__":
