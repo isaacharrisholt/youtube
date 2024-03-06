@@ -46,7 +46,7 @@ def get_note_by_id(request: Request):
                 headers=Headers({}),
                 description="Bad request",
             )
-        note = session.query(Note).get(int(note_id))
+        note = session.get(Note, int(note_id))
 
         return templates.render_template("editor.html", note=note)
 
@@ -68,7 +68,7 @@ def update_note_by_id(request: Request):
     title = title_list[0]
 
     with SessionLocal() as session:
-        note = session.query(Note).get(int(note_id))
+        note = session.get(Note, int(note_id))
         if note is None:
             return Response(
                 status_code=404,
@@ -94,7 +94,7 @@ def delete_note_by_id(request: Request):
         )
 
     with SessionLocal() as session:
-        note = session.query(Note).get(int(note_id))
+        note = session.get(Note, note_id)
         if note is None:
             return Response(
                 status_code=404,

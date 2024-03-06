@@ -1,4 +1,5 @@
-<input type="text" name="title" id="title" class="w-full p-4" placeholder="Title" value="{{ note.title }}">
+<input type="text" name="title" id="title" class="w-full p-4 font-bold text-lg" placeholder="Title"
+  value="{{ note.title }}">
 <textarea class="w-full flex-grow p-4" id="content" name="content" placeholder="Content"
   hx-trigger="load, keyup changed" hx-post="/markdown" hx-target="#preview" hx-params="content">{{ note.content
   }}</textarea>
