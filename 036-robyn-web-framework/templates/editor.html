@@ -1,0 +1,11 @@
+<input type="text" name="title" id="title" class="w-full p-4 font-bold text-lg" placeholder="Title"
+  value="{{ note.title }}">
+<textarea class="w-full flex-grow p-4" id="content" name="content" placeholder="Content"
+  hx-trigger="load, keyup changed" hx-post="/markdown" hx-target="#preview" hx-params="content">{{ note.content
+  }}</textarea>
+<div class="flex flex-row">
+  <button hx-patch="/note/{{ note.id }}" hx-swap="none"
+    class="rounded-sm bg-blue-400 text-white py-2 flex-grow">Save</button>
+  <button hx-delete="/note/{{ note.id }}" hx-target="#editor-container"
+    class="rounded-sm bg-red-400 text-white py-2 px-4 w-fit">Delete</button>
+</div>

@@ -1,0 +1,5 @@
+{% for note in notes %}
+<button class="text-left p-1" hx-get="/note/{{ note.id }}" hx-target="#editor-container">
+  <h2 class="text-xl font-bold">{{ note.title }}</h2>
+</button>
+{% endfor %}
