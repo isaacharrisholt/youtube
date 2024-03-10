@@ -25,3 +25,4 @@ run the code.
 | [Use THIS Language to Speed Up Your Python Code](https://youtu.be/Bo7lXrqaaIc)          | [speed-up-python-code-with-nim](./028-speed-up-python-code-with-nim)            |
 | [How to Create Mobile Apps with Python: BeeWare Tutorial](https://youtu.be/CvjepVlYR2M) | [creating-mobile-apps-with-beeware](./030-creating-mobile-apps-with-beeware)    |
 | [The 5 Languages Making Python Code Faster](https://youtu.be/dvdGuuTad-g)               | [5-languages-for-speeding-up-python](./033-5-languages-for-speeding-up-python/) |
+| [You might never need Pandas again...](https://youtu.be/qDEY0WstcLc)                    | [polars-vs-pandas](./035-polars-vs-pandas/)                                     |
