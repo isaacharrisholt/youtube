@@ -11,25 +11,14 @@ import app/cache.{type Cache}
 const pokeapi_url = "https://pokeapi.co/api/v2/"
 
 /// Get a Pokemon by its name from the PokeAPI
-pub fn get_pokemon(
-  name: String,
-  pokemon_cache: Cache(Pokemon),
-) -> Result(Pokemon, dynamic.Dynamic) {
-  case cache.get(pokemon_cache, name) {
+pub fn get_pokemon(name: String) -> Result(Pokemon, dynamic.Dynamic) {
+  let assert Ok(req) = request.to(pokeapi_url <> "pokemon/" <> name)
+
+  use resp <- result.try(httpc.send(req))
+
+  case json.decode(from: resp.body, using: pokemon_decoder()) {
     Ok(pokemon) -> Ok(pokemon)
-    Error(_) -> {
-      let assert Ok(req) = request.to(pokeapi_url <> "pokemon/" <> name)
-
-      use resp <- result.try(httpc.send(req))
-
-      case json.decode(from: resp.body, using: pokemon_decoder()) {
-        Ok(pokemon) -> {
-          cache.set(pokemon_cache, name, pokemon)
-          Ok(pokemon)
-        }
-        Error(err) -> Error(dynamic.from(err))
-      }
-    }
+    Error(err) -> Error(dynamic.from(err))
   }
 }
 

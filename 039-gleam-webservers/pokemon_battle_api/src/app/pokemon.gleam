@@ -86,3 +86,8 @@ pub fn move_decoder() {
     dynamic.field("damage_class", resource_info_decoder()),
   )
 }
+
+/// A Pokemon with all its move details
+pub type PokemonWithMoves {
+  PokemonWithMoves(pokemon: Pokemon, moves: List(Move))
+}

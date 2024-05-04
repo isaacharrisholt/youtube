@@ -14,6 +14,7 @@ pub type Cache(value) =
 pub type Message(value) {
   Set(key: String, value: value)
   Get(reply_with: Subject(Result(value, Nil)), key: String)
+  GetKeys(reply_with: Subject(List(String)))
   Shutdown
 }
 
@@ -31,6 +32,10 @@ fn handle_message(
       process.send(client, dict.get(store, key))
       actor.continue(store)
     }
+    GetKeys(client) -> {
+      process.send(client, dict.keys(store))
+      actor.continue(store)
+    }
   }
 }
 
@@ -46,6 +51,10 @@ pub fn set(cache: Cache(value), key: String, value: value) {
 pub fn get(cache: Cache(value), key: String) -> Result(value, Nil) {
   io.println("Getting cache value: " <> key)
   actor.call(cache, Get(_, key), timeout)
+}
+
+pub fn get_keys(cache: Cache(value)) -> List(String) {
+  actor.call(cache, GetKeys, timeout)
 }
 
 pub fn shutdown(cache: Cache(value)) {
