@@ -1,9 +1,10 @@
 import gleam/erlang/process
 import mist
 import wisp
-import app/router
+import app/battle/manager
 import app/cache
 import app/context.{Context}
+import app/router
 
 pub fn main() {
   wisp.configure_logger()
@@ -15,6 +16,9 @@ pub fn main() {
 
   let context = Context(pokemon_cache, move_cache, battle_cache)
   let handler = router.handle_request(_, context)
+
+  // Start battle manager
+  manager.start(pokemon_cache, battle_cache)
 
   let assert Ok(_) =
     wisp.mist_handler(handler, secret_key_base)

@@ -23,7 +23,9 @@ fn fetch_pokemon(ctx: Context, name: String) {
     Error(_) -> {
       use pokemon <- result.try(get_pokemon(name))
       let moves = get_moves_for_pokemon(pokemon, ctx.move_cache)
-      Ok(PokemonWithMoves(pokemon, moves))
+      let pokemon_with_moves = PokemonWithMoves(pokemon, moves)
+      cache.set(ctx.pokemon_cache, name, pokemon_with_moves)
+      Ok(pokemon_with_moves)
     }
   }
 }
@@ -49,9 +51,14 @@ fn get_battle_handler(ctx: Context, name1: String, name2: String) {
       use pokemon1 <- result.try(fetch_pokemon(ctx, name1))
       use pokemon2 <- result.try(fetch_pokemon(ctx, name2))
 
-      result.map_error(battle.battle(pokemon1, pokemon2), fn(_) {
-        dynamic.from(Nil)
-      })
+      case battle.battle(pokemon1, pokemon2) {
+        Ok(winner) -> {
+          cache.get_composite_key([name1, name2])
+          |> cache.set(ctx.battle_cache, _, winner)
+          Ok(winner)
+        }
+        Error(e) -> Error(dynamic.from(e))
+      }
     }
   }
   case result {
