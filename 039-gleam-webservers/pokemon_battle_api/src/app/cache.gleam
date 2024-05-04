@@ -1,7 +1,6 @@
 import gleam/otp/actor
 import gleam/erlang/process.{type Subject}
 import gleam/dict.{type Dict}
-import gleam/io
 
 const timeout = 3000
 
@@ -44,12 +43,10 @@ pub fn new() -> Result(Subject(Message(value)), actor.StartError) {
 }
 
 pub fn set(cache: Cache(value), key: String, value: value) {
-  io.println("Setting cache value: " <> key)
   process.send(cache, Set(key, value))
 }
 
 pub fn get(cache: Cache(value), key: String) -> Result(value, Nil) {
-  io.println("Getting cache value: " <> key)
   actor.call(cache, Get(_, key), timeout)
 }
 
