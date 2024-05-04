@@ -1,9 +1,9 @@
 import wisp.{type Request, type Response}
-import gleam/io
+import gleam/json
 import app/pokeapi.{get_moves_for_pokemon, get_pokemon}
 import gleam/result
 import app/context.{type Context}
-import app/pokemon.{PokemonWithMoves}
+import app/pokemon.{PokemonWithMoves, encode_pokemon_with_moves}
 import app/cache
 import app/battle
 import gleam/dynamic
@@ -31,8 +31,9 @@ fn fetch_pokemon(name: String, ctx: Context) {
 fn get_pokemon_handler(name: String, ctx: Context) -> Response {
   case fetch_pokemon(name, ctx) {
     Ok(pokemon) -> {
-      io.debug(pokemon)
-      wisp.ok()
+      encode_pokemon_with_moves(pokemon)
+      |> json.to_string_builder
+      |> wisp.json_response(200)
     }
     Error(_) -> wisp.not_found()
   }
@@ -49,8 +50,9 @@ fn get_battle_handler(name1: String, name2: String, ctx) {
   }
   case result {
     Ok(pokemon) -> {
-      io.debug("Winner: " <> pokemon.pokemon.name)
-      wisp.ok()
+      json.object([#("winner", json.string(pokemon.pokemon.name))])
+      |> json.to_string_builder
+      |> wisp.json_response(200)
     }
     Error(_) -> wisp.internal_server_error()
   }

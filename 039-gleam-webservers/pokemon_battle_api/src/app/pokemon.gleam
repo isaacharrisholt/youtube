@@ -1,5 +1,7 @@
 import gleam/dynamic
+import gleam/list
 import gleam/option.{type Option}
+import gleam/json.{int, nullable, object, preprocessed_array, string}
 
 /// Info about a resource
 pub type ResourceInfo {
@@ -26,6 +28,14 @@ fn stat_decoder() {
     dynamic.field("effort", dynamic.int),
     dynamic.field("stat", resource_info_decoder()),
   )
+}
+
+fn encode_stat(stat: Stat) {
+  object([
+    #("name", string(stat.stat.name)),
+    #("base_stat", int(stat.base_stat)),
+    #("effort", int(stat.effort)),
+  ])
 }
 
 /// A move that a Pokemon can learn
@@ -87,7 +97,30 @@ pub fn move_decoder() {
   )
 }
 
+fn encode_move(move: Move) {
+  object([
+    #("id", int(move.id)),
+    #("name", string(move.name)),
+    #("accuracy", nullable(move.accuracy, int)),
+    #("pp", int(move.pp)),
+    #("priority", int(move.priority)),
+    #("power", nullable(move.power, int)),
+    #("type", string(move.type_.name)),
+    #("damage_class", string(move.damage_class.name)),
+  ])
+}
+
 /// A Pokemon with all its move details
 pub type PokemonWithMoves {
   PokemonWithMoves(pokemon: Pokemon, moves: List(Move))
+}
+
+pub fn encode_pokemon_with_moves(pokemon: PokemonWithMoves) {
+  object([
+    #("id", int(pokemon.pokemon.id)),
+    #("name", string(pokemon.pokemon.name)),
+    #("base_experience", int(pokemon.pokemon.base_experience)),
+    #("stats", preprocessed_array(list.map(pokemon.pokemon.stats, encode_stat))),
+    #("moves", preprocessed_array(list.map(pokemon.moves, encode_move))),
+  ])
 }
