@@ -1,6 +1,7 @@
 import gleam/otp/actor
 import gleam/erlang/process.{type Subject}
 import gleam/dict.{type Dict}
+import gleam/string
 
 const timeout = 3000
 
@@ -56,4 +57,8 @@ pub fn get_keys(cache: Cache(value)) -> List(String) {
 
 pub fn shutdown(cache: Cache(value)) {
   process.send(cache, Shutdown)
+}
+
+pub fn get_composite_key(keys: List(String)) -> String {
+  string.join(keys, ":")
 }

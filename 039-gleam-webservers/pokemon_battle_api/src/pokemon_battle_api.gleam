@@ -11,8 +11,9 @@ pub fn main() {
 
   let assert Ok(pokemon_cache) = cache.new()
   let assert Ok(move_cache) = cache.new()
+  let assert Ok(battle_cache) = cache.new()
 
-  let context = Context(pokemon_cache, move_cache)
+  let context = Context(pokemon_cache, move_cache, battle_cache)
   let handler = router.handle_request(_, context)
 
   let assert Ok(_) =
