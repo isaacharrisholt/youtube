@@ -1,3 +1,9 @@
+//// Functions for interacting with the PokeApi (https://pokeapi.co/).
+////
+//// Where possible, the results of these functions are parsed into
+//// types defined in the `app/pokemon` module, to make it easier to
+//// work with the data in the rest of the application.
+
 import gleam/http/request
 import gleam/http/response.{type Response}
 import gleam/httpc
@@ -13,7 +19,7 @@ import app/pokemon.{
 
 const pokeapi_url = "https://pokeapi.co/api/v2"
 
-/// Make a request to the PokeAPI
+/// Make a request to the PokeAPI.
 pub fn make_request(path: String) -> Result(Response(String), String) {
   let assert Ok(req) = request.to(pokeapi_url <> path)
 
@@ -33,6 +39,11 @@ pub fn make_request(path: String) -> Result(Response(String), String) {
 }
 
 /// Get a Pokemon by its name from the PokeAPI
+///
+/// Note: this function doesn't use the cache, as it returns an ApiPokemon,
+/// which doesn't have all associated move data. We cache the moves separately
+/// to avoid making multiple requests for the same move, and then cache
+/// the full Pokemon data later.
 pub fn get_pokemon(name: String) -> Result(ApiPokemon, String) {
   use resp <- result.try(make_request("/pokemon/" <> name))
 
@@ -42,7 +53,8 @@ pub fn get_pokemon(name: String) -> Result(ApiPokemon, String) {
   }
 }
 
-/// Get a move by its name from the PokeAPI
+/// Get a move by its name from the PokeAPI.
+/// Will also cache the move in the provided cache.
 pub fn get_move(name: String, move_cache: Cache(Move)) -> Result(Move, String) {
   case cache.get(move_cache, name) {
     Ok(move) -> Ok(move)
@@ -60,7 +72,7 @@ pub fn get_move(name: String, move_cache: Cache(Move)) -> Result(Move, String) {
   }
 }
 
-/// Get all moves for a Pokemon
+/// Get all moves for a Pokemon.
 pub fn get_moves_for_pokemon(
   api_pokemon: ApiPokemon,
   move_cache: Cache(Move),

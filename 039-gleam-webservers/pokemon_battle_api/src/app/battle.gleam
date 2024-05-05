@@ -1,3 +1,12 @@
+//// The battle module contains functions for simulating battles between Pokemon.
+//// Many features of battles are not implemented, such as status effects, critical hits,
+//// and type effectiveness. This is a simple battle simulation that only uses the
+//// most powerful move of each Pokemon (by effective power) and does not take into account
+//// many factors that would be present in a real Pokemon battle.
+////
+//// Only attack and defense stats are considered. Speed and priority are not implemented.
+//// The first Pokemon to attack each turn will always be the first Pokemon in the battle.
+
 import gleam/float
 import gleam/int
 import gleam/io
@@ -6,7 +15,26 @@ import gleam/option.{Some}
 import gleam/result
 import app/pokemon.{type Move, type Pokemon}
 
+/// The level of the Pokemon in the battle
 const battle_level = 100
+
+/// Simulate a battle between two Pokemon.
+/// The loser is the Pokemon that faints first (HP <= 0).
+/// This function can fail if either Pokemon only has non-attacking moves.
+pub fn battle(pokemon1: Pokemon, pokemon2: Pokemon) -> Result(Pokemon, Nil) {
+  use battle_pokemon1 <- result.try(get_battle_pokemon(pokemon1))
+  use battle_pokemon2 <- result.try(get_battle_pokemon(pokemon2))
+
+  io.println("Battle between " <> pokemon1.name <> " and " <> pokemon2.name)
+
+  battle_loop(battle_pokemon1, battle_pokemon2)
+  |> result.map(fn(winner) {
+    case winner.name == pokemon1.name {
+      True -> pokemon1
+      False -> pokemon2
+    }
+  })
+}
 
 /// Represents a Pokemon in battle
 type BattlePokemon {
@@ -20,21 +48,33 @@ type BattlePokemon {
   )
 }
 
-pub fn battle(pokemon1: Pokemon, pokemon2: Pokemon) -> Result(Pokemon, Nil) {
-  use battle_pokemon1 <- result.try(get_pokemon_profile(pokemon1))
-  use battle_pokemon2 <- result.try(get_pokemon_profile(pokemon2))
+/// Convert a Pokemon to a BattlePokemon. 
+/// Fails if the Pokemon has not attacking moves (all moves have no power).
+fn get_battle_pokemon(pokemon: Pokemon) -> Result(BattlePokemon, Nil) {
+  let hp = calculate_hp(pokemon.base_stats.hp, battle_level)
+  let attack = calculate_stat(pokemon.base_stats.atk, battle_level)
+  let defense = calculate_stat(pokemon.base_stats.def, battle_level)
+  let speed = calculate_stat(pokemon.base_stats.speed, battle_level)
 
-  io.println("Battle between " <> pokemon1.name <> " and " <> pokemon2.name)
-
-  battle_loop(battle_pokemon1, battle_pokemon2)
-  |> result.map(fn(winner) {
-    case winner.name == pokemon1.name {
-      True -> pokemon1
-      False -> pokemon2
-    }
-  })
+  case get_most_powerful_move(pokemon.moves) {
+    Ok(most_powerful_move) ->
+      Ok(BattlePokemon(
+        pokemon.name,
+        hp,
+        attack,
+        defense,
+        speed,
+        most_powerful_move,
+      ))
+    Error(_) -> Error(Nil)
+  }
 }
 
+/// The recursive battle loop.
+/// Each Pokemon attacks the other with their most powerful move.
+/// The first Pokemon to faint loses.
+/// If both Pokemon faint on the same turn, the first Pokemon wins,
+/// as in a real battle, the second Pokemon would not get to attack.
 fn battle_loop(
   pokemon1: BattlePokemon,
   pokemon2: BattlePokemon,
@@ -46,70 +86,50 @@ fn battle_loop(
     x, _ if x <= 0 -> Ok(pokemon2)
     _, x if x <= 0 -> Ok(pokemon1)
     _, _ -> {
-      let pokemon1_damage = move_damage(pokemon1, pokemon2)
-      let pokemon2_damage = move_damage(pokemon2, pokemon1)
+      let new_pokemon2 = do_attack(attacker: pokemon1, defender: pokemon2)
+      let new_pokemon1 = do_attack(attacker: pokemon2, defender: pokemon1)
 
-      io.println(
-        pokemon1.name
-        <> " attacks "
-        <> pokemon2.name
-        <> " with "
-        <> pokemon1.most_powerful_move.name
-        <> " for "
-        <> int.to_string(pokemon1_damage)
-        <> " damage",
-      )
-
-      let new_pokemon2_hp = pokemon2.hp - pokemon1_damage
-
-      case new_pokemon2_hp {
-        // If pokemon 2 has fainted, pokemon 1 wins
-        x if x <= 0 -> Ok(pokemon1)
-        _ -> {
-          io.println(
-            pokemon2.name
-            <> " attacks "
-            <> pokemon1.name
-            <> " with "
-            <> pokemon2.most_powerful_move.name
-            <> " for "
-            <> int.to_string(pokemon2_damage)
-            <> " damage",
-          )
-
-          let new_pokemon1_hp = pokemon1.hp - pokemon2_damage
-
-          let new_pokemon1 =
-            BattlePokemon(
-              pokemon1.name,
-              new_pokemon1_hp,
-              pokemon1.attack,
-              pokemon1.defense,
-              pokemon1.speed,
-              pokemon1.most_powerful_move,
-            )
-
-          let new_pokemon2 =
-            BattlePokemon(
-              pokemon2.name,
-              new_pokemon2_hp,
-              pokemon2.attack,
-              pokemon2.defense,
-              pokemon2.speed,
-              pokemon2.most_powerful_move,
-            )
-
-          battle_loop(new_pokemon1, new_pokemon2)
-        }
-      }
+      battle_loop(new_pokemon1, new_pokemon2)
     }
   }
 }
 
+/// Simulate an attack between two Pokemon.
+/// Returns the defender with updated HP.
+fn do_attack(
+  attacker attacker: BattlePokemon,
+  defender defender: BattlePokemon,
+) -> BattlePokemon {
+  let damage = move_damage(attacker, defender)
+  let new_hp = defender.hp - damage
+
+  io.println(
+    attacker.name
+    <> " attacks "
+    <> defender.name
+    <> " with "
+    <> attacker.most_powerful_move.name
+    <> " for "
+    <> int.to_string(damage)
+    <> " damage",
+  )
+
+  BattlePokemon(
+    defender.name,
+    new_hp,
+    defender.attack,
+    defender.defense,
+    defender.speed,
+    defender.most_powerful_move,
+  )
+}
+
 /// Calculates the damage dealt by a move.
+///
 /// Note, this is a very simple calculation and does not
 /// take into account many factors such as type effectiveness,
 /// critical hits, or status effects.
+///
 /// It also only uses attack and defense, not special attack
 /// and special defense.
 fn move_damage(attacker: BattlePokemon, defender: BattlePokemon) -> Int {
@@ -147,26 +167,8 @@ fn move_damage(attacker: BattlePokemon, defender: BattlePokemon) -> Int {
   }
 }
 
-fn get_pokemon_profile(pokemon: Pokemon) -> Result(BattlePokemon, Nil) {
-  let hp = calculate_hp(pokemon.base_stats.hp, battle_level)
-  let attack = calculate_stat(pokemon.base_stats.atk, battle_level)
-  let defense = calculate_stat(pokemon.base_stats.def, battle_level)
-  let speed = calculate_stat(pokemon.base_stats.speed, battle_level)
-
-  case get_most_powerful_move(pokemon.moves) {
-    Ok(most_powerful_move) ->
-      Ok(BattlePokemon(
-        pokemon.name,
-        hp,
-        attack,
-        defense,
-        speed,
-        most_powerful_move,
-      ))
-    Error(_) -> Error(Nil)
-  }
-}
-
+/// Calculate a stat for a Pokemon at a given level.
+/// This does not apply to the HP stat.
 fn calculate_stat(base_stat: Int, level: Int) -> Int {
   let base_stat_float = int.to_float(base_stat)
   let level_float = int.to_float(level)
@@ -179,6 +181,7 @@ fn calculate_stat(base_stat: Int, level: Int) -> Int {
   intermediate + 5
 }
 
+/// Calculate the HP stat for a Pokemon at a given level.
 fn calculate_hp(base_stat: Int, level: Int) -> Int {
   let base_stat_float = int.to_float(base_stat)
   let level_float = int.to_float(level)
@@ -192,8 +195,10 @@ fn calculate_hp(base_stat: Int, level: Int) -> Int {
 }
 
 /// Calculate the most powerful move from a list
-/// using the 'expected power' (base power * accuracy)
-fn get_most_powerful_move(moves: List(Move)) {
+/// using the 'expected power' (base power * accuracy).
+/// Filters out moves with no power, and will fail
+/// if all moves have no power.
+fn get_most_powerful_move(moves: List(Move)) -> Result(Move, Nil) {
   moves
   |> list.filter(fn(move) { option.is_some(move.power) })
   |> list.reduce(fn(curr, next) {
