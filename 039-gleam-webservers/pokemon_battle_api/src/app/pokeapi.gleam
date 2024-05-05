@@ -1,14 +1,15 @@
-import gleam/httpc
 import gleam/http/request
 import gleam/http/response.{type Response}
-import gleam/result
+import gleam/httpc
+import gleam/int
 import gleam/json
+import gleam/list
+import gleam/otp/task
+import gleam/result
+import app/cache.{type Cache}
 import app/pokemon.{
   type ApiPokemon, type Move, api_pokemon_decoder, move_decoder,
 }
-import gleam/list
-import gleam/otp/task
-import app/cache.{type Cache}
 
 const pokeapi_url = "https://pokeapi.co/api/v2"
 
@@ -16,8 +17,19 @@ const pokeapi_url = "https://pokeapi.co/api/v2"
 pub fn make_request(path: String) -> Result(Response(String), String) {
   let assert Ok(req) = request.to(pokeapi_url <> path)
 
-  httpc.send(req)
-  |> result.replace_error("Failed to make request to PokeAPI: " <> path)
+  let resp_result =
+    httpc.send(req)
+    |> result.replace_error("Failed to make request to PokeAPI: " <> path)
+
+  use resp <- result.try(resp_result)
+
+  case resp.status {
+    200 -> Ok(resp)
+    _ ->
+      Error(
+        "Got status " <> int.to_string(resp.status) <> " from PokeAPI: " <> path,
+      )
+  }
 }
 
 /// Get a Pokemon by its name from the PokeAPI

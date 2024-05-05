@@ -1,6 +1,6 @@
-import gleam/otp/actor
-import gleam/erlang/process.{type Subject}
 import gleam/dict.{type Dict}
+import gleam/erlang/process.{type Subject}
+import gleam/otp/actor
 import gleam/string
 
 const timeout = 3000

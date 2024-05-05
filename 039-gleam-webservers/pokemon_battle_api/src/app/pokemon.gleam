@@ -1,8 +1,8 @@
 import gleam/dynamic
+import gleam/json.{int, nullable, object, preprocessed_array, string}
 import gleam/list
 import gleam/option.{type Option}
 import gleam/result
-import gleam/json.{int, nullable, object, preprocessed_array, string}
 
 /// Info about a resource
 pub type ResourceInfo {

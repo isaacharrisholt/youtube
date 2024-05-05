@@ -1,12 +1,12 @@
-import gleam/otp/task
 import gleam/erlang/process
-import gleam/list
 import gleam/int
-import gleam/result
 import gleam/io
+import gleam/list
+import gleam/otp/task
+import gleam/result
+import app/battle
 import app/cache.{type Cache}
 import app/pokemon.{type Pokemon}
-import app/battle
 
 pub fn start(pokemon_cache: Cache(Pokemon), battle_cache: Cache(Pokemon)) {
   task.async(fn() { compute_all_battles(pokemon_cache, battle_cache) })

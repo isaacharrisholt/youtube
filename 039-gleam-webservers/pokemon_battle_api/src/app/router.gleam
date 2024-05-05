@@ -1,11 +1,11 @@
-import wisp.{type Request, type Response}
 import gleam/json
-import app/pokeapi.{get_moves_for_pokemon, get_pokemon}
 import gleam/result
-import app/context.{type Context}
-import app/pokemon.{Pokemon, encode_pokemon}
-import app/cache
+import wisp.{type Request, type Response}
 import app/battle
+import app/cache
+import app/context.{type Context}
+import app/pokeapi.{get_moves_for_pokemon, get_pokemon}
+import app/pokemon.{Pokemon, encode_pokemon}
 
 pub fn handle_request(req: Request, ctx: Context) -> Response {
   case wisp.path_segments(req) {
