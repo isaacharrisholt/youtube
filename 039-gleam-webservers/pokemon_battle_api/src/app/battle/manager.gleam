@@ -31,9 +31,15 @@ fn compute_all_battles(
   pokemon_cache: Cache(Pokemon),
   battle_cache: Cache(Pokemon),
 ) {
+  let all_pokemon = cache.get_keys(pokemon_cache)
+
   let pokemon_pairs =
-    cache.get_keys(pokemon_cache)
+    all_pokemon
     |> list.combination_pairs
+
+  let num_pokemon =
+    list.length(all_pokemon)
+    |> int.to_string
 
   let num_pokemon_pairs =
     list.length(pokemon_pairs)
@@ -43,7 +49,11 @@ fn compute_all_battles(
     "0" -> wisp.log_info("No pokemon to battle")
     _ ->
       wisp.log_info(
-        "Computing battles for " <> num_pokemon_pairs <> " pokemon pairs",
+        "Computing battles for "
+        <> num_pokemon_pairs
+        <> " Pokemon pairs ("
+        <> num_pokemon
+        <> " Pokemon)",
       )
   }
 
