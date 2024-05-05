@@ -6,7 +6,6 @@ import app/context.{type Context}
 import app/pokemon.{Pokemon, encode_pokemon}
 import app/cache
 import app/battle
-import gleam/dynamic
 
 pub fn handle_request(req: Request, ctx: Context) -> Response {
   case wisp.path_segments(req) {
@@ -44,7 +43,11 @@ fn get_pokemon_handler(ctx: Context, name: String) -> Response {
       |> json.to_string_builder
       |> wisp.json_response(200)
     }
-    Error(_) -> wisp.not_found()
+    Error(msg) -> {
+      json.object([#("error", json.string(msg))])
+      |> json.to_string_builder
+      |> wisp.json_response(500)
+    }
   }
 }
 
@@ -64,7 +67,7 @@ fn get_battle_handler(ctx: Context, name1: String, name2: String) {
           |> cache.set(ctx.battle_cache, _, winner)
           Ok(winner)
         }
-        Error(e) -> Error(dynamic.from(e))
+        Error(_) -> Error("Failed to battle " <> name1 <> " vs " <> name2)
       }
     }
   }
@@ -74,6 +77,10 @@ fn get_battle_handler(ctx: Context, name1: String, name2: String) {
       |> json.to_string_builder
       |> wisp.json_response(200)
     }
-    Error(_) -> wisp.internal_server_error()
+    Error(msg) -> {
+      json.object([#("error", json.string(msg))])
+      |> json.to_string_builder
+      |> wisp.json_response(500)
+    }
   }
 }

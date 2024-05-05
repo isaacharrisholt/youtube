@@ -1,8 +1,8 @@
 import gleam/httpc
 import gleam/http/request
+import gleam/http/response.{type Response}
 import gleam/result
 import gleam/json
-import gleam/dynamic
 import app/pokemon.{
   type ApiPokemon, type Move, api_pokemon_decoder, move_decoder,
 }
@@ -10,38 +10,39 @@ import gleam/list
 import gleam/otp/task
 import app/cache.{type Cache}
 
-const pokeapi_url = "https://pokeapi.co/api/v2/"
+const pokeapi_url = "https://pokeapi.co/api/v2"
+
+/// Make a request to the PokeAPI
+pub fn make_request(path: String) -> Result(Response(String), String) {
+  let assert Ok(req) = request.to(pokeapi_url <> path)
+
+  httpc.send(req)
+  |> result.replace_error("Failed to make request to PokeAPI: " <> path)
+}
 
 /// Get a Pokemon by its name from the PokeAPI
-pub fn get_pokemon(name: String) -> Result(ApiPokemon, dynamic.Dynamic) {
-  let assert Ok(req) = request.to(pokeapi_url <> "pokemon/" <> name)
-
-  use resp <- result.try(httpc.send(req))
+pub fn get_pokemon(name: String) -> Result(ApiPokemon, String) {
+  use resp <- result.try(make_request("/pokemon/" <> name))
 
   case json.decode(from: resp.body, using: api_pokemon_decoder()) {
     Ok(pokemon) -> Ok(pokemon)
-    Error(err) -> Error(dynamic.from(err))
+    Error(_) -> Error("Failed to decode Pokemon")
   }
 }
 
 /// Get a move by its name from the PokeAPI
-pub fn get_move(
-  name: String,
-  move_cache: Cache(Move),
-) -> Result(Move, dynamic.Dynamic) {
+pub fn get_move(name: String, move_cache: Cache(Move)) -> Result(Move, String) {
   case cache.get(move_cache, name) {
     Ok(move) -> Ok(move)
     Error(_) -> {
-      let assert Ok(req) = request.to(pokeapi_url <> "move/" <> name)
-
-      use resp <- result.try(httpc.send(req))
+      use resp <- result.try(make_request("/move/" <> name))
 
       case json.decode(from: resp.body, using: move_decoder()) {
         Ok(move) -> {
           cache.set(move_cache, name, move)
           Ok(move)
         }
-        Error(err) -> Error(dynamic.from(err))
+        Error(_) -> Error("Failed to decode Move")
       }
     }
   }
