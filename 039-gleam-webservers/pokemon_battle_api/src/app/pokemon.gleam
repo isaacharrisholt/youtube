@@ -17,9 +17,18 @@ fn resource_info_decoder() {
   )
 }
 
-/// A Pokemon's stats as returned by the PokeAPI
+/// Decode a dynamic resource info into a ResourceInfo's name
+fn resource_info_name_decoder(maybe_resource_info: dynamic.Dynamic) {
+  let decoder = resource_info_decoder()
+  case decoder(maybe_resource_info) {
+    Error(err) -> Error(err)
+    Ok(resource_info) -> Ok(resource_info.name)
+  }
+}
+
+/// A single stat as returned by the PokeAPI
 pub type ApiStat {
-  ApiStat(base_stat: Int, effort: Int, stat: ResourceInfo)
+  ApiStat(base_stat: Int, effort: Int, name: String)
 }
 
 fn api_stat_decoder() {
@@ -27,12 +36,12 @@ fn api_stat_decoder() {
     ApiStat,
     dynamic.field("base_stat", dynamic.int),
     dynamic.field("effort", dynamic.int),
-    dynamic.field("stat", resource_info_decoder()),
+    dynamic.field("stat", resource_info_name_decoder),
   )
 }
 
 fn get_base_stat(stats: List(ApiStat), stat: String) -> Result(Int, Nil) {
-  case list.find(stats, fn(pokemon_stat) { pokemon_stat.stat.name == stat }) {
+  case list.find(stats, fn(pokemon_stat) { pokemon_stat.name == stat }) {
     Ok(pokemon_stat) -> Ok(pokemon_stat.base_stat)
     Error(_) -> Error(Nil)
   }
@@ -93,34 +102,38 @@ fn encode_stats(stats: Stats) {
   ])
 }
 
-/// A move that a Pokemon can learn
-pub type LearnableMove {
-  LearnableMove(move: ResourceInfo)
+/// Information about a move returned by the PokeAPI
+/// as part of the Pokemon resource
+pub type ApiPokemonMove {
+  ApiPokemonMove(move: ResourceInfo)
 }
 
-fn learnable_move_decoder() {
-  dynamic.decode1(LearnableMove, dynamic.field("move", resource_info_decoder()))
+fn api_pokemon_move_decoder() {
+  dynamic.decode1(
+    ApiPokemonMove,
+    dynamic.field("move", resource_info_decoder()),
+  )
 }
 
-/// A Pokemon
-pub type Pokemon {
-  Pokemon(
+/// A Pokemon as returned by the PokeAPI
+pub type ApiPokemon {
+  ApiPokemon(
     id: Int,
     name: String,
     base_experience: Int,
     base_stats: Stats,
-    moves: List(LearnableMove),
+    moves: List(ApiPokemonMove),
   )
 }
 
-pub fn pokemon_decoder() {
+pub fn api_pokemon_decoder() {
   dynamic.decode5(
-    Pokemon,
+    ApiPokemon,
     dynamic.field("id", dynamic.int),
     dynamic.field("name", dynamic.string),
     dynamic.field("base_experience", dynamic.int),
     dynamic.field("stats", stats_decoder),
-    dynamic.field("moves", dynamic.list(learnable_move_decoder())),
+    dynamic.field("moves", dynamic.list(api_pokemon_move_decoder())),
   )
 }
 
@@ -133,8 +146,8 @@ pub type Move {
     pp: Int,
     priority: Int,
     power: Option(Int),
-    type_: ResourceInfo,
-    damage_class: ResourceInfo,
+    type_: String,
+    damage_class: String,
   )
 }
 
@@ -147,8 +160,8 @@ pub fn move_decoder() {
     dynamic.field("pp", dynamic.int),
     dynamic.field("priority", dynamic.int),
     dynamic.field("power", dynamic.optional(dynamic.int)),
-    dynamic.field("type", resource_info_decoder()),
-    dynamic.field("damage_class", resource_info_decoder()),
+    dynamic.field("type", resource_info_name_decoder),
+    dynamic.field("damage_class", resource_info_name_decoder),
   )
 }
 
@@ -160,22 +173,28 @@ fn encode_move(move: Move) {
     #("pp", int(move.pp)),
     #("priority", int(move.priority)),
     #("power", nullable(move.power, int)),
-    #("type", string(move.type_.name)),
-    #("damage_class", string(move.damage_class.name)),
+    #("type", string(move.type_)),
+    #("damage_class", string(move.damage_class)),
   ])
 }
 
 /// A Pokemon with all its move details
-pub type PokemonWithMoves {
-  PokemonWithMoves(pokemon: Pokemon, moves: List(Move))
+pub type Pokemon {
+  Pokemon(
+    id: Int,
+    name: String,
+    base_experience: Int,
+    base_stats: Stats,
+    moves: List(Move),
+  )
 }
 
-pub fn encode_pokemon_with_moves(pokemon: PokemonWithMoves) {
+pub fn encode_pokemon(pokemon: Pokemon) {
   object([
-    #("id", int(pokemon.pokemon.id)),
-    #("name", string(pokemon.pokemon.name)),
-    #("base_experience", int(pokemon.pokemon.base_experience)),
-    #("base_stats", encode_stats(pokemon.pokemon.base_stats)),
+    #("id", int(pokemon.id)),
+    #("name", string(pokemon.name)),
+    #("base_experience", int(pokemon.base_experience)),
+    #("base_stats", encode_stats(pokemon.base_stats)),
     #("moves", preprocessed_array(list.map(pokemon.moves, encode_move))),
   ])
 }

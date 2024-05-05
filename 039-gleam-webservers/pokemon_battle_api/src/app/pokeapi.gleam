@@ -3,7 +3,9 @@ import gleam/http/request
 import gleam/result
 import gleam/json
 import gleam/dynamic
-import app/pokemon.{type Move, type Pokemon, move_decoder, pokemon_decoder}
+import app/pokemon.{
+  type ApiPokemon, type Move, api_pokemon_decoder, move_decoder,
+}
 import gleam/list
 import gleam/otp/task
 import app/cache.{type Cache}
@@ -11,12 +13,12 @@ import app/cache.{type Cache}
 const pokeapi_url = "https://pokeapi.co/api/v2/"
 
 /// Get a Pokemon by its name from the PokeAPI
-pub fn get_pokemon(name: String) -> Result(Pokemon, dynamic.Dynamic) {
+pub fn get_pokemon(name: String) -> Result(ApiPokemon, dynamic.Dynamic) {
   let assert Ok(req) = request.to(pokeapi_url <> "pokemon/" <> name)
 
   use resp <- result.try(httpc.send(req))
 
-  case json.decode(from: resp.body, using: pokemon_decoder()) {
+  case json.decode(from: resp.body, using: api_pokemon_decoder()) {
     Ok(pokemon) -> Ok(pokemon)
     Error(err) -> Error(dynamic.from(err))
   }
@@ -47,11 +49,11 @@ pub fn get_move(
 
 /// Get all moves for a Pokemon
 pub fn get_moves_for_pokemon(
-  pokemon: Pokemon,
+  api_pokemon: ApiPokemon,
   move_cache: Cache(Move),
 ) -> List(Move) {
   let handles =
-    list.map(pokemon.moves, fn(move) {
+    list.map(api_pokemon.moves, fn(move) {
       task.async(fn() {
         let assert Ok(move) = get_move(move.move.name, move_cache)
         move

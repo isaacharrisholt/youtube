@@ -3,7 +3,7 @@ import gleam/json
 import app/pokeapi.{get_moves_for_pokemon, get_pokemon}
 import gleam/result
 import app/context.{type Context}
-import app/pokemon.{PokemonWithMoves, encode_pokemon_with_moves}
+import app/pokemon.{Pokemon, encode_pokemon}
 import app/cache
 import app/battle
 import gleam/dynamic
@@ -23,7 +23,14 @@ fn fetch_pokemon(ctx: Context, name: String) {
     Error(_) -> {
       use pokemon <- result.try(get_pokemon(name))
       let moves = get_moves_for_pokemon(pokemon, ctx.move_cache)
-      let pokemon_with_moves = PokemonWithMoves(pokemon, moves)
+      let pokemon_with_moves =
+        Pokemon(
+          id: pokemon.id,
+          name: pokemon.name,
+          base_experience: pokemon.base_experience,
+          base_stats: pokemon.base_stats,
+          moves: moves,
+        )
       cache.set(ctx.pokemon_cache, name, pokemon_with_moves)
       Ok(pokemon_with_moves)
     }
@@ -33,7 +40,7 @@ fn fetch_pokemon(ctx: Context, name: String) {
 fn get_pokemon_handler(ctx: Context, name: String) -> Response {
   case fetch_pokemon(ctx, name) {
     Ok(pokemon) -> {
-      encode_pokemon_with_moves(pokemon)
+      encode_pokemon(pokemon)
       |> json.to_string_builder
       |> wisp.json_response(200)
     }
@@ -63,7 +70,7 @@ fn get_battle_handler(ctx: Context, name1: String, name2: String) {
   }
   case result {
     Ok(pokemon) -> {
-      json.object([#("winner", json.string(pokemon.pokemon.name))])
+      json.object([#("winner", json.string(pokemon.name))])
       |> json.to_string_builder
       |> wisp.json_response(200)
     }

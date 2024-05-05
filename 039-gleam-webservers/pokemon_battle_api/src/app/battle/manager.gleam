@@ -5,19 +5,16 @@ import gleam/int
 import gleam/result
 import gleam/io
 import app/cache.{type Cache}
-import app/pokemon.{type PokemonWithMoves}
+import app/pokemon.{type Pokemon}
 import app/battle
 
-pub fn start(
-  pokemon_cache: Cache(PokemonWithMoves),
-  battle_cache: Cache(PokemonWithMoves),
-) {
+pub fn start(pokemon_cache: Cache(Pokemon), battle_cache: Cache(Pokemon)) {
   task.async(fn() { compute_all_battles(pokemon_cache, battle_cache) })
 }
 
 fn compute_all_battles(
-  pokemon_cache: Cache(PokemonWithMoves),
-  battle_cache: Cache(PokemonWithMoves),
+  pokemon_cache: Cache(Pokemon),
+  battle_cache: Cache(Pokemon),
 ) {
   let pokemon_pairs =
     cache.get_keys(pokemon_cache)
@@ -45,13 +42,13 @@ fn compute_all_battles(
 }
 
 fn calculate_and_store_battle(
-  pokemon1: PokemonWithMoves,
-  pokemon2: PokemonWithMoves,
-  battle_cache: Cache(PokemonWithMoves),
+  pokemon1: Pokemon,
+  pokemon2: Pokemon,
+  battle_cache: Cache(Pokemon),
 ) {
   let assert Ok(r) =
     result.try(battle.battle(pokemon1, pokemon2), fn(winner) {
-      cache.get_composite_key([pokemon1.pokemon.name, pokemon2.pokemon.name])
+      cache.get_composite_key([pokemon1.name, pokemon2.name])
       |> cache.set(battle_cache, _, winner)
       Ok(Nil)
     })

@@ -2,14 +2,15 @@ import gleam/float
 import gleam/int
 import gleam/io
 import gleam/list
-import gleam/option.{None, Some}
+import gleam/option.{Some}
 import gleam/result
-import app/pokemon.{type Move, type PokemonWithMoves}
+import app/pokemon.{type Move, type Pokemon}
 
 const battle_level = 100
 
-type PokemonProfile {
-  PokemonProfile(
+/// Represents a Pokemon in battle
+type BattlePokemon {
+  BattlePokemon(
     name: String,
     hp: Int,
     attack: Int,
@@ -19,23 +20,15 @@ type PokemonProfile {
   )
 }
 
-pub fn battle(
-  pokemon1: PokemonWithMoves,
-  pokemon2: PokemonWithMoves,
-) -> Result(PokemonWithMoves, Nil) {
-  use pokemon1_profile <- result.try(get_pokemon_profile(pokemon1))
-  use pokemon2_profile <- result.try(get_pokemon_profile(pokemon2))
+pub fn battle(pokemon1: Pokemon, pokemon2: Pokemon) -> Result(Pokemon, Nil) {
+  use battle_pokemon1 <- result.try(get_pokemon_profile(pokemon1))
+  use battle_pokemon2 <- result.try(get_pokemon_profile(pokemon2))
 
-  io.println(
-    "Battle between "
-    <> pokemon1.pokemon.name
-    <> " and "
-    <> pokemon2.pokemon.name,
-  )
+  io.println("Battle between " <> pokemon1.name <> " and " <> pokemon2.name)
 
-  battle_loop(pokemon1_profile, pokemon2_profile)
+  battle_loop(battle_pokemon1, battle_pokemon2)
   |> result.map(fn(winner) {
-    case winner.name == pokemon1.pokemon.name {
+    case winner.name == pokemon1.name {
       True -> pokemon1
       False -> pokemon2
     }
@@ -43,9 +36,9 @@ pub fn battle(
 }
 
 fn battle_loop(
-  pokemon1: PokemonProfile,
-  pokemon2: PokemonProfile,
-) -> Result(PokemonProfile, Nil) {
+  pokemon1: BattlePokemon,
+  pokemon2: BattlePokemon,
+) -> Result(BattlePokemon, Nil) {
   io.println(pokemon1.name <> " HP: " <> int.to_string(pokemon1.hp))
   io.println(pokemon2.name <> " HP: " <> int.to_string(pokemon2.hp))
   case pokemon1.hp, pokemon2.hp {
@@ -87,7 +80,7 @@ fn battle_loop(
           let new_pokemon1_hp = pokemon1.hp - pokemon2_damage
 
           let new_pokemon1 =
-            PokemonProfile(
+            BattlePokemon(
               pokemon1.name,
               new_pokemon1_hp,
               pokemon1.attack,
@@ -97,7 +90,7 @@ fn battle_loop(
             )
 
           let new_pokemon2 =
-            PokemonProfile(
+            BattlePokemon(
               pokemon2.name,
               new_pokemon2_hp,
               pokemon2.attack,
@@ -119,7 +112,7 @@ fn battle_loop(
 /// critical hits, or status effects.
 /// It also only uses attack and defense, not special attack
 /// and special defense.
-fn move_damage(attacker: PokemonProfile, defender: PokemonProfile) -> Int {
+fn move_damage(attacker: BattlePokemon, defender: BattlePokemon) -> Int {
   let attack = attacker.attack
   let defense = defender.defense
   let move = attacker.most_powerful_move
@@ -154,16 +147,16 @@ fn move_damage(attacker: PokemonProfile, defender: PokemonProfile) -> Int {
   }
 }
 
-fn get_pokemon_profile(pokemon: PokemonWithMoves) -> Result(PokemonProfile, Nil) {
-  let hp = calculate_hp(pokemon.pokemon.base_stats.hp, battle_level)
-  let attack = calculate_stat(pokemon.pokemon.base_stats.atk, battle_level)
-  let defense = calculate_stat(pokemon.pokemon.base_stats.def, battle_level)
-  let speed = calculate_stat(pokemon.pokemon.base_stats.speed, battle_level)
+fn get_pokemon_profile(pokemon: Pokemon) -> Result(BattlePokemon, Nil) {
+  let hp = calculate_hp(pokemon.base_stats.hp, battle_level)
+  let attack = calculate_stat(pokemon.base_stats.atk, battle_level)
+  let defense = calculate_stat(pokemon.base_stats.def, battle_level)
+  let speed = calculate_stat(pokemon.base_stats.speed, battle_level)
 
   case get_most_powerful_move(pokemon.moves) {
     Ok(most_powerful_move) ->
-      Ok(PokemonProfile(
-        pokemon.pokemon.name,
+      Ok(BattlePokemon(
+        pokemon.name,
         hp,
         attack,
         defense,
@@ -201,30 +194,20 @@ fn calculate_hp(base_stat: Int, level: Int) -> Int {
 /// Calculate the most powerful move from a list
 /// using the 'expected power' (base power * accuracy)
 fn get_most_powerful_move(moves: List(Move)) {
-  list.fold(moves, Error(Nil), fn(curr, next) {
-    case curr, next.power {
-      // No current, but there is a next
-      // which has a power. Return the next
-      Error(_), Some(_) -> Ok(next)
-      // No current, next has no power.
-      // Return Error(Nil)
-      Error(_), None -> Error(Nil)
-      // Current exists (and therefore has a power),
-      // but next doesn't
-      Ok(curr), None -> Ok(curr)
-      Ok(curr), Some(next_power) -> {
-        // We know curr MUST have a power
-        let assert Some(curr_power) = curr.power
-        let curr_accuracy = option.unwrap(curr.accuracy, 100)
-        let next_accuracy = option.unwrap(next.accuracy, 100)
-        let curr_expected_power = curr_power * curr_accuracy
-        let next_expected_power = next_power * next_accuracy
+  moves
+  |> list.filter(fn(move) { option.is_some(move.power) })
+  |> list.reduce(fn(curr, next) {
+    // We know curr and next MUST have a power
+    let assert Some(curr_power) = curr.power
+    let assert Some(next_power) = next.power
+    let curr_accuracy = option.unwrap(curr.accuracy, 100)
+    let next_accuracy = option.unwrap(next.accuracy, 100)
+    let curr_expected_power = curr_power * curr_accuracy
+    let next_expected_power = next_power * next_accuracy
 
-        case curr_expected_power > next_expected_power {
-          True -> Ok(curr)
-          False -> Ok(next)
-        }
-      }
+    case curr_expected_power > next_expected_power {
+      True -> curr
+      False -> next
     }
   })
 }
