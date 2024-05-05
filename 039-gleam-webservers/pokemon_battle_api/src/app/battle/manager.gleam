@@ -4,11 +4,14 @@
 //// It's designed as an OTP task that runs indefinitely.
 
 import gleam/erlang/process
+import gleam/float
 import gleam/int
-import gleam/io
 import gleam/list
 import gleam/otp/task
 import gleam/result
+import birl
+import birl/duration
+import wisp
 import app/battle
 import app/cache.{type Cache}
 import app/pokemon.{type Pokemon}
@@ -36,7 +39,15 @@ fn compute_all_battles(
     list.length(pokemon_pairs)
     |> int.to_string
 
-  io.println("Computing battles for " <> num_pokemon_pairs <> " pokemon pairs")
+  case num_pokemon_pairs {
+    "0" -> wisp.log_info("No pokemon to battle")
+    _ ->
+      wisp.log_info(
+        "Computing battles for " <> num_pokemon_pairs <> " pokemon pairs",
+      )
+  }
+
+  let start = birl.utc_now()
 
   list.each(pokemon_pairs, fn(pair) {
     let assert Ok(pokemon1) = cache.get(pokemon_cache, pair.0)
@@ -46,6 +57,16 @@ fn compute_all_battles(
     calculate_and_store_battle(pokemon1, pokemon2, battle_cache)
     calculate_and_store_battle(pokemon2, pokemon1, battle_cache)
   })
+
+  case num_pokemon_pairs {
+    "0" -> Nil
+    _ -> {
+      let end = birl.utc_now()
+      let assert duration.Duration(microseconds) = birl.difference(end, start)
+      let seconds = int.to_float(microseconds) /. 1_000_000.0
+      wisp.log_info("Computed battles in " <> float.to_string(seconds) <> "s")
+    }
+  }
 
   // Recursively call this function at an interval
   process.sleep(sleep_time)

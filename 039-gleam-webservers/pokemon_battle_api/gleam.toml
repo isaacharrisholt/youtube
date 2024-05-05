@@ -21,6 +21,7 @@ gleam_httpc = "~> 2.2"
 gleam_http = "~> 3.6"
 gleam_json = "~> 1.0"
 gleam_otp = "~> 0.10"
+birl = "~> 1.6"
 
 [dev-dependencies]
 gleeunit = "~> 1.0"

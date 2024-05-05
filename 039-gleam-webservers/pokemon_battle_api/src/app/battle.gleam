@@ -9,10 +9,10 @@
 
 import gleam/float
 import gleam/int
-import gleam/io
 import gleam/list
 import gleam/option.{Some}
 import gleam/result
+import wisp
 import app/pokemon.{type Move, type Pokemon}
 
 /// The level of the Pokemon in the battle
@@ -25,7 +25,7 @@ pub fn battle(pokemon1: Pokemon, pokemon2: Pokemon) -> Result(Pokemon, Nil) {
   use battle_pokemon1 <- result.try(get_battle_pokemon(pokemon1))
   use battle_pokemon2 <- result.try(get_battle_pokemon(pokemon2))
 
-  io.println("Battle between " <> pokemon1.name <> " and " <> pokemon2.name)
+  wisp.log_debug("Battle between " <> pokemon1.name <> " and " <> pokemon2.name)
 
   battle_loop(battle_pokemon1, battle_pokemon2)
   |> result.map(fn(winner) {
@@ -79,8 +79,8 @@ fn battle_loop(
   pokemon1: BattlePokemon,
   pokemon2: BattlePokemon,
 ) -> Result(BattlePokemon, Nil) {
-  io.println(pokemon1.name <> " HP: " <> int.to_string(pokemon1.hp))
-  io.println(pokemon2.name <> " HP: " <> int.to_string(pokemon2.hp))
+  wisp.log_debug(pokemon1.name <> " HP: " <> int.to_string(pokemon1.hp))
+  wisp.log_debug(pokemon2.name <> " HP: " <> int.to_string(pokemon2.hp))
   case pokemon1.hp, pokemon2.hp {
     // If either pokemon has fainted, the other wins
     x, _ if x <= 0 -> Ok(pokemon2)
@@ -103,7 +103,7 @@ fn do_attack(
   let damage = move_damage(attacker, defender)
   let new_hp = defender.hp - damage
 
-  io.println(
+  wisp.log_debug(
     attacker.name
     <> " attacks "
     <> defender.name
