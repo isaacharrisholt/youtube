@@ -131,18 +131,26 @@ fn move_damage(attacker: PokemonProfile, defender: PokemonProfile) -> Int {
   case miss_chance > accuracy {
     // Miss
     True -> 0
-    False ->
+    False -> {
       // Calculate damage using the damage formula
-      float.round(float.floor(
+      let battle_level = int.to_float(battle_level)
+      let power = int.to_float(power)
+      let attack = int.to_float(attack)
+      let defense = int.to_float(defense)
+
+      let intermediate =
         {
-          { { 2.0 *. int.to_float(battle_level) /. 5.0 } +. 2.0 }
-          *. int.to_float(power)
-          *. int.to_float(attack)
-          /. int.to_float(defense)
+          { { 2.0 *. battle_level /. 5.0 } +. 2.0 }
+          *. power
+          *. attack
+          /. defense
         }
-        /. 50.0,
-      ))
-      + 2
+        /. 50.0
+        |> float.floor
+        |> float.round
+
+      intermediate + 2
+    }
   }
 }
 
@@ -183,18 +191,27 @@ fn get_base_stat(pokemon: PokemonWithMoves, stat: String) -> Result(Int, Nil) {
 }
 
 fn calculate_stat(base_stat: Int, level: Int) -> Int {
-  float.round(float.floor(
-    0.01 *. 2.0 *. int.to_float(base_stat) *. int.to_float(level),
-  ))
-  + 5
+  let base_stat_float = int.to_float(base_stat)
+  let level_float = int.to_float(level)
+
+  let intermediate =
+    { 0.01 *. 2.0 *. base_stat_float *. level_float }
+    |> float.floor
+    |> float.round
+
+  intermediate + 5
 }
 
 fn calculate_hp(base_stat: Int, level: Int) -> Int {
-  float.round(float.floor(
-    0.01 *. 2.0 *. int.to_float(base_stat) *. int.to_float(level),
-  ))
-  + level
-  + 10
+  let base_stat_float = int.to_float(base_stat)
+  let level_float = int.to_float(level)
+
+  let intermediate =
+    { 0.01 *. 2.0 *. base_stat_float *. level_float }
+    |> float.floor
+    |> float.round
+
+  intermediate + level + 10
 }
 
 /// Calculate the most powerful move from a list
