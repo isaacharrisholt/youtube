@@ -1,6 +1,7 @@
 import gleam/dynamic
 import gleam/list
 import gleam/option.{type Option}
+import gleam/result
 import gleam/json.{int, nullable, object, preprocessed_array, string}
 
 /// Info about a resource
@@ -16,25 +17,79 @@ fn resource_info_decoder() {
   )
 }
 
-/// A Pokemon's base stat
-pub type Stat {
-  Stat(base_stat: Int, effort: Int, stat: ResourceInfo)
+/// A Pokemon's stats as returned by the PokeAPI
+pub type ApiStat {
+  ApiStat(base_stat: Int, effort: Int, stat: ResourceInfo)
 }
 
-fn stat_decoder() {
+fn api_stat_decoder() {
   dynamic.decode3(
-    Stat,
+    ApiStat,
     dynamic.field("base_stat", dynamic.int),
     dynamic.field("effort", dynamic.int),
     dynamic.field("stat", resource_info_decoder()),
   )
 }
 
-fn encode_stat(stat: Stat) {
+fn get_base_stat(stats: List(ApiStat), stat: String) -> Result(Int, Nil) {
+  case list.find(stats, fn(pokemon_stat) { pokemon_stat.stat.name == stat }) {
+    Ok(pokemon_stat) -> Ok(pokemon_stat.base_stat)
+    Error(_) -> Error(Nil)
+  }
+}
+
+/// A Pokemon's stats
+pub type Stats {
+  Stats(hp: Int, atk: Int, def: Int, sp_atk: Int, sp_def: Int, speed: Int)
+}
+
+fn api_stats_to_stats(api_stats: List(ApiStat)) -> Result(Stats, Nil) {
+  use hp <- result.try(get_base_stat(api_stats, "hp"))
+  use atk <- result.try(get_base_stat(api_stats, "attack"))
+  use def <- result.try(get_base_stat(api_stats, "defense"))
+  use sp_atk <- result.try(get_base_stat(api_stats, "special-attack"))
+  use sp_def <- result.try(get_base_stat(api_stats, "special-defense"))
+  use speed <- result.try(get_base_stat(api_stats, "speed"))
+
+  Ok(Stats(hp, atk, def, sp_atk, sp_def, speed))
+}
+
+/// Decodes a Stats object from the PokeAPI representation:
+/// ```json
+/// [
+///   {
+///     "base_stat": 45,
+///     "effort": 0,
+///     "stat": {
+///       "name": "hp",
+///       "url": "https://pokeapi.co/api/v2/stat/1/"
+///     }
+///   },
+///   ...
+/// ]
+/// ```
+fn stats_decoder(maybe_stats: dynamic.Dynamic) {
+  let decoder = dynamic.list(api_stat_decoder())
+  case decoder(maybe_stats) {
+    Error(err) -> Error(err)
+    Ok(stats) -> {
+      case api_stats_to_stats(stats) {
+        Ok(stats) -> Ok(stats)
+        // Not filling this out for now, but we could provide a more detailed error message
+        Error(_) -> Error([dynamic.DecodeError("", "", [""])])
+      }
+    }
+  }
+}
+
+fn encode_stats(stats: Stats) {
   object([
-    #("name", string(stat.stat.name)),
-    #("base_stat", int(stat.base_stat)),
-    #("effort", int(stat.effort)),
+    #("hp", int(stats.hp)),
+    #("atk", int(stats.atk)),
+    #("def", int(stats.def)),
+    #("sp_atk", int(stats.sp_atk)),
+    #("sp_def", int(stats.sp_def)),
+    #("speed", int(stats.speed)),
   ])
 }
 
@@ -53,7 +108,7 @@ pub type Pokemon {
     id: Int,
     name: String,
     base_experience: Int,
-    stats: List(Stat),
+    base_stats: Stats,
     moves: List(LearnableMove),
   )
 }
@@ -64,7 +119,7 @@ pub fn pokemon_decoder() {
     dynamic.field("id", dynamic.int),
     dynamic.field("name", dynamic.string),
     dynamic.field("base_experience", dynamic.int),
-    dynamic.field("stats", dynamic.list(stat_decoder())),
+    dynamic.field("stats", stats_decoder),
     dynamic.field("moves", dynamic.list(learnable_move_decoder())),
   )
 }
@@ -120,7 +175,7 @@ pub fn encode_pokemon_with_moves(pokemon: PokemonWithMoves) {
     #("id", int(pokemon.pokemon.id)),
     #("name", string(pokemon.pokemon.name)),
     #("base_experience", int(pokemon.pokemon.base_experience)),
-    #("stats", preprocessed_array(list.map(pokemon.pokemon.stats, encode_stat))),
+    #("base_stats", encode_stats(pokemon.pokemon.base_stats)),
     #("moves", preprocessed_array(list.map(pokemon.moves, encode_move))),
   ])
 }

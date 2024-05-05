@@ -155,15 +155,10 @@ fn move_damage(attacker: PokemonProfile, defender: PokemonProfile) -> Int {
 }
 
 fn get_pokemon_profile(pokemon: PokemonWithMoves) -> Result(PokemonProfile, Nil) {
-  use base_hp <- result.try(get_base_stat(pokemon, "hp"))
-  use base_attack <- result.try(get_base_stat(pokemon, "attack"))
-  use base_defense <- result.try(get_base_stat(pokemon, "defense"))
-  use base_speed <- result.try(get_base_stat(pokemon, "speed"))
-
-  let hp = calculate_hp(base_hp, battle_level)
-  let attack = calculate_stat(base_attack, battle_level)
-  let defense = calculate_stat(base_defense, battle_level)
-  let speed = calculate_stat(base_speed, battle_level)
+  let hp = calculate_hp(pokemon.pokemon.base_stats.hp, battle_level)
+  let attack = calculate_stat(pokemon.pokemon.base_stats.atk, battle_level)
+  let defense = calculate_stat(pokemon.pokemon.base_stats.def, battle_level)
+  let speed = calculate_stat(pokemon.pokemon.base_stats.speed, battle_level)
 
   case get_most_powerful_move(pokemon.moves) {
     Ok(most_powerful_move) ->
@@ -175,17 +170,6 @@ fn get_pokemon_profile(pokemon: PokemonWithMoves) -> Result(PokemonProfile, Nil)
         speed,
         most_powerful_move,
       ))
-    Error(_) -> Error(Nil)
-  }
-}
-
-fn get_base_stat(pokemon: PokemonWithMoves, stat: String) -> Result(Int, Nil) {
-  case
-    list.find(pokemon.pokemon.stats, fn(pokemon_stat) {
-      pokemon_stat.stat.name == stat
-    })
-  {
-    Ok(pokemon_stat) -> Ok(pokemon_stat.base_stat)
     Error(_) -> Error(Nil)
   }
 }
