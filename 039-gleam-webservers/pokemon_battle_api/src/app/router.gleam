@@ -35,7 +35,7 @@ fn fetch_pokemon(ctx: Context, name: String) {
     Ok(pokemon) -> Ok(pokemon)
     Error(_) -> {
       use pokemon <- result.try(get_pokemon(name))
-      let moves = get_moves_for_pokemon(pokemon, ctx.move_cache)
+      use moves <- result.try(get_moves_for_pokemon(pokemon, ctx.move_cache))
       let pokemon_with_moves =
         Pokemon(
           id: pokemon.id,

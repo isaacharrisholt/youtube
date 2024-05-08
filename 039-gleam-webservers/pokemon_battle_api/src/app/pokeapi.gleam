@@ -73,16 +73,20 @@ pub fn get_move(name: String, move_cache: Cache(Move)) -> Result(Move, String) {
 }
 
 /// Get all moves for a Pokemon.
+/// Returns the first error encountered, if any.
 pub fn get_moves_for_pokemon(
   api_pokemon: ApiPokemon,
   move_cache: Cache(Move),
-) -> List(Move) {
-  let handles =
+) -> Result(List(Move), String) {
+  let results =
     list.map(api_pokemon.moves, fn(move) {
-      task.async(fn() {
-        let assert Ok(move) = get_move(move.move.name, move_cache)
-        move
-      })
+      task.async(fn() { get_move(move.move.name, move_cache) })
     })
-  list.map(handles, fn(handle) { task.await(handle, 3000) })
+    |> list.map(fn(handle) { task.await(handle, 3000) })
+    |> result.partition
+
+  case results.1 {
+    [] -> Ok(results.0)
+    [err, ..] -> Error("Error fetching moves: " <> err)
+  }
 }
