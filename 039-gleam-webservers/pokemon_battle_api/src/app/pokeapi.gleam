@@ -82,7 +82,11 @@ pub fn get_moves_for_pokemon(
     list.map(api_pokemon.moves, fn(move) {
       task.async(fn() { get_move(move.move.name, move_cache) })
     })
-    |> list.map(fn(handle) { task.await(handle, 3000) })
+    |> list.map(fn(handle) {
+      task.try_await(handle, 3000)
+      |> result.replace_error("Failed to fetch move")
+      |> result.flatten
+    })
     |> result.partition
 
   case results.1 {
