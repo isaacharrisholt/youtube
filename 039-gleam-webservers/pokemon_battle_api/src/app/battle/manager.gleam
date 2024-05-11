@@ -3,18 +3,18 @@
 ////
 //// It's designed as an OTP task that runs indefinitely.
 
+import app/battle
+import app/cache.{type Cache}
+import app/pokemon.{type Pokemon}
+import birl
+import birl/duration
 import gleam/erlang/process
 import gleam/float
 import gleam/int
 import gleam/list
 import gleam/otp/task
 import gleam/result
-import birl
-import birl/duration
 import wisp
-import app/battle
-import app/cache.{type Cache}
-import app/pokemon.{type Pokemon}
 
 const sleep_time = 10_000
 
@@ -72,7 +72,7 @@ fn compute_all_battles(
     "0" -> Nil
     _ -> {
       let end = birl.utc_now()
-      let assert duration.Duration(microseconds) = birl.difference(end, start)
+      let duration.Duration(microseconds) = birl.difference(end, start)
       let seconds = int.to_float(microseconds) /. 1_000_000.0
       wisp.log_info("Computed battles in " <> float.to_string(seconds) <> "s")
     }
