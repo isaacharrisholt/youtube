@@ -1,6 +1,11 @@
 # Why you should be writing webservers in Gleam
 
-TODO
+Modern software engineering can be a bit of a nightmare. You've got all these different
+third-party services to keep track of, and often many first-party microservices too! As
+it turns out, things can be made more simple using Gleam. Let me show you how.
+
+Thanks to CodeCrafters for sponsoring this video! Level up your coding skills:
+https://ihh.dev/codecrafters
 
 ## Running the code
 
