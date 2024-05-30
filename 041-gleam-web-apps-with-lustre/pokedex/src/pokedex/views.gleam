@@ -8,13 +8,12 @@ import lustre/element/html
 import lustre/event
 import lustre/ui
 import lustre/ui/button
-import lustre/ui/layout/aside
 import lustre/ui/layout/stack
 import lustre/ui/util/cn.{bg_element, px_md}
-import pokedex/types.{type CanLoad, LoadError, Loaded, Loading}
 import pokedex/types/model.{type Model}
 import pokedex/types/msg.{
-  type Msg, UserClickedSearchButton, UserSelectedPokemon,
+  type CanLoad, type Msg, LoadError, Loaded, Loading, UserClickedSearchButton,
+  UserSelectedPokemon,
 }
 import pokedex/types/pokemon.{type Pokemon}
 
@@ -26,7 +25,23 @@ pub fn header() -> element.Element(Msg) {
   ])
 }
 
-pub fn pokemon_search() -> element.Element(Msg) {
+pub fn main_content(model: Model) -> element.Element(Msg) {
+  html.main([], [
+    ui.stack([], [
+      pokemon_search(),
+      ui.aside(
+        [px_md()],
+        pokemon_details(model.current_pokemon, model.all_pokemon),
+        ui.stack(
+          [stack.tight(), class("min-w-[20dvw]")],
+          pokemon_list(model.all_pokemon),
+        ),
+      ),
+    ]),
+  ])
+}
+
+fn pokemon_search() -> element.Element(Msg) {
   html.div(
     [px_md(), class("flex items-center flex-col sm:flex-row gap-2 sm:gap-4")],
     [
@@ -46,45 +61,6 @@ pub fn pokemon_search() -> element.Element(Msg) {
       ),
     ],
   )
-}
-
-pub fn main_content(model: Model) -> element.Element(Msg) {
-  html.main([], [
-    ui.stack([], [
-      pokemon_search(),
-      ui.aside(
-        [px_md()],
-        pokemon_details(model.current_pokemon, model.all_pokemon),
-        ui.stack(
-          [stack.tight(), class("min-w-[20dvw]")],
-          pokemon_list(model.all_pokemon),
-        ),
-      ),
-    ]),
-  ])
-}
-
-fn pokemon_list(
-  pokemon: CanLoad(List(String), String),
-) -> List(element.Element(Msg)) {
-  case pokemon {
-    Loaded(pokemon) ->
-      list.map(pokemon, fn(p) {
-        ui.button(
-          [
-            event.on_click(UserSelectedPokemon(string.lowercase(p))),
-            button.soft(),
-            button.small(),
-            class("w-full text-left"),
-          ],
-          [html.text(p)],
-        )
-      })
-    LoadError(err) -> [
-      html.p([], [html.text("Error loading Pokémon: " <> err)]),
-    ]
-    Loading -> [html.p([], [html.text("Loading Pokémon...")])]
-  }
 }
 
 fn pokemon_details(
@@ -121,5 +97,28 @@ fn pokemon_details(
       ])
     LoadError(err) -> html.p([], [html.text("Error loading Pokémon: " <> err)])
     Loading -> html.p([], [html.text("Loading Pokémon...")])
+  }
+}
+
+fn pokemon_list(
+  pokemon: CanLoad(List(String), String),
+) -> List(element.Element(Msg)) {
+  case pokemon {
+    Loaded(pokemon) ->
+      list.map(pokemon, fn(p) {
+        ui.button(
+          [
+            event.on_click(UserSelectedPokemon(string.lowercase(p))),
+            button.soft(),
+            button.small(),
+            class("w-full text-left"),
+          ],
+          [html.text(p)],
+        )
+      })
+    LoadError(err) -> [
+      html.p([], [html.text("Error loading Pokémon: " <> err)]),
+    ]
+    Loading -> [html.p([], [html.text("Loading Pokémon...")])]
   }
 }

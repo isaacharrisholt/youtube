@@ -2910,78 +2910,6 @@ function elements() {
   return style(toList([]), element_css);
 }
 
-// build/dev/javascript/gleam_javascript/ffi.mjs
-var PromiseLayer = class _PromiseLayer {
-  constructor(promise) {
-    this.promise = promise;
-  }
-  static wrap(value2) {
-    return value2 instanceof Promise ? new _PromiseLayer(value2) : value2;
-  }
-  static unwrap(value2) {
-    return value2 instanceof _PromiseLayer ? value2.promise : value2;
-  }
-};
-function resolve(value2) {
-  return Promise.resolve(PromiseLayer.wrap(value2));
-}
-function then(promise, fn) {
-  return promise.then((value2) => fn(PromiseLayer.unwrap(value2)));
-}
-function map_promise(promise, fn) {
-  return promise.then(
-    (value2) => PromiseLayer.wrap(fn(PromiseLayer.unwrap(value2)))
-  );
-}
-function rescue(promise, fn) {
-  return promise.catch((error) => fn(error));
-}
-
-// build/dev/javascript/plinth/document_ffi.mjs
-function querySelector(query) {
-  let found = document.querySelector(query);
-  if (!found) {
-    return new Error();
-  }
-  return new Ok(found);
-}
-
-// build/dev/javascript/gleam_javascript/gleam/javascript/promise.mjs
-function tap(promise, callback) {
-  let _pipe = promise;
-  return map_promise(
-    _pipe,
-    (a) => {
-      callback(a);
-      return a;
-    }
-  );
-}
-function try_await(promise, callback) {
-  let _pipe = promise;
-  return then(
-    _pipe,
-    (result) => {
-      if (result.isOk()) {
-        let a = result[0];
-        return callback(a);
-      } else {
-        let e = result[0];
-        return resolve(new Error(e));
-      }
-    }
-  );
-}
-
-// build/dev/javascript/plinth/element_ffi.mjs
-function value(element2) {
-  let value2 = element2.value;
-  if (value2 != void 0) {
-    return new Ok(value2);
-  }
-  return new Error();
-}
-
 // build/dev/javascript/gleam_stdlib/gleam/uri.mjs
 var Uri = class extends CustomType {
   constructor(scheme, userinfo, host, port, path, query, fragment) {
@@ -3354,6 +3282,60 @@ var Response = class extends CustomType {
   }
 };
 
+// build/dev/javascript/gleam_javascript/ffi.mjs
+var PromiseLayer = class _PromiseLayer {
+  constructor(promise) {
+    this.promise = promise;
+  }
+  static wrap(value2) {
+    return value2 instanceof Promise ? new _PromiseLayer(value2) : value2;
+  }
+  static unwrap(value2) {
+    return value2 instanceof _PromiseLayer ? value2.promise : value2;
+  }
+};
+function resolve(value2) {
+  return Promise.resolve(PromiseLayer.wrap(value2));
+}
+function then(promise, fn) {
+  return promise.then((value2) => fn(PromiseLayer.unwrap(value2)));
+}
+function map_promise(promise, fn) {
+  return promise.then(
+    (value2) => PromiseLayer.wrap(fn(PromiseLayer.unwrap(value2)))
+  );
+}
+function rescue(promise, fn) {
+  return promise.catch((error) => fn(error));
+}
+
+// build/dev/javascript/gleam_javascript/gleam/javascript/promise.mjs
+function tap(promise, callback) {
+  let _pipe = promise;
+  return map_promise(
+    _pipe,
+    (a) => {
+      callback(a);
+      return a;
+    }
+  );
+}
+function try_await(promise, callback) {
+  let _pipe = promise;
+  return then(
+    _pipe,
+    (result) => {
+      if (result.isOk()) {
+        let a = result[0];
+        return callback(a);
+      } else {
+        let e = result[0];
+        return resolve(new Error(e));
+      }
+    }
+  );
+}
+
 // build/dev/javascript/gleam_fetch/ffi.mjs
 async function raw_send(request) {
   try {
@@ -3631,6 +3613,20 @@ var ApiReturnedAllPokemon = class extends CustomType {
 };
 var AppRequestedAllPokemon = class extends CustomType {
 };
+var Loading = class extends CustomType {
+};
+var Loaded = class extends CustomType {
+  constructor(x0) {
+    super();
+    this[0] = x0;
+  }
+};
+var LoadError = class extends CustomType {
+  constructor(x0) {
+    super();
+    this[0] = x0;
+  }
+};
 
 // build/dev/javascript/pokedex/pokedex/api.mjs
 var api_root = "http://localhost:8000";
@@ -3656,26 +3652,28 @@ function fetch_all_pokemon() {
   return get2(api_root + "/pokemon", expect);
 }
 
+// build/dev/javascript/plinth/document_ffi.mjs
+function querySelector(query) {
+  let found = document.querySelector(query);
+  if (!found) {
+    return new Error();
+  }
+  return new Ok(found);
+}
+
+// build/dev/javascript/plinth/element_ffi.mjs
+function value(element2) {
+  let value2 = element2.value;
+  if (value2 != void 0) {
+    return new Ok(value2);
+  }
+  return new Error();
+}
+
 // priv/static/dom_ffi.mjs
 function set_value(element2, value2) {
   element2.value = value2;
 }
-
-// build/dev/javascript/pokedex/pokedex/types.mjs
-var Loading = class extends CustomType {
-};
-var Loaded = class extends CustomType {
-  constructor(x0) {
-    super();
-    this[0] = x0;
-  }
-};
-var LoadError = class extends CustomType {
-  constructor(x0) {
-    super();
-    this[0] = x0;
-  }
-};
 
 // build/dev/javascript/pokedex/pokedex/types/model.mjs
 var Model = class extends CustomType {
@@ -3715,37 +3713,6 @@ function header() {
       )
     ])
   );
-}
-function pokemon_list(pokemon) {
-  if (pokemon instanceof Loaded) {
-    let pokemon$1 = pokemon[0];
-    return map3(
-      pokemon$1,
-      (p2) => {
-        return button3(
-          toList([
-            on_click(new UserSelectedPokemon(lowercase2(p2))),
-            soft(),
-            small(),
-            class$("w-full text-left")
-          ]),
-          toList([text2(p2)])
-        );
-      }
-    );
-  } else if (pokemon instanceof LoadError) {
-    let err = pokemon[0];
-    return toList([
-      p(
-        toList([]),
-        toList([text2("Error loading Pok\xE9mon: " + err)])
-      )
-    ]);
-  } else {
-    return toList([
-      p(toList([]), toList([text2("Loading Pok\xE9mon...")]))
-    ]);
-  }
 }
 function pokemon_details(maybe_pokemon, all_pokemon) {
   let message = (() => {
@@ -3814,6 +3781,37 @@ function pokemon_details(maybe_pokemon, all_pokemon) {
     return p(toList([]), toList([text2("Loading Pok\xE9mon...")]));
   }
 }
+function pokemon_list(pokemon) {
+  if (pokemon instanceof Loaded) {
+    let pokemon$1 = pokemon[0];
+    return map3(
+      pokemon$1,
+      (p2) => {
+        return button3(
+          toList([
+            on_click(new UserSelectedPokemon(lowercase2(p2))),
+            soft(),
+            small(),
+            class$("w-full text-left")
+          ]),
+          toList([text2(p2)])
+        );
+      }
+    );
+  } else if (pokemon instanceof LoadError) {
+    let err = pokemon[0];
+    return toList([
+      p(
+        toList([]),
+        toList([text2("Error loading Pok\xE9mon: " + err)])
+      )
+    ]);
+  } else {
+    return toList([
+      p(toList([]), toList([text2("Loading Pok\xE9mon...")]))
+    ]);
+  }
+}
 var pokemon_search_input_id = "pokemon-search-input";
 function pokemon_search() {
   return div(
@@ -3863,10 +3861,7 @@ function main_content(model) {
   );
 }
 
-// build/dev/javascript/pokedex/pokedex.mjs
-function init2(_) {
-  return [new Model(new Loaded(new None()), new Loading()), fetch_all_pokemon()];
-}
+// build/dev/javascript/pokedex/pokedex/message_handlers.mjs
 function handle_user_selected_pokemon(model, pokemon_name) {
   let default_return = [
     model.withFields({ current_pokemon: new Loading() }),
@@ -3890,8 +3885,8 @@ function handle_user_clicked_search_button(model) {
   if (!$.isOk()) {
     throw makeError(
       "assignment_no_match",
-      "pokedex",
-      51,
+      "pokedex/message_handlers",
+      36,
       "handle_user_clicked_search_button",
       "Assignment pattern did not match",
       { value: $ }
@@ -3902,8 +3897,8 @@ function handle_user_clicked_search_button(model) {
   if (!$1.isOk()) {
     throw makeError(
       "assignment_no_match",
-      "pokedex",
-      53,
+      "pokedex/message_handlers",
+      38,
       "handle_user_clicked_search_button",
       "Assignment pattern did not match",
       { value: $1 }
@@ -3941,6 +3936,17 @@ function handle_api_returned_pokemon_ok(model, pokemon) {
   } else {
     return default_return;
   }
+}
+
+// build/dev/javascript/pokedex/pokedex.mjs
+function init2(_) {
+  return [new Model(new Loaded(new None()), new Loading()), fetch_all_pokemon()];
+}
+function view(model) {
+  return stack2(
+    toList([]),
+    toList([elements(), header(), main_content(model)])
+  );
 }
 function update2(model, msg) {
   if (msg instanceof UserSelectedPokemon) {
@@ -3991,12 +3997,6 @@ function update2(model, msg) {
     ];
   }
 }
-function view(model) {
-  return stack2(
-    toList([]),
-    toList([elements(), header(), main_content(model)])
-  );
-}
 function main2() {
   let app = application(init2, update2, view);
   let $ = start3(app, "#app", void 0);
@@ -4004,7 +4004,7 @@ function main2() {
     throw makeError(
       "assignment_no_match",
       "pokedex",
-      143,
+      23,
       "main",
       "Assignment pattern did not match",
       { value: $ }

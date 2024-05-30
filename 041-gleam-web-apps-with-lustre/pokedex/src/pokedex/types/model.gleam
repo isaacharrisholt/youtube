@@ -1,5 +1,5 @@
 import gleam/option.{type Option}
-import pokedex/types.{type CanLoad}
+import pokedex/types/msg.{type CanLoad}
 import pokedex/types/pokemon.{type Pokemon}
 
 pub type Model {
