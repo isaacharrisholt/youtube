@@ -1,4 +1,4 @@
-name = "pokemon_battle_sim"
+name = "pokedex"
 target = "javascript"
 version = "1.0.0"
 

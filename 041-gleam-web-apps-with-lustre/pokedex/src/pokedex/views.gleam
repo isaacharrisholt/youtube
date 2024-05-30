@@ -11,40 +11,41 @@ import lustre/ui/button
 import lustre/ui/layout/aside
 import lustre/ui/layout/stack
 import lustre/ui/util/cn.{bg_element, px_md}
-import pokemon_battle_sim/types.{type CanLoad, LoadError, Loaded, Loading}
-import pokemon_battle_sim/types/model.{type Model}
-import pokemon_battle_sim/types/msg.{
+import pokedex/types.{type CanLoad, LoadError, Loaded, Loading}
+import pokedex/types/model.{type Model}
+import pokedex/types/msg.{
   type Msg, UserClickedSearchButton, UserSelectedPokemon,
 }
-import pokemon_battle_sim/types/pokemon.{type Pokemon}
+import pokedex/types/pokemon.{type Pokemon}
 
 pub const pokemon_search_input_id = "pokemon-search-input"
 
 pub fn header() -> element.Element(Msg) {
   ui.box([bg_element()], [
-    html.h1([class("text-2xl font-bold")], [
-      html.text("Pokémon Battle Simulator"),
-    ]),
+    html.h1([class("text-2xl font-bold")], [html.text("Pokédex")]),
   ])
 }
 
 pub fn pokemon_search() -> element.Element(Msg) {
-  html.div([px_md(), class("flex items-center flex-row gap-4")], [
-    ui.input([
-      attribute.id(pokemon_search_input_id),
-      attribute.placeholder("Search Pokémon"),
-      attribute.type_("search"),
-      class("w-full flex-grow"),
-    ]),
-    ui.button(
-      [
-        button.primary(),
-        class("w-fit"),
-        event.on_click(UserClickedSearchButton),
-      ],
-      [html.text("Search")],
-    ),
-  ])
+  html.div(
+    [px_md(), class("flex items-center flex-col sm:flex-row gap-2 sm:gap-4")],
+    [
+      ui.input([
+        attribute.id(pokemon_search_input_id),
+        attribute.placeholder("Search Pokémon"),
+        attribute.type_("search"),
+        class("w-full flex-grow"),
+      ]),
+      ui.button(
+        [
+          button.primary(),
+          class("w-full sm:w-fit"),
+          event.on_click(UserClickedSearchButton),
+        ],
+        [html.text("Search")],
+      ),
+    ],
+  )
 }
 
 pub fn main_content(model: Model) -> element.Element(Msg) {
@@ -52,7 +53,7 @@ pub fn main_content(model: Model) -> element.Element(Msg) {
     ui.stack([], [
       pokemon_search(),
       ui.aside(
-        [aside.content_last(), px_md()],
+        [px_md()],
         pokemon_details(model.current_pokemon, model.all_pokemon),
         ui.stack(
           [stack.tight(), class("min-w-[20dvw]")],

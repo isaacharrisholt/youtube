@@ -216,6 +216,16 @@ function structurallyCompatibleObjects(a, b) {
     return false;
   return a.constructor === b.constructor;
 }
+function divideInt(a, b) {
+  return Math.trunc(divideFloat(a, b));
+}
+function divideFloat(a, b) {
+  if (b === 0) {
+    return 0;
+  } else {
+    return a / b;
+  }
+}
 function makeError(variant, module, line, fn, message, extra) {
   let error = new globalThis.Error(message);
   error.gleam_error = variant;
@@ -298,6 +308,14 @@ function scan(regex, string3) {
   return regex_scan(regex, string3);
 }
 
+// build/dev/javascript/gleam_stdlib/gleam/order.mjs
+var Lt = class extends CustomType {
+};
+var Eq = class extends CustomType {
+};
+var Gt = class extends CustomType {
+};
+
 // build/dev/javascript/gleam_stdlib/gleam/int.mjs
 function parse(string3) {
   return parse_int(string3);
@@ -306,152 +324,8 @@ function to_string2(x) {
   return to_string(x);
 }
 
-// build/dev/javascript/gleam_stdlib/gleam/pair.mjs
-function second(pair) {
-  let a = pair[1];
-  return a;
-}
-
-// build/dev/javascript/gleam_stdlib/gleam/list.mjs
-function do_reverse(loop$remaining, loop$accumulator) {
-  while (true) {
-    let remaining = loop$remaining;
-    let accumulator = loop$accumulator;
-    if (remaining.hasLength(0)) {
-      return accumulator;
-    } else {
-      let item = remaining.head;
-      let rest$1 = remaining.tail;
-      loop$remaining = rest$1;
-      loop$accumulator = prepend(item, accumulator);
-    }
-  }
-}
-function reverse(xs) {
-  return do_reverse(xs, toList([]));
-}
-function first(list2) {
-  if (list2.hasLength(0)) {
-    return new Error(void 0);
-  } else {
-    let x = list2.head;
-    return new Ok(x);
-  }
-}
-function do_map(loop$list, loop$fun, loop$acc) {
-  while (true) {
-    let list2 = loop$list;
-    let fun = loop$fun;
-    let acc = loop$acc;
-    if (list2.hasLength(0)) {
-      return reverse(acc);
-    } else {
-      let x = list2.head;
-      let xs = list2.tail;
-      loop$list = xs;
-      loop$fun = fun;
-      loop$acc = prepend(fun(x), acc);
-    }
-  }
-}
-function map2(list2, fun) {
-  return do_map(list2, fun, toList([]));
-}
-function do_try_map(loop$list, loop$fun, loop$acc) {
-  while (true) {
-    let list2 = loop$list;
-    let fun = loop$fun;
-    let acc = loop$acc;
-    if (list2.hasLength(0)) {
-      return new Ok(reverse(acc));
-    } else {
-      let x = list2.head;
-      let xs = list2.tail;
-      let $ = fun(x);
-      if ($.isOk()) {
-        let y = $[0];
-        loop$list = xs;
-        loop$fun = fun;
-        loop$acc = prepend(y, acc);
-      } else {
-        let error = $[0];
-        return new Error(error);
-      }
-    }
-  }
-}
-function try_map(list2, fun) {
-  return do_try_map(list2, fun, toList([]));
-}
-function do_append(loop$first, loop$second) {
-  while (true) {
-    let first2 = loop$first;
-    let second2 = loop$second;
-    if (first2.hasLength(0)) {
-      return second2;
-    } else {
-      let item = first2.head;
-      let rest$1 = first2.tail;
-      loop$first = rest$1;
-      loop$second = prepend(item, second2);
-    }
-  }
-}
-function append(first2, second2) {
-  return do_append(reverse(first2), second2);
-}
-function reverse_and_prepend(loop$prefix, loop$suffix) {
-  while (true) {
-    let prefix = loop$prefix;
-    let suffix = loop$suffix;
-    if (prefix.hasLength(0)) {
-      return suffix;
-    } else {
-      let first$1 = prefix.head;
-      let rest$1 = prefix.tail;
-      loop$prefix = rest$1;
-      loop$suffix = prepend(first$1, suffix);
-    }
-  }
-}
-function do_concat(loop$lists, loop$acc) {
-  while (true) {
-    let lists = loop$lists;
-    let acc = loop$acc;
-    if (lists.hasLength(0)) {
-      return reverse(acc);
-    } else {
-      let list2 = lists.head;
-      let further_lists = lists.tail;
-      loop$lists = further_lists;
-      loop$acc = reverse_and_prepend(list2, acc);
-    }
-  }
-}
-function concat(lists) {
-  return do_concat(lists, toList([]));
-}
-function do_repeat(loop$a, loop$times, loop$acc) {
-  while (true) {
-    let a = loop$a;
-    let times = loop$times;
-    let acc = loop$acc;
-    let $ = times <= 0;
-    if ($) {
-      return acc;
-    } else {
-      loop$a = a;
-      loop$times = times - 1;
-      loop$acc = prepend(a, acc);
-    }
-  }
-}
-function repeat(a, times) {
-  return do_repeat(a, times, toList([]));
-}
-
 // build/dev/javascript/gleam_stdlib/gleam/result.mjs
-function map3(result, fun) {
+function map2(result, fun) {
   if (result.isOk()) {
     let x = result[0];
     return new Ok(fun(x));
@@ -497,7 +371,7 @@ function nil_error(result) {
 
 // build/dev/javascript/gleam_stdlib/gleam/string_builder.mjs
 function from_strings(strings) {
-  return concat2(strings);
+  return concat(strings);
 }
 function to_string3(builder) {
   return identity(builder);
@@ -563,7 +437,7 @@ function push_path(error, name) {
   let name$1 = from(name);
   let decoder2 = any(
     toList([string, (x) => {
-      return map3(int(x), to_string2);
+      return map2(int(x), to_string2);
     }])
   );
   let name$2 = (() => {
@@ -600,7 +474,7 @@ function map_errors(result, f) {
   return map_error(
     result,
     (_capture) => {
-      return map2(_capture, f);
+      return map3(_capture, f);
     }
   );
 }
@@ -644,7 +518,7 @@ function decode5(constructor, t1, t2, t3, t4, t5) {
       let d = $3;
       let e = $4;
       return new Error(
-        concat(
+        concat2(
           toList([
             all_errors(a),
             all_errors(b),
@@ -681,7 +555,7 @@ function decode6(constructor, t1, t2, t3, t4, t5, t6) {
       let e = $4;
       let f = $5;
       return new Error(
-        concat(
+        concat2(
           toList([
             all_errors(a),
             all_errors(b),
@@ -725,7 +599,7 @@ function decode8(constructor, t1, t2, t3, t4, t5, t6, t7, t8) {
       let g = $6;
       let h = $7;
       return new Error(
-        concat(
+        concat2(
           toList([
             all_errors(a),
             all_errors(b),
@@ -1477,7 +1351,10 @@ function pop_grapheme(string3) {
 function lowercase(string3) {
   return string3.toLowerCase();
 }
-function concat2(xs) {
+function less_than(a, b) {
+  return a < b;
+}
+function concat(xs) {
   let result = "";
   for (const x of xs) {
     result = result + x;
@@ -1685,9 +1562,360 @@ function inspectUtfCodepoint(codepoint2) {
   return `//utfcodepoint(${String.fromCodePoint(codepoint2.value)})`;
 }
 
+// build/dev/javascript/gleam_stdlib/gleam/pair.mjs
+function second(pair) {
+  let a = pair[1];
+  return a;
+}
+
+// build/dev/javascript/gleam_stdlib/gleam/list.mjs
+function count_length(loop$list, loop$count) {
+  while (true) {
+    let list2 = loop$list;
+    let count = loop$count;
+    if (list2.atLeastLength(1)) {
+      let list$1 = list2.tail;
+      loop$list = list$1;
+      loop$count = count + 1;
+    } else {
+      return count;
+    }
+  }
+}
+function length2(list2) {
+  return count_length(list2, 0);
+}
+function do_reverse(loop$remaining, loop$accumulator) {
+  while (true) {
+    let remaining = loop$remaining;
+    let accumulator = loop$accumulator;
+    if (remaining.hasLength(0)) {
+      return accumulator;
+    } else {
+      let item = remaining.head;
+      let rest$1 = remaining.tail;
+      loop$remaining = rest$1;
+      loop$accumulator = prepend(item, accumulator);
+    }
+  }
+}
+function reverse(xs) {
+  return do_reverse(xs, toList([]));
+}
+function contains(loop$list, loop$elem) {
+  while (true) {
+    let list2 = loop$list;
+    let elem = loop$elem;
+    if (list2.hasLength(0)) {
+      return false;
+    } else if (list2.atLeastLength(1) && isEqual(list2.head, elem)) {
+      let first$1 = list2.head;
+      return true;
+    } else {
+      let rest$1 = list2.tail;
+      loop$list = rest$1;
+      loop$elem = elem;
+    }
+  }
+}
+function first(list2) {
+  if (list2.hasLength(0)) {
+    return new Error(void 0);
+  } else {
+    let x = list2.head;
+    return new Ok(x);
+  }
+}
+function do_map(loop$list, loop$fun, loop$acc) {
+  while (true) {
+    let list2 = loop$list;
+    let fun = loop$fun;
+    let acc = loop$acc;
+    if (list2.hasLength(0)) {
+      return reverse(acc);
+    } else {
+      let x = list2.head;
+      let xs = list2.tail;
+      loop$list = xs;
+      loop$fun = fun;
+      loop$acc = prepend(fun(x), acc);
+    }
+  }
+}
+function map3(list2, fun) {
+  return do_map(list2, fun, toList([]));
+}
+function do_try_map(loop$list, loop$fun, loop$acc) {
+  while (true) {
+    let list2 = loop$list;
+    let fun = loop$fun;
+    let acc = loop$acc;
+    if (list2.hasLength(0)) {
+      return new Ok(reverse(acc));
+    } else {
+      let x = list2.head;
+      let xs = list2.tail;
+      let $ = fun(x);
+      if ($.isOk()) {
+        let y = $[0];
+        loop$list = xs;
+        loop$fun = fun;
+        loop$acc = prepend(y, acc);
+      } else {
+        let error = $[0];
+        return new Error(error);
+      }
+    }
+  }
+}
+function try_map(list2, fun) {
+  return do_try_map(list2, fun, toList([]));
+}
+function drop(loop$list, loop$n) {
+  while (true) {
+    let list2 = loop$list;
+    let n = loop$n;
+    let $ = n <= 0;
+    if ($) {
+      return list2;
+    } else {
+      if (list2.hasLength(0)) {
+        return toList([]);
+      } else {
+        let xs = list2.tail;
+        loop$list = xs;
+        loop$n = n - 1;
+      }
+    }
+  }
+}
+function do_append(loop$first, loop$second) {
+  while (true) {
+    let first2 = loop$first;
+    let second2 = loop$second;
+    if (first2.hasLength(0)) {
+      return second2;
+    } else {
+      let item = first2.head;
+      let rest$1 = first2.tail;
+      loop$first = rest$1;
+      loop$second = prepend(item, second2);
+    }
+  }
+}
+function append(first2, second2) {
+  return do_append(reverse(first2), second2);
+}
+function reverse_and_prepend(loop$prefix, loop$suffix) {
+  while (true) {
+    let prefix = loop$prefix;
+    let suffix = loop$suffix;
+    if (prefix.hasLength(0)) {
+      return suffix;
+    } else {
+      let first$1 = prefix.head;
+      let rest$1 = prefix.tail;
+      loop$prefix = rest$1;
+      loop$suffix = prepend(first$1, suffix);
+    }
+  }
+}
+function do_concat(loop$lists, loop$acc) {
+  while (true) {
+    let lists = loop$lists;
+    let acc = loop$acc;
+    if (lists.hasLength(0)) {
+      return reverse(acc);
+    } else {
+      let list2 = lists.head;
+      let further_lists = lists.tail;
+      loop$lists = further_lists;
+      loop$acc = reverse_and_prepend(list2, acc);
+    }
+  }
+}
+function concat2(lists) {
+  return do_concat(lists, toList([]));
+}
+function merge_up(loop$na, loop$nb, loop$a, loop$b, loop$acc, loop$compare) {
+  while (true) {
+    let na = loop$na;
+    let nb = loop$nb;
+    let a = loop$a;
+    let b = loop$b;
+    let acc = loop$acc;
+    let compare4 = loop$compare;
+    if (na === 0 && nb === 0) {
+      return acc;
+    } else if (nb === 0 && a.atLeastLength(1)) {
+      let ax = a.head;
+      let ar = a.tail;
+      loop$na = na - 1;
+      loop$nb = nb;
+      loop$a = ar;
+      loop$b = b;
+      loop$acc = prepend(ax, acc);
+      loop$compare = compare4;
+    } else if (na === 0 && b.atLeastLength(1)) {
+      let bx = b.head;
+      let br = b.tail;
+      loop$na = na;
+      loop$nb = nb - 1;
+      loop$a = a;
+      loop$b = br;
+      loop$acc = prepend(bx, acc);
+      loop$compare = compare4;
+    } else if (a.atLeastLength(1) && b.atLeastLength(1)) {
+      let ax = a.head;
+      let ar = a.tail;
+      let bx = b.head;
+      let br = b.tail;
+      let $ = compare4(ax, bx);
+      if ($ instanceof Gt) {
+        loop$na = na;
+        loop$nb = nb - 1;
+        loop$a = a;
+        loop$b = br;
+        loop$acc = prepend(bx, acc);
+        loop$compare = compare4;
+      } else {
+        loop$na = na - 1;
+        loop$nb = nb;
+        loop$a = ar;
+        loop$b = b;
+        loop$acc = prepend(ax, acc);
+        loop$compare = compare4;
+      }
+    } else {
+      return acc;
+    }
+  }
+}
+function merge_down(loop$na, loop$nb, loop$a, loop$b, loop$acc, loop$compare) {
+  while (true) {
+    let na = loop$na;
+    let nb = loop$nb;
+    let a = loop$a;
+    let b = loop$b;
+    let acc = loop$acc;
+    let compare4 = loop$compare;
+    if (na === 0 && nb === 0) {
+      return acc;
+    } else if (nb === 0 && a.atLeastLength(1)) {
+      let ax = a.head;
+      let ar = a.tail;
+      loop$na = na - 1;
+      loop$nb = nb;
+      loop$a = ar;
+      loop$b = b;
+      loop$acc = prepend(ax, acc);
+      loop$compare = compare4;
+    } else if (na === 0 && b.atLeastLength(1)) {
+      let bx = b.head;
+      let br = b.tail;
+      loop$na = na;
+      loop$nb = nb - 1;
+      loop$a = a;
+      loop$b = br;
+      loop$acc = prepend(bx, acc);
+      loop$compare = compare4;
+    } else if (a.atLeastLength(1) && b.atLeastLength(1)) {
+      let ax = a.head;
+      let ar = a.tail;
+      let bx = b.head;
+      let br = b.tail;
+      let $ = compare4(bx, ax);
+      if ($ instanceof Lt) {
+        loop$na = na - 1;
+        loop$nb = nb;
+        loop$a = ar;
+        loop$b = b;
+        loop$acc = prepend(ax, acc);
+        loop$compare = compare4;
+      } else {
+        loop$na = na;
+        loop$nb = nb - 1;
+        loop$a = a;
+        loop$b = br;
+        loop$acc = prepend(bx, acc);
+        loop$compare = compare4;
+      }
+    } else {
+      return acc;
+    }
+  }
+}
+function merge_sort(l, ln, compare4, down) {
+  let n = divideInt(ln, 2);
+  let a = l;
+  let b = drop(l, n);
+  let $ = ln < 3;
+  if ($) {
+    if (down) {
+      return merge_down(n, ln - n, a, b, toList([]), compare4);
+    } else {
+      return merge_up(n, ln - n, a, b, toList([]), compare4);
+    }
+  } else {
+    if (down) {
+      return merge_down(
+        n,
+        ln - n,
+        merge_sort(a, n, compare4, false),
+        merge_sort(b, ln - n, compare4, false),
+        toList([]),
+        compare4
+      );
+    } else {
+      return merge_up(
+        n,
+        ln - n,
+        merge_sort(a, n, compare4, true),
+        merge_sort(b, ln - n, compare4, true),
+        toList([]),
+        compare4
+      );
+    }
+  }
+}
+function sort(list2, compare4) {
+  return merge_sort(list2, length2(list2), compare4, true);
+}
+function do_repeat(loop$a, loop$times, loop$acc) {
+  while (true) {
+    let a = loop$a;
+    let times = loop$times;
+    let acc = loop$acc;
+    let $ = times <= 0;
+    if ($) {
+      return acc;
+    } else {
+      loop$a = a;
+      loop$times = times - 1;
+      loop$acc = prepend(a, acc);
+    }
+  }
+}
+function repeat(a, times) {
+  return do_repeat(a, times, toList([]));
+}
+
 // build/dev/javascript/gleam_stdlib/gleam/string.mjs
 function lowercase2(string3) {
   return lowercase(string3);
+}
+function compare3(a, b) {
+  let $ = a === b;
+  if ($) {
+    return new Eq();
+  } else {
+    let $1 = less_than(a, b);
+    if ($1) {
+      return new Lt();
+    } else {
+      return new Gt();
+    }
+  }
 }
 function starts_with2(string3, prefix) {
   return starts_with(string3, prefix);
@@ -2483,9 +2711,6 @@ function of2(element2, attributes, side, main3) {
 function aside(attributes, side, main3) {
   return of2(div, attributes, side, main3);
 }
-function content_last() {
-  return class$("content-last");
-}
 
 // build/dev/javascript/lustre_ui/lustre/ui/layout/box.mjs
 function of3(element2, attributes, children) {
@@ -2774,14 +2999,14 @@ function regex_submatches(pattern, string3) {
   let _pipe = pattern;
   let _pipe$1 = compile(_pipe, new Options(true, false));
   let _pipe$2 = nil_error(_pipe$1);
-  let _pipe$3 = map3(
+  let _pipe$3 = map2(
     _pipe$2,
     (_capture) => {
       return scan(_capture, string3);
     }
   );
   let _pipe$4 = try$(_pipe$3, first);
-  let _pipe$5 = map3(_pipe$4, (m) => {
+  let _pipe$5 = map2(_pipe$4, (m) => {
     return m.submatches;
   });
   return unwrap2(_pipe$5, toList([]));
@@ -2903,7 +3128,7 @@ function do_parse(uri_string) {
     let _pipe = fragment;
     let _pipe$1 = to_result(_pipe, void 0);
     let _pipe$2 = try$(_pipe$1, pop_grapheme2);
-    let _pipe$3 = map3(_pipe$2, second);
+    let _pipe$3 = map2(_pipe$2, second);
     return from_result(_pipe$3);
   })();
   let scheme$2 = (() => {
@@ -3307,7 +3532,7 @@ function expect_json(decoder2, to_msg) {
   );
 }
 
-// build/dev/javascript/pokemon_battle_sim/pokemon_battle_sim/types/pokemon.mjs
+// build/dev/javascript/pokedex/pokedex/types/pokemon.mjs
 var Stats = class extends CustomType {
   constructor(hp, atk, def, sp_atk, sp_def, speed) {
     super();
@@ -3383,14 +3608,8 @@ function pokemon_decoder() {
   );
 }
 
-// build/dev/javascript/pokemon_battle_sim/pokemon_battle_sim/types/msg.mjs
+// build/dev/javascript/pokedex/pokedex/types/msg.mjs
 var UserSelectedPokemon = class extends CustomType {
-  constructor(x0) {
-    super();
-    this[0] = x0;
-  }
-};
-var ApiReturnedPokemon = class extends CustomType {
   constructor(x0) {
     super();
     this[0] = x0;
@@ -3398,8 +3617,22 @@ var ApiReturnedPokemon = class extends CustomType {
 };
 var UserClickedSearchButton = class extends CustomType {
 };
+var ApiReturnedPokemon = class extends CustomType {
+  constructor(x0) {
+    super();
+    this[0] = x0;
+  }
+};
+var ApiReturnedAllPokemon = class extends CustomType {
+  constructor(x0) {
+    super();
+    this[0] = x0;
+  }
+};
+var AppRequestedAllPokemon = class extends CustomType {
+};
 
-// build/dev/javascript/pokemon_battle_sim/pokemon_battle_sim/api.mjs
+// build/dev/javascript/pokedex/pokedex/api.mjs
 var api_root = "http://localhost:8000";
 function fetch_pokemon(search) {
   let expect = expect_json(
@@ -3413,13 +3646,22 @@ function fetch_pokemon(search) {
     expect
   );
 }
+function fetch_all_pokemon() {
+  let expect = expect_json(
+    list(string),
+    (var0) => {
+      return new ApiReturnedAllPokemon(var0);
+    }
+  );
+  return get2(api_root + "/pokemon", expect);
+}
 
 // priv/static/dom_ffi.mjs
 function set_value(element2, value2) {
   element2.value = value2;
 }
 
-// build/dev/javascript/pokemon_battle_sim/pokemon_battle_sim/types.mjs
+// build/dev/javascript/pokedex/pokedex/types.mjs
 var Loading = class extends CustomType {
 };
 var Loaded = class extends CustomType {
@@ -3435,13 +3677,12 @@ var LoadError = class extends CustomType {
   }
 };
 
-// build/dev/javascript/pokemon_battle_sim/pokemon_battle_sim/types/model.mjs
+// build/dev/javascript/pokedex/pokedex/types/model.mjs
 var Model = class extends CustomType {
-  constructor(current_pokemon, all_pokemon, battle_pair) {
+  constructor(current_pokemon, all_pokemon) {
     super();
     this.current_pokemon = current_pokemon;
     this.all_pokemon = all_pokemon;
-    this.battle_pair = battle_pair;
   }
 };
 
@@ -3463,14 +3704,14 @@ function px_md() {
   return class$("px-md");
 }
 
-// build/dev/javascript/pokemon_battle_sim/pokemon_battle_sim/views.mjs
+// build/dev/javascript/pokedex/pokedex/views.mjs
 function header() {
   return box2(
     toList([bg_element()]),
     toList([
       h1(
         toList([class$("text-2xl font-bold")]),
-        toList([text2("Pok\xE9mon Battle Simulator")])
+        toList([text2("Pok\xE9dex")])
       )
     ])
   );
@@ -3478,7 +3719,7 @@ function header() {
 function pokemon_list(pokemon) {
   if (pokemon instanceof Loaded) {
     let pokemon$1 = pokemon[0];
-    return map2(
+    return map3(
       pokemon$1,
       (p2) => {
         return button3(
@@ -3576,7 +3817,10 @@ function pokemon_details(maybe_pokemon, all_pokemon) {
 var pokemon_search_input_id = "pokemon-search-input";
 function pokemon_search() {
   return div(
-    toList([px_md(), class$("flex items-center flex-row gap-4")]),
+    toList([
+      px_md(),
+      class$("flex items-center flex-col sm:flex-row gap-2 sm:gap-4")
+    ]),
     toList([
       input3(
         toList([
@@ -3589,7 +3833,7 @@ function pokemon_search() {
       button3(
         toList([
           primary(),
-          class$("w-fit"),
+          class$("w-full sm:w-fit"),
           on_click(new UserClickedSearchButton())
         ]),
         toList([text2("Search")])
@@ -3606,7 +3850,7 @@ function main_content(model) {
         toList([
           pokemon_search(),
           aside2(
-            toList([content_last(), px_md()]),
+            toList([px_md()]),
             pokemon_details(model.current_pokemon, model.all_pokemon),
             stack2(
               toList([tight(), class$("min-w-[20dvw]")]),
@@ -3619,16 +3863,9 @@ function main_content(model) {
   );
 }
 
-// build/dev/javascript/pokemon_battle_sim/pokemon_battle_sim.mjs
+// build/dev/javascript/pokedex/pokedex.mjs
 function init2(_) {
-  return [
-    new Model(
-      new Loaded(new None()),
-      new Loaded(toList(["Pikachu", "Turtwig", "Chimchar", "Piplup", "Zorua"])),
-      new None()
-    ),
-    none()
-  ];
+  return [new Model(new Loaded(new None()), new Loading()), fetch_all_pokemon()];
 }
 function handle_user_selected_pokemon(model, pokemon_name) {
   let default_return = [
@@ -3653,8 +3890,8 @@ function handle_user_clicked_search_button(model) {
   if (!$.isOk()) {
     throw makeError(
       "assignment_no_match",
-      "pokemon_battle_sim",
-      52,
+      "pokedex",
+      51,
       "handle_user_clicked_search_button",
       "Assignment pattern did not match",
       { value: $ }
@@ -3665,8 +3902,8 @@ function handle_user_clicked_search_button(model) {
   if (!$1.isOk()) {
     throw makeError(
       "assignment_no_match",
-      "pokemon_battle_sim",
-      54,
+      "pokedex",
+      53,
       "handle_user_clicked_search_button",
       "Assignment pattern did not match",
       { value: $1 }
@@ -3687,23 +3924,66 @@ function handle_user_clicked_search_button(model) {
     return handle_user_selected_pokemon(model, cleaned);
   }
 }
+function handle_api_returned_pokemon_ok(model, pokemon) {
+  let default_return = [
+    model.withFields({ current_pokemon: new Loaded(new Some(pokemon)) }),
+    none()
+  ];
+  let $ = model.all_pokemon;
+  if ($ instanceof Loaded) {
+    let pokemon_names = $[0];
+    let $1 = contains(pokemon_names, pokemon.name);
+    if (!$1) {
+      return [default_return[0], fetch_all_pokemon()];
+    } else {
+      return default_return;
+    }
+  } else {
+    return default_return;
+  }
+}
 function update2(model, msg) {
   if (msg instanceof UserSelectedPokemon) {
     let pokemon_name = msg[0];
     return handle_user_selected_pokemon(model, pokemon_name);
   } else if (msg instanceof UserClickedSearchButton) {
     return handle_user_clicked_search_button(model);
+  } else if (msg instanceof AppRequestedAllPokemon) {
+    return [
+      model.withFields({ all_pokemon: new Loading() }),
+      fetch_all_pokemon()
+    ];
   } else if (msg instanceof ApiReturnedPokemon && msg[0].isOk()) {
     let pokemon = msg[0][0];
+    return handle_api_returned_pokemon_ok(model, pokemon);
+  } else if (msg instanceof ApiReturnedPokemon && !msg[0].isOk()) {
+    let err = msg[0][0];
     return [
-      model.withFields({ current_pokemon: new Loaded(new Some(pokemon)) }),
+      model.withFields({
+        current_pokemon: new LoadError(
+          "Error fetching Pokemon: " + inspect2(err)
+        )
+      }),
+      none()
+    ];
+  } else if (msg instanceof ApiReturnedAllPokemon && msg[0].isOk()) {
+    let pokemon_names = msg[0][0];
+    return [
+      model.withFields({
+        all_pokemon: new Loaded(
+          (() => {
+            let _pipe = pokemon_names;
+            return sort(_pipe, compare3);
+          })()
+        )
+      }),
       none()
     ];
   } else {
     let err = msg[0][0];
     return [
       model.withFields({
-        current_pokemon: new LoadError(
+        all_pokemon: new LoadError(
           "Error fetching Pokemon: " + inspect2(err)
         )
       }),
@@ -3723,8 +4003,8 @@ function main2() {
   if (!$.isOk()) {
     throw makeError(
       "assignment_no_match",
-      "pokemon_battle_sim",
-      97,
+      "pokedex",
+      143,
       "main",
       "Assignment pattern did not match",
       { value: $ }

@@ -548,11 +548,6 @@ video {
   display: flex;
 }
 
-.w-fit {
-  width: -moz-fit-content;
-  width: fit-content;
-}
-
 .w-full {
   width: 100%;
 }
@@ -565,16 +560,16 @@ video {
   flex-grow: 1;
 }
 
-.flex-row {
-  flex-direction: row;
+.flex-col {
+  flex-direction: column;
 }
 
 .items-center {
   align-items: center;
 }
 
-.gap-4 {
-  gap: 1rem;
+.gap-2 {
+  gap: 0.5rem;
 }
 
 .text-left {
@@ -592,4 +587,19 @@ video {
 
 .lowercase {
   text-transform: lowercase;
+}
+
+@media (min-width: 640px) {
+  .sm\:w-fit {
+    width: -moz-fit-content;
+    width: fit-content;
+  }
+
+  .sm\:flex-row {
+    flex-direction: row;
+  }
+
+  .sm\:gap-4 {
+    gap: 1rem;
+  }
 }
