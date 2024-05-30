@@ -37,12 +37,29 @@ pub fn handle_request(req: Request, ctx: Context) -> Response {
   case wisp.path_segments(req) {
     // Health check
     [] -> wisp.ok()
+    // /pokemon
+    ["pokemon"] -> get_all_pokemon_handler(ctx)
     // /pokemon/:name
     ["pokemon", name] -> get_pokemon_handler(ctx, name)
     // /battle/:name1/:name2
     ["battle", name1, name2] -> get_battle_handler(ctx, name1, name2)
     // Any non-matching routes
     _ -> wisp.not_found()
+  }
+}
+
+/// Handler for the /pokemon route.
+/// Gets all Pokemon names currently in the cache, and returns them as JSON.
+fn get_all_pokemon_handler(ctx: Context) {
+  case cache.get_keys(ctx.pokemon_cache) {
+    [] -> wisp.ok()
+    names -> {
+      let encode = json.array(_, json.string)
+      names
+      |> encode
+      |> json.to_string_builder
+      |> wisp.json_response(200)
+    }
   }
 }
 
