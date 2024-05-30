@@ -5,14 +5,16 @@ import lustre/effect
 import lustre/element
 import lustre/ui
 import lustre/ui/util/styles
+import plinth/browser/document
+import plinth/browser/element as browser_element
 import pokemon_battle_sim/api.{fetch_pokemon}
+import pokemon_battle_sim/dom
 import pokemon_battle_sim/types.{LoadError, Loaded, Loading}
 import pokemon_battle_sim/types/model.{type Model, Model}
 import pokemon_battle_sim/types/msg.{
-  type Msg, ApiReturnedPokemon, UserSelectedPokemon,
+  type Msg, ApiReturnedPokemon, UserClickedSearchButton, UserSelectedPokemon,
 }
-
-import pokemon_battle_sim/views.{header, main_content}
+import pokemon_battle_sim/views.{header, main_content, pokemon_search_input_id}
 
 fn init(_flags) -> #(Model, effect.Effect(Msg)) {
   #(
@@ -44,10 +46,30 @@ fn handle_user_selected_pokemon(
   }
 }
 
+fn handle_user_clicked_search_button(
+  model: Model,
+) -> #(Model, effect.Effect(Msg)) {
+  let assert Ok(search_element) =
+    document.query_selector("#" <> pokemon_search_input_id)
+  let assert Ok(pokemon_name) = browser_element.value(search_element)
+  let cleaned_pokemon_name =
+    pokemon_name
+    |> string.trim
+    |> string.lowercase
+  case string.trim(cleaned_pokemon_name) {
+    "" -> #(model, effect.none())
+    cleaned -> {
+      dom.set_value(search_element, "")
+      handle_user_selected_pokemon(model, cleaned)
+    }
+  }
+}
+
 fn update(model: Model, msg: Msg) -> #(Model, effect.Effect(Msg)) {
   case msg {
     UserSelectedPokemon(pokemon_name) ->
       handle_user_selected_pokemon(model, pokemon_name)
+    UserClickedSearchButton -> handle_user_clicked_search_button(model)
     ApiReturnedPokemon(Ok(pokemon)) -> #(
       Model(..model, current_pokemon: Loaded(Some(pokemon))),
       effect.none(),

@@ -13,10 +13,14 @@ import lustre/ui/layout/stack
 import lustre/ui/util/cn.{bg_element, px_md}
 import pokemon_battle_sim/types.{type CanLoad, LoadError, Loaded, Loading}
 import pokemon_battle_sim/types/model.{type Model}
-import pokemon_battle_sim/types/msg.{type Msg, UserSelectedPokemon}
+import pokemon_battle_sim/types/msg.{
+  type Msg, UserClickedSearchButton, UserSelectedPokemon,
+}
 import pokemon_battle_sim/types/pokemon.{type Pokemon}
 
-pub fn header() -> element.Element(a) {
+pub const pokemon_search_input_id = "pokemon-search-input"
+
+pub fn header() -> element.Element(Msg) {
   ui.box([bg_element()], [
     html.h1([class("text-2xl font-bold")], [
       html.text("Pokémon Battle Simulator"),
@@ -24,14 +28,22 @@ pub fn header() -> element.Element(a) {
   ])
 }
 
-pub fn pokemon_search() -> element.Element(a) {
+pub fn pokemon_search() -> element.Element(Msg) {
   html.div([px_md(), class("flex items-center flex-row gap-4")], [
     ui.input([
+      attribute.id(pokemon_search_input_id),
       attribute.placeholder("Search Pokémon"),
       attribute.type_("search"),
       class("w-full flex-grow"),
     ]),
-    ui.button([button.primary(), class("w-fit")], [html.text("Search")]),
+    ui.button(
+      [
+        button.primary(),
+        class("w-fit"),
+        event.on_click(UserClickedSearchButton),
+      ],
+      [html.text("Search")],
+    ),
   ])
 }
 

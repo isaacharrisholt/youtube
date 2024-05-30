@@ -109,17 +109,17 @@ var BitArray = class _BitArray {
   }
 };
 var UtfCodepoint = class {
-  constructor(value) {
-    this.value = value;
+  constructor(value2) {
+    this.value = value2;
   }
 };
 function byteArrayToInt(byteArray) {
   byteArray = byteArray.reverse();
-  let value = 0;
+  let value2 = 0;
   for (let i = byteArray.length - 1; i >= 0; i--) {
-    value = value * 256 + byteArray[i];
+    value2 = value2 * 256 + byteArray[i];
   }
-  return value;
+  return value2;
 }
 function byteArrayToFloat(byteArray) {
   return new Float64Array(byteArray.reverse().buffer)[0];
@@ -131,9 +131,9 @@ var Result = class _Result extends CustomType {
   }
 };
 var Ok = class extends Result {
-  constructor(value) {
+  constructor(value2) {
     super();
-    this[0] = value;
+    this[0] = value2;
   }
   // @internal
   isOk() {
@@ -524,12 +524,12 @@ function classify(data) {
 function int(data) {
   return decode_int(data);
 }
-function shallow_list(value) {
-  return decode_list(value);
+function shallow_list(value2) {
+  return decode_list(value2);
 }
 function optional(decode3) {
-  return (value) => {
-    return decode_option(value, decode3);
+  return (value2) => {
+    return decode_option(value2, decode3);
   };
 }
 function any(decoders) {
@@ -605,10 +605,10 @@ function map_errors(result, f) {
   );
 }
 function field(name, inner_type) {
-  return (value) => {
+  return (value2) => {
     let missing_field_error = new DecodeError("field", "nothing", toList([]));
     return try$(
-      decode_field(value, name),
+      decode_field(value2, name),
       (maybe_inner) => {
         let _pipe = maybe_inner;
         let _pipe$1 = to_result(_pipe, toList([missing_field_error]));
@@ -1445,9 +1445,9 @@ var NOT_FOUND = {};
 function identity(x) {
   return x;
 }
-function parse_int(value) {
-  if (/^[-+]?(\d+)$/.test(value)) {
-    return new Ok(parseInt(value));
+function parse_int(value2) {
+  if (/^[-+]?(\d+)$/.test(value2)) {
+    return new Ok(parseInt(value2));
   } else {
     return new Error(Nil);
   }
@@ -1487,6 +1487,9 @@ function concat2(xs) {
 function starts_with(haystack, needle) {
   return haystack.startsWith(needle);
 }
+function trim(string3) {
+  return string3.trim();
+}
 function compile_regex(pattern, options) {
   try {
     let flags = "gu";
@@ -1518,11 +1521,11 @@ function regex_scan(regex, string3) {
   return List.fromArray(matches);
 }
 function map_get(map6, key) {
-  const value = map6.get(key, NOT_FOUND);
-  if (value === NOT_FOUND) {
+  const value2 = map6.get(key, NOT_FOUND);
+  if (value2 === NOT_FOUND) {
     return new Error(Nil);
   }
-  return new Ok(value);
+  return new Ok(value2);
 }
 function classify_dynamic(data) {
   if (typeof data === "string") {
@@ -1584,22 +1587,22 @@ function decode_option(data, decoder2) {
     return result;
   }
 }
-function decode_field(value, name) {
-  const not_a_map_error = () => decoder_error("Dict", value);
-  if (value instanceof Dict || value instanceof WeakMap || value instanceof Map) {
-    const entry = map_get(value, name);
+function decode_field(value2, name) {
+  const not_a_map_error = () => decoder_error("Dict", value2);
+  if (value2 instanceof Dict || value2 instanceof WeakMap || value2 instanceof Map) {
+    const entry = map_get(value2, name);
     return new Ok(entry.isOk() ? new Some(entry[0]) : new None());
-  } else if (value === null) {
+  } else if (value2 === null) {
     return not_a_map_error();
-  } else if (Object.getPrototypeOf(value) == Object.prototype) {
-    return try_get_field(value, name, () => new Ok(new None()));
+  } else if (Object.getPrototypeOf(value2) == Object.prototype) {
+    return try_get_field(value2, name, () => new Ok(new None()));
   } else {
-    return try_get_field(value, name, not_a_map_error);
+    return try_get_field(value2, name, not_a_map_error);
   }
 }
-function try_get_field(value, field3, or_else) {
+function try_get_field(value2, field3, or_else) {
   try {
-    return field3 in value ? new Ok(new Some(value[field3])) : or_else();
+    return field3 in value2 ? new Ok(new Some(value2[field3])) : or_else();
   } catch {
     return or_else();
   }
@@ -1645,15 +1648,15 @@ function inspect(v) {
   return inspectObject(v);
 }
 function inspectDict(map6) {
-  let body = "dict.from_list([";
+  let body2 = "dict.from_list([";
   let first2 = true;
-  map6.forEach((value, key) => {
+  map6.forEach((value2, key) => {
     if (!first2)
-      body = body + ", ";
-    body = body + "#(" + inspect(key) + ", " + inspect(value) + ")";
+      body2 = body2 + ", ";
+    body2 = body2 + "#(" + inspect(key) + ", " + inspect(value2) + ")";
     first2 = false;
   });
-  return body + "])";
+  return body2 + "])";
 }
 function inspectObject(v) {
   const name = Object.getPrototypeOf(v)?.constructor?.name || "Object";
@@ -1661,14 +1664,14 @@ function inspectObject(v) {
   for (const k of Object.keys(v)) {
     props.push(`${inspect(k)}: ${inspect(v[k])}`);
   }
-  const body = props.length ? " " + props.join(", ") + " " : "";
+  const body2 = props.length ? " " + props.join(", ") + " " : "";
   const head = name === "Object" ? "" : name + " ";
-  return `//js(${head}{${body}})`;
+  return `//js(${head}{${body2}})`;
 }
 function inspectCustomType(record) {
   const props = Object.keys(record).map((label2) => {
-    const value = inspect(record[label2]);
-    return isNaN(parseInt(label2)) ? `${label2}: ${value}` : value;
+    const value2 = inspect(record[label2]);
+    return isNaN(parseInt(label2)) ? `${label2}: ${value2}` : value2;
   }).join(", ");
   return props ? `${record.constructor.name}(${props})` : record.constructor.name;
 }
@@ -1693,6 +1696,9 @@ function concat3(strings) {
   let _pipe = strings;
   let _pipe$1 = from_strings(_pipe);
   return to_string3(_pipe$1);
+}
+function trim2(string3) {
+  return trim(string3);
 }
 function pop_grapheme2(string3) {
   return pop_grapheme(string3);
@@ -1885,14 +1891,17 @@ var Event = class extends CustomType {
 };
 
 // build/dev/javascript/lustre/lustre/attribute.mjs
-function attribute(name, value) {
-  return new Attribute(name, from(value), false);
+function attribute(name, value2) {
+  return new Attribute(name, from(value2), false);
 }
 function on(name, handler) {
   return new Event("on" + name, handler);
 }
 function class$(name) {
   return attribute("class", name);
+}
+function id(name) {
+  return attribute("id", name);
 }
 function type_(name) {
   return attribute("type", name);
@@ -2027,15 +2036,15 @@ function createElementNode({ prev, next, dispatch, stack: stack3 }) {
   let innerHTML = null;
   for (const attr of next.attrs) {
     const name = attr[0];
-    const value = attr[1];
+    const value2 = attr[1];
     if (attr.as_property) {
-      if (el2[name] !== value)
-        el2[name] = value;
+      if (el2[name] !== value2)
+        el2[name] = value2;
       if (canMorph)
         prevAttributes.delete(name);
     } else if (name.startsWith("on")) {
       const eventName = name.slice(2);
-      const callback = dispatch(value);
+      const callback = dispatch(value2);
       if (!handlersForEl.has(eventName)) {
         el2.addEventListener(eventName, lustreGenericEventHandler);
       }
@@ -2049,18 +2058,18 @@ function createElementNode({ prev, next, dispatch, stack: stack3 }) {
         el2.addEventListener(eventName, lustreGenericEventHandler);
       }
       handlersForEl.set(eventName, callback);
-      el2.setAttribute(name, value);
+      el2.setAttribute(name, value2);
     } else if (name === "class") {
-      className = className === null ? value : className + " " + value;
+      className = className === null ? value2 : className + " " + value2;
     } else if (name === "style") {
-      style3 = style3 === null ? value : style3 + value;
+      style3 = style3 === null ? value2 : style3 + value2;
     } else if (name === "dangerous-unescaped-html") {
-      innerHTML = value;
+      innerHTML = value2;
     } else {
-      if (typeof value === "string")
-        el2.setAttribute(name, value);
+      if (typeof value2 === "string")
+        el2.setAttribute(name, value2);
       if (name === "value" || name === "selected")
-        el2[name] = value;
+        el2[name] = value2;
       if (canMorph)
         prevAttributes.delete(name);
     }
@@ -2129,14 +2138,14 @@ function createElementNode({ prev, next, dispatch, stack: stack3 }) {
 }
 var registeredHandlers = /* @__PURE__ */ new WeakMap();
 function lustreGenericEventHandler(event2) {
-  const target = event2.currentTarget;
-  if (!registeredHandlers.has(target)) {
-    target.removeEventListener(event2.type, lustreGenericEventHandler);
+  const target2 = event2.currentTarget;
+  if (!registeredHandlers.has(target2)) {
+    target2.removeEventListener(event2.type, lustreGenericEventHandler);
     return;
   }
-  const handlersForEventTarget = registeredHandlers.get(target);
+  const handlersForEventTarget = registeredHandlers.get(target2);
   if (!handlersForEventTarget.has(event2.type)) {
-    target.removeEventListener(event2.type, lustreGenericEventHandler);
+    target2.removeEventListener(event2.type, lustreGenericEventHandler);
     return;
   }
   handlersForEventTarget.get(event2.type)(event2);
@@ -2676,6 +2685,78 @@ function elements() {
   return style(toList([]), element_css);
 }
 
+// build/dev/javascript/gleam_javascript/ffi.mjs
+var PromiseLayer = class _PromiseLayer {
+  constructor(promise) {
+    this.promise = promise;
+  }
+  static wrap(value2) {
+    return value2 instanceof Promise ? new _PromiseLayer(value2) : value2;
+  }
+  static unwrap(value2) {
+    return value2 instanceof _PromiseLayer ? value2.promise : value2;
+  }
+};
+function resolve(value2) {
+  return Promise.resolve(PromiseLayer.wrap(value2));
+}
+function then(promise, fn) {
+  return promise.then((value2) => fn(PromiseLayer.unwrap(value2)));
+}
+function map_promise(promise, fn) {
+  return promise.then(
+    (value2) => PromiseLayer.wrap(fn(PromiseLayer.unwrap(value2)))
+  );
+}
+function rescue(promise, fn) {
+  return promise.catch((error) => fn(error));
+}
+
+// build/dev/javascript/plinth/document_ffi.mjs
+function querySelector(query) {
+  let found = document.querySelector(query);
+  if (!found) {
+    return new Error();
+  }
+  return new Ok(found);
+}
+
+// build/dev/javascript/gleam_javascript/gleam/javascript/promise.mjs
+function tap(promise, callback) {
+  let _pipe = promise;
+  return map_promise(
+    _pipe,
+    (a) => {
+      callback(a);
+      return a;
+    }
+  );
+}
+function try_await(promise, callback) {
+  let _pipe = promise;
+  return then(
+    _pipe,
+    (result) => {
+      if (result.isOk()) {
+        let a = result[0];
+        return callback(a);
+      } else {
+        let e = result[0];
+        return resolve(new Error(e));
+      }
+    }
+  );
+}
+
+// build/dev/javascript/plinth/element_ffi.mjs
+function value(element2) {
+  let value2 = element2.value;
+  if (value2 != void 0) {
+    return new Ok(value2);
+  }
+  return new Error();
+}
+
 // build/dev/javascript/gleam_stdlib/gleam/uri.mjs
 var Uri = class extends CustomType {
   constructor(scheme, userinfo, host, port, path, query, fragment) {
@@ -2979,11 +3060,11 @@ function scheme_from_string(scheme) {
 
 // build/dev/javascript/gleam_http/gleam/http/request.mjs
 var Request = class extends CustomType {
-  constructor(method, headers, body, scheme, host, port, path, query) {
+  constructor(method, headers, body2, scheme, host, port, path, query) {
     super();
     this.method = method;
     this.headers = headers;
-    this.body = body;
+    this.body = body2;
     this.scheme = scheme;
     this.host = host;
     this.port = port;
@@ -3040,67 +3121,13 @@ function to(url) {
 
 // build/dev/javascript/gleam_http/gleam/http/response.mjs
 var Response = class extends CustomType {
-  constructor(status, headers, body) {
+  constructor(status, headers, body2) {
     super();
     this.status = status;
     this.headers = headers;
-    this.body = body;
+    this.body = body2;
   }
 };
-
-// build/dev/javascript/gleam_javascript/ffi.mjs
-var PromiseLayer = class _PromiseLayer {
-  constructor(promise) {
-    this.promise = promise;
-  }
-  static wrap(value) {
-    return value instanceof Promise ? new _PromiseLayer(value) : value;
-  }
-  static unwrap(value) {
-    return value instanceof _PromiseLayer ? value.promise : value;
-  }
-};
-function resolve(value) {
-  return Promise.resolve(PromiseLayer.wrap(value));
-}
-function then(promise, fn) {
-  return promise.then((value) => fn(PromiseLayer.unwrap(value)));
-}
-function map_promise(promise, fn) {
-  return promise.then(
-    (value) => PromiseLayer.wrap(fn(PromiseLayer.unwrap(value)))
-  );
-}
-function rescue(promise, fn) {
-  return promise.catch((error) => fn(error));
-}
-
-// build/dev/javascript/gleam_javascript/gleam/javascript/promise.mjs
-function tap(promise, callback) {
-  let _pipe = promise;
-  return map_promise(
-    _pipe,
-    (a) => {
-      callback(a);
-      return a;
-    }
-  );
-}
-function try_await(promise, callback) {
-  let _pipe = promise;
-  return then(
-    _pipe,
-    (result) => {
-      if (result.isOk()) {
-        let a = result[0];
-        return callback(a);
-      } else {
-        let e = result[0];
-        return resolve(new Error(e));
-      }
-    }
-  );
-}
 
 // build/dev/javascript/gleam_fetch/ffi.mjs
 async function raw_send(request) {
@@ -3135,13 +3162,13 @@ function make_headers(headersList) {
   return headers;
 }
 async function read_text_body(response) {
-  let body;
+  let body2;
   try {
-    body = await response.body.text();
+    body2 = await response.body.text();
   } catch (error) {
     return new Error(new UnableToReadBody());
   }
-  return new Ok(response.withFields({ body }));
+  return new Ok(response.withFields({ body: body2 }));
 }
 
 // build/dev/javascript/gleam_fetch/gleam/fetch.mjs
@@ -3242,19 +3269,19 @@ function get2(url, expect) {
 function response_to_result(response) {
   if (response instanceof Response && (200 <= response.status && response.status <= 299)) {
     let status = response.status;
-    let body = response.body;
-    return new Ok(body);
+    let body2 = response.body;
+    return new Ok(body2);
   } else if (response instanceof Response && response.status === 401) {
     return new Error(new Unauthorized());
   } else if (response instanceof Response && response.status === 404) {
     return new Error(new NotFound());
   } else if (response instanceof Response && response.status === 500) {
-    let body = response.body;
-    return new Error(new InternalServerError(body));
+    let body2 = response.body;
+    return new Error(new InternalServerError(body2));
   } else {
     let code = response.status;
-    let body = response.body;
-    return new Error(new OtherError(code, body));
+    let body2 = response.body;
+    return new Error(new OtherError(code, body2));
   }
 }
 function expect_json(decoder2, to_msg) {
@@ -3264,8 +3291,8 @@ function expect_json(decoder2, to_msg) {
       let _pipe$1 = then$(_pipe, response_to_result);
       let _pipe$2 = then$(
         _pipe$1,
-        (body) => {
-          let $ = decode2(body, decoder2);
+        (body2) => {
+          let $ = decode2(body2, decoder2);
           if ($.isOk()) {
             let json = $[0];
             return new Ok(json);
@@ -3293,9 +3320,9 @@ var Stats = class extends CustomType {
   }
 };
 var Move = class extends CustomType {
-  constructor(id, name, accuracy, pp, priority, power4, type_2, damage_class) {
+  constructor(id2, name, accuracy, pp, priority, power4, type_2, damage_class) {
     super();
-    this.id = id;
+    this.id = id2;
     this.name = name;
     this.accuracy = accuracy;
     this.pp = pp;
@@ -3306,9 +3333,9 @@ var Move = class extends CustomType {
   }
 };
 var Pokemon = class extends CustomType {
-  constructor(id, name, base_experience, base_stats, moves) {
+  constructor(id2, name, base_experience, base_stats, moves) {
     super();
-    this.id = id;
+    this.id = id2;
     this.name = name;
     this.base_experience = base_experience;
     this.base_stats = base_stats;
@@ -3369,6 +3396,8 @@ var ApiReturnedPokemon = class extends CustomType {
     this[0] = x0;
   }
 };
+var UserClickedSearchButton = class extends CustomType {
+};
 
 // build/dev/javascript/pokemon_battle_sim/pokemon_battle_sim/api.mjs
 var api_root = "http://localhost:8000";
@@ -3383,6 +3412,11 @@ function fetch_pokemon(search) {
     api_root + "/pokemon/" + lowercase2(search),
     expect
   );
+}
+
+// priv/static/dom_ffi.mjs
+function set_value(element2, value2) {
+  element2.value = value2;
 }
 
 // build/dev/javascript/pokemon_battle_sim/pokemon_battle_sim/types.mjs
@@ -3437,24 +3471,6 @@ function header() {
       h1(
         toList([class$("text-2xl font-bold")]),
         toList([text2("Pok\xE9mon Battle Simulator")])
-      )
-    ])
-  );
-}
-function pokemon_search() {
-  return div(
-    toList([px_md(), class$("flex items-center flex-row gap-4")]),
-    toList([
-      input3(
-        toList([
-          placeholder("Search Pok\xE9mon"),
-          type_("search"),
-          class$("w-full flex-grow")
-        ])
-      ),
-      button3(
-        toList([primary(), class$("w-fit")]),
-        toList([text2("Search")])
       )
     ])
   );
@@ -3557,6 +3573,30 @@ function pokemon_details(maybe_pokemon, all_pokemon) {
     return p(toList([]), toList([text2("Loading Pok\xE9mon...")]));
   }
 }
+var pokemon_search_input_id = "pokemon-search-input";
+function pokemon_search() {
+  return div(
+    toList([px_md(), class$("flex items-center flex-row gap-4")]),
+    toList([
+      input3(
+        toList([
+          id(pokemon_search_input_id),
+          placeholder("Search Pok\xE9mon"),
+          type_("search"),
+          class$("w-full flex-grow")
+        ])
+      ),
+      button3(
+        toList([
+          primary(),
+          class$("w-fit"),
+          on_click(new UserClickedSearchButton())
+        ]),
+        toList([text2("Search")])
+      )
+    ])
+  );
+}
 function main_content(model) {
   return main(
     toList([]),
@@ -3608,10 +3648,51 @@ function handle_user_selected_pokemon(model, pokemon_name) {
     return default_return;
   }
 }
+function handle_user_clicked_search_button(model) {
+  let $ = querySelector("#" + pokemon_search_input_id);
+  if (!$.isOk()) {
+    throw makeError(
+      "assignment_no_match",
+      "pokemon_battle_sim",
+      52,
+      "handle_user_clicked_search_button",
+      "Assignment pattern did not match",
+      { value: $ }
+    );
+  }
+  let search_element = $[0];
+  let $1 = value(search_element);
+  if (!$1.isOk()) {
+    throw makeError(
+      "assignment_no_match",
+      "pokemon_battle_sim",
+      54,
+      "handle_user_clicked_search_button",
+      "Assignment pattern did not match",
+      { value: $1 }
+    );
+  }
+  let pokemon_name = $1[0];
+  let cleaned_pokemon_name = (() => {
+    let _pipe = pokemon_name;
+    let _pipe$1 = trim2(_pipe);
+    return lowercase2(_pipe$1);
+  })();
+  let $2 = trim2(cleaned_pokemon_name);
+  if ($2 === "") {
+    return [model, none()];
+  } else {
+    let cleaned = $2;
+    set_value(search_element, "");
+    return handle_user_selected_pokemon(model, cleaned);
+  }
+}
 function update2(model, msg) {
   if (msg instanceof UserSelectedPokemon) {
     let pokemon_name = msg[0];
     return handle_user_selected_pokemon(model, pokemon_name);
+  } else if (msg instanceof UserClickedSearchButton) {
+    return handle_user_clicked_search_button(model);
   } else if (msg instanceof ApiReturnedPokemon && msg[0].isOk()) {
     let pokemon = msg[0][0];
     return [
@@ -3643,7 +3724,7 @@ function main2() {
     throw makeError(
       "assignment_no_match",
       "pokemon_battle_sim",
-      75,
+      97,
       "main",
       "Assignment pattern did not match",
       { value: $ }
