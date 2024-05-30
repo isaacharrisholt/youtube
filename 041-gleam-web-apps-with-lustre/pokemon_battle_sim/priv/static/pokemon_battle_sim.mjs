@@ -1487,9 +1487,6 @@ function concat2(xs) {
 function starts_with(haystack, needle) {
   return haystack.startsWith(needle);
 }
-function console_log(term) {
-  console.log(term);
-}
 function compile_regex(pattern, options) {
   try {
     let flags = "gu";
@@ -1705,11 +1702,6 @@ function inspect2(term) {
   return to_string3(_pipe);
 }
 
-// build/dev/javascript/gleam_stdlib/gleam/io.mjs
-function println(string3) {
-  return console_log(string3);
-}
-
 // build/dev/javascript/gleam_stdlib/gleam/bool.mjs
 function guard(requirement, consequence, alternative) {
   if (requirement) {
@@ -1907,12 +1899,6 @@ function type_(name) {
 }
 function placeholder(text3) {
   return attribute("placeholder", text3);
-}
-function href(uri) {
-  return attribute("href", uri);
-}
-function rel(relationship) {
-  return attribute("rel", relationship);
 }
 
 // build/dev/javascript/lustre/lustre/element.mjs
@@ -2411,9 +2397,6 @@ function start3(app, selector, flags) {
 // build/dev/javascript/lustre/lustre/element/html.mjs
 function text2(content) {
   return text(content);
-}
-function link(attrs) {
-  return element("link", attrs, toList([]));
 }
 function style(attrs, css) {
   return element("style", attrs, toList([text2(css)]));
@@ -3402,6 +3385,22 @@ function fetch_pokemon(search) {
   );
 }
 
+// build/dev/javascript/pokemon_battle_sim/pokemon_battle_sim/types.mjs
+var Loading = class extends CustomType {
+};
+var Loaded = class extends CustomType {
+  constructor(x0) {
+    super();
+    this[0] = x0;
+  }
+};
+var LoadError = class extends CustomType {
+  constructor(x0) {
+    super();
+    this[0] = x0;
+  }
+};
+
 // build/dev/javascript/pokemon_battle_sim/pokemon_battle_sim/types/model.mjs
 var Model = class extends CustomType {
   constructor(current_pokemon, all_pokemon, battle_pair) {
@@ -3461,33 +3460,53 @@ function pokemon_search() {
   );
 }
 function pokemon_list(pokemon) {
-  return map2(
-    pokemon,
-    (p2) => {
-      return button3(
-        toList([
-          on_click(new UserSelectedPokemon(p2)),
-          soft(),
-          small(),
-          class$("w-full text-left")
-        ]),
-        toList([text2(p2)])
-      );
-    }
-  );
+  if (pokemon instanceof Loaded) {
+    let pokemon$1 = pokemon[0];
+    return map2(
+      pokemon$1,
+      (p2) => {
+        return button3(
+          toList([
+            on_click(new UserSelectedPokemon(lowercase2(p2))),
+            soft(),
+            small(),
+            class$("w-full text-left")
+          ]),
+          toList([text2(p2)])
+        );
+      }
+    );
+  } else if (pokemon instanceof LoadError) {
+    let err = pokemon[0];
+    return toList([
+      p(
+        toList([]),
+        toList([text2("Error loading Pok\xE9mon: " + err)])
+      )
+    ]);
+  } else {
+    return toList([
+      p(toList([]), toList([text2("Loading Pok\xE9mon...")]))
+    ]);
+  }
 }
 function pokemon_details(maybe_pokemon, all_pokemon) {
   let message = (() => {
-    if (all_pokemon.hasLength(0)) {
+    if (all_pokemon instanceof Loaded && all_pokemon[0].hasLength(0)) {
       return "Search for a Pok\xE9mon to view details";
-    } else {
+    } else if (all_pokemon instanceof Loaded) {
       return "Select a Pok\xE9mon to view details";
+    } else if (all_pokemon instanceof LoadError) {
+      let err = all_pokemon[0];
+      return "Error loading Pok\xE9mon: " + err;
+    } else {
+      return "Loading Pok\xE9mon selection...";
     }
   })();
-  if (maybe_pokemon instanceof None) {
+  if (maybe_pokemon instanceof Loaded && maybe_pokemon[0] instanceof None) {
     return p(toList([]), toList([text2(message)]));
-  } else {
-    let pokemon = maybe_pokemon[0];
+  } else if (maybe_pokemon instanceof Loaded && maybe_pokemon[0] instanceof Some) {
+    let pokemon = maybe_pokemon[0][0];
     return div(
       toList([]),
       toList([
@@ -3528,6 +3547,14 @@ function pokemon_details(maybe_pokemon, all_pokemon) {
         )
       ])
     );
+  } else if (maybe_pokemon instanceof LoadError) {
+    let err = maybe_pokemon[0];
+    return p(
+      toList([]),
+      toList([text2("Error loading Pok\xE9mon: " + err)])
+    );
+  } else {
+    return p(toList([]), toList([text2("Loading Pok\xE9mon...")]));
   }
 }
 function main_content(model) {
@@ -3556,43 +3583,57 @@ function main_content(model) {
 function init2(_) {
   return [
     new Model(
-      new None(),
-      toList(["Pikachu", "Turtwig", "Chimchar", "Piplup", "Zorua"]),
+      new Loaded(new None()),
+      new Loaded(toList(["Pikachu", "Turtwig", "Chimchar", "Piplup", "Zorua"])),
       new None()
     ),
     none()
   ];
 }
+function handle_user_selected_pokemon(model, pokemon_name) {
+  let default_return = [
+    model.withFields({ current_pokemon: new Loading() }),
+    fetch_pokemon(pokemon_name)
+  ];
+  let $ = model.current_pokemon;
+  if ($ instanceof Loaded && $[0] instanceof Some) {
+    let current_pokemon = $[0][0];
+    let $1 = current_pokemon.name === pokemon_name;
+    if ($1) {
+      return [model, none()];
+    } else {
+      return default_return;
+    }
+  } else {
+    return default_return;
+  }
+}
 function update2(model, msg) {
   if (msg instanceof UserSelectedPokemon) {
     let pokemon_name = msg[0];
-    return [model, fetch_pokemon(pokemon_name)];
+    return handle_user_selected_pokemon(model, pokemon_name);
   } else if (msg instanceof ApiReturnedPokemon && msg[0].isOk()) {
     let pokemon = msg[0][0];
     return [
-      model.withFields({ current_pokemon: new Some(pokemon) }),
+      model.withFields({ current_pokemon: new Loaded(new Some(pokemon)) }),
       none()
     ];
   } else {
     let err = msg[0][0];
-    println("Error fetching Pokemon: " + inspect2(err));
-    return [model, none()];
+    return [
+      model.withFields({
+        current_pokemon: new LoadError(
+          "Error fetching Pokemon: " + inspect2(err)
+        )
+      }),
+      none()
+    ];
   }
 }
 function view(model) {
   return stack2(
     toList([]),
-    toList([
-      elements(),
-      link(
-        toList([
-          rel("stylesheet"),
-          href("./priv/static/pokemon_battle_sim.css")
-        ])
-      ),
-      header(),
-      main_content(model)
-    ])
+    toList([elements(), header(), main_content(model)])
   );
 }
 function main2() {
@@ -3602,7 +3643,7 @@ function main2() {
     throw makeError(
       "assignment_no_match",
       "pokemon_battle_sim",
-      58,
+      75,
       "main",
       "Assignment pattern did not match",
       { value: $ }
