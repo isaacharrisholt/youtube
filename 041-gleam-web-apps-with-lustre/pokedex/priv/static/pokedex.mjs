@@ -401,11 +401,6 @@ function int(data) {
 function shallow_list(value2) {
   return decode_list(value2);
 }
-function optional(decode3) {
-  return (value2) => {
-    return decode_option(value2, decode3);
-  };
-}
 function any(decoders) {
   return (data) => {
     if (decoders.hasLength(0)) {
@@ -497,35 +492,26 @@ function field(name, inner_type) {
     );
   };
 }
-function decode5(constructor, t1, t2, t3, t4, t5) {
+function decode4(constructor, t1, t2, t3, t4) {
   return (x) => {
     let $ = t1(x);
     let $1 = t2(x);
     let $2 = t3(x);
     let $3 = t4(x);
-    let $4 = t5(x);
-    if ($.isOk() && $1.isOk() && $2.isOk() && $3.isOk() && $4.isOk()) {
+    if ($.isOk() && $1.isOk() && $2.isOk() && $3.isOk()) {
       let a = $[0];
       let b = $1[0];
       let c = $2[0];
       let d = $3[0];
-      let e = $4[0];
-      return new Ok(constructor(a, b, c, d, e));
+      return new Ok(constructor(a, b, c, d));
     } else {
       let a = $;
       let b = $1;
       let c = $2;
       let d = $3;
-      let e = $4;
       return new Error(
         concat2(
-          toList([
-            all_errors(a),
-            all_errors(b),
-            all_errors(c),
-            all_errors(d),
-            all_errors(e)
-          ])
+          toList([all_errors(a), all_errors(b), all_errors(c), all_errors(d)])
         )
       );
     }
@@ -563,52 +549,6 @@ function decode6(constructor, t1, t2, t3, t4, t5, t6) {
             all_errors(d),
             all_errors(e),
             all_errors(f)
-          ])
-        )
-      );
-    }
-  };
-}
-function decode8(constructor, t1, t2, t3, t4, t5, t6, t7, t8) {
-  return (x) => {
-    let $ = t1(x);
-    let $1 = t2(x);
-    let $2 = t3(x);
-    let $3 = t4(x);
-    let $4 = t5(x);
-    let $5 = t6(x);
-    let $6 = t7(x);
-    let $7 = t8(x);
-    if ($.isOk() && $1.isOk() && $2.isOk() && $3.isOk() && $4.isOk() && $5.isOk() && $6.isOk() && $7.isOk()) {
-      let a = $[0];
-      let b = $1[0];
-      let c = $2[0];
-      let d = $3[0];
-      let e = $4[0];
-      let f = $5[0];
-      let g = $6[0];
-      let h = $7[0];
-      return new Ok(constructor(a, b, c, d, e, f, g, h));
-    } else {
-      let a = $;
-      let b = $1;
-      let c = $2;
-      let d = $3;
-      let e = $4;
-      let f = $5;
-      let g = $6;
-      let h = $7;
-      return new Error(
-        concat2(
-          toList([
-            all_errors(a),
-            all_errors(b),
-            all_errors(c),
-            all_errors(d),
-            all_errors(e),
-            all_errors(f),
-            all_errors(g),
-            all_errors(h)
           ])
         )
       );
@@ -1451,18 +1391,6 @@ function decode_list(data) {
     return new Ok(List.fromArray(data));
   }
   return data instanceof List ? new Ok(data) : decoder_error("List", data);
-}
-function decode_option(data, decoder2) {
-  if (data === null || data === void 0 || data instanceof None)
-    return new Ok(new None());
-  if (data instanceof Some)
-    data = data[0];
-  const result = decoder2(data);
-  if (result.isOk()) {
-    return new Ok(new Some(result[0]));
-  } else {
-    return result;
-  }
 }
 function decode_field(value2, name) {
   const not_a_map_error = () => decoder_error("Dict", value2);
@@ -3526,27 +3454,13 @@ var Stats = class extends CustomType {
     this.speed = speed;
   }
 };
-var Move = class extends CustomType {
-  constructor(id2, name, accuracy, pp, priority, power4, type_2, damage_class) {
-    super();
-    this.id = id2;
-    this.name = name;
-    this.accuracy = accuracy;
-    this.pp = pp;
-    this.priority = priority;
-    this.power = power4;
-    this.type_ = type_2;
-    this.damage_class = damage_class;
-  }
-};
 var Pokemon = class extends CustomType {
-  constructor(id2, name, base_experience, base_stats, moves) {
+  constructor(id2, name, base_experience, base_stats) {
     super();
     this.id = id2;
     this.name = name;
     this.base_experience = base_experience;
     this.base_stats = base_stats;
-    this.moves = moves;
   }
 };
 function stats_decoder() {
@@ -3562,31 +3476,15 @@ function stats_decoder() {
     field("speed", int)
   );
 }
-function move_decoder() {
-  return decode8(
-    (var0, var1, var2, var3, var4, var5, var6, var7) => {
-      return new Move(var0, var1, var2, var3, var4, var5, var6, var7);
-    },
-    field("id", int),
-    field("name", string),
-    field("accuracy", optional(int)),
-    field("pp", int),
-    field("priority", int),
-    field("power", optional(int)),
-    field("type", string),
-    field("damage_class", string)
-  );
-}
 function pokemon_decoder() {
-  return decode5(
-    (var0, var1, var2, var3, var4) => {
-      return new Pokemon(var0, var1, var2, var3, var4);
+  return decode4(
+    (var0, var1, var2, var3) => {
+      return new Pokemon(var0, var1, var2, var3);
     },
     field("id", int),
     field("name", string),
     field("base_experience", int),
-    field("base_stats", stats_decoder()),
-    field("moves", list(move_decoder()))
+    field("base_stats", stats_decoder())
   );
 }
 
