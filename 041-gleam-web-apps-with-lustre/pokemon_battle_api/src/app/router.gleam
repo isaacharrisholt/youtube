@@ -51,16 +51,12 @@ pub fn handle_request(req: Request, ctx: Context) -> Response {
 /// Handler for the /pokemon route.
 /// Gets all Pokemon names currently in the cache, and returns them as JSON.
 fn get_all_pokemon_handler(ctx: Context) {
-  case cache.get_keys(ctx.pokemon_cache) {
-    [] -> wisp.ok()
-    names -> {
-      let encode = json.array(_, json.string)
-      names
-      |> encode
-      |> json.to_string_builder
-      |> wisp.json_response(200)
-    }
-  }
+  let pokemon = cache.get_keys(ctx.pokemon_cache)
+  let encode = json.array(_, json.string)
+  pokemon
+  |> encode
+  |> json.to_string_builder
+  |> wisp.json_response(200)
 }
 
 /// Fetch a Pokemon from the PokeAPI.

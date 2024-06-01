@@ -3,6 +3,7 @@ import pokedex/types/pokemon.{type Pokemon}
 
 pub type Msg {
   UserSelectedPokemon(String)
+  UserUpdatedPokemonSearchTerm(String)
   UserClickedSearchButton
 
   ApiReturnedPokemon(Result(Pokemon, lustre_http.HttpError))

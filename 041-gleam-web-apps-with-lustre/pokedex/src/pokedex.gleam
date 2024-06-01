@@ -15,6 +15,7 @@ import pokedex/types/model.{type Model, Model}
 import pokedex/types/msg.{
   type Msg, ApiReturnedAllPokemon, ApiReturnedPokemon, AppRequestedAllPokemon,
   LoadError, Loaded, Loading, UserClickedSearchButton, UserSelectedPokemon,
+  UserUpdatedPokemonSearchTerm,
 }
 import pokedex/views.{header, main_content}
 
@@ -27,7 +28,11 @@ pub fn main() {
 
 fn init(_flags) -> #(Model, effect.Effect(Msg)) {
   #(
-    Model(current_pokemon: Loaded(None), all_pokemon: Loading),
+    Model(
+      current_pokemon: Loaded(None),
+      all_pokemon: Loading,
+      pokemon_search: "",
+    ),
     fetch_all_pokemon(),
   )
 }
@@ -40,6 +45,10 @@ fn update(model: Model, msg: Msg) -> #(Model, effect.Effect(Msg)) {
   case msg {
     UserSelectedPokemon(pokemon_name) ->
       handle_user_selected_pokemon(model, pokemon_name)
+    UserUpdatedPokemonSearchTerm(search_term) -> #(
+      Model(..model, pokemon_search: search_term),
+      effect.none(),
+    )
     UserClickedSearchButton -> handle_user_clicked_search_button(model)
 
     AppRequestedAllPokemon -> #(

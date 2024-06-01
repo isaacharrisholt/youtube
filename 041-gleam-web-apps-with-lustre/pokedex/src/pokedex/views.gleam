@@ -13,11 +13,9 @@ import lustre/ui/util/cn.{bg_element, px_md}
 import pokedex/types/model.{type Model}
 import pokedex/types/msg.{
   type CanLoad, type Msg, LoadError, Loaded, Loading, UserClickedSearchButton,
-  UserSelectedPokemon,
+  UserSelectedPokemon, UserUpdatedPokemonSearchTerm,
 }
 import pokedex/types/pokemon.{type Pokemon}
-
-pub const pokemon_search_input_id = "pokemon-search-input"
 
 pub fn header() -> element.Element(Msg) {
   ui.box([bg_element()], [
@@ -28,7 +26,7 @@ pub fn header() -> element.Element(Msg) {
 pub fn main_content(model: Model) -> element.Element(Msg) {
   html.main([], [
     ui.stack([], [
-      pokemon_search(),
+      pokemon_search(model),
       ui.aside(
         [px_md()],
         pokemon_details(model.current_pokemon, model.all_pokemon),
@@ -41,15 +39,16 @@ pub fn main_content(model: Model) -> element.Element(Msg) {
   ])
 }
 
-fn pokemon_search() -> element.Element(Msg) {
+fn pokemon_search(model: Model) -> element.Element(Msg) {
   html.div(
     [px_md(), class("flex items-center flex-col sm:flex-row gap-2 sm:gap-4")],
     [
       ui.input([
-        attribute.id(pokemon_search_input_id),
         attribute.placeholder("Search Pokémon"),
         attribute.type_("search"),
+        attribute.value(model.pokemon_search),
         class("w-full flex-grow"),
+        event.on_input(UserUpdatedPokemonSearchTerm),
       ]),
       ui.button(
         [
