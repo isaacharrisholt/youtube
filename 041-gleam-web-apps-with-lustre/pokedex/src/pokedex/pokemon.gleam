@@ -18,7 +18,7 @@ fn stats_decoder() -> fn(dynamic.Dynamic) ->
   )
 }
 
-/// A Pokemon with all its move details
+/// A Pokemon with all its details
 pub type Pokemon {
   Pokemon(id: Int, name: String, base_experience: Int, base_stats: Stats)
 }
