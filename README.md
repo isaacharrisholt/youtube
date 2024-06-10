@@ -28,3 +28,4 @@ run the code.
 | [You might never need Pandas again...](https://youtu.be/qDEY0WstcLc)                    | [polars-vs-pandas](./035-polars-vs-pandas/)                                     |
 | [Using Rust to write scalable Python APIs](https://youtu.be/t08OA4CfRFs)                | [robyn-web-framework](./036-robyn-web-framework/)                               |
 | [Simplify your backend with Gleam](https://youtu.be/D88S_RdagP8)                        | [gleam-webservers](./039-gleam-webservers/)                                     |
+| [Create Robust Web Apps in Gleam with Lustre](https://youtu.be/3kr4Ydx6GGU)             | [gleam-web-apps-with-lustre](./041-gleam-web-apps-with-lustre/)                 |
