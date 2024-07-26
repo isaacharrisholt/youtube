@@ -5,7 +5,6 @@
 
 import app/battle
 import app/cache.{type Cache}
-import app/pokemon.{type Pokemon}
 import birl
 import birl/duration
 import gleam/erlang/process
@@ -14,6 +13,7 @@ import gleam/int
 import gleam/list
 import gleam/otp/task
 import gleam/result
+import shared/pokemon.{type Pokemon}
 import wisp
 
 const sleep_time = 10_000

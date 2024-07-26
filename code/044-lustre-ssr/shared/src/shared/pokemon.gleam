@@ -92,7 +92,7 @@ fn api_stats_to_stats(api_stats: List(ApiStat)) -> Result(Stats, Nil) {
 ///   ...
 /// ]
 /// ```
-fn stats_decoder(maybe_stats: dynamic.Dynamic) {
+fn api_stats_decoder(maybe_stats: dynamic.Dynamic) {
   let decoder = dynamic.list(api_stat_decoder())
   case decoder(maybe_stats) {
     Error(err) -> Error(err)
@@ -125,7 +125,7 @@ pub type ApiPokemonMove {
 }
 
 /// Decode a Pokemon move from the PokeAPI
-fn api_pokemon_move_decoder() {
+fn api_pokemon_api_move_decoder() {
   dynamic.decode1(
     ApiPokemonMove,
     dynamic.field("move", api_resource_info_decoder()),
@@ -150,8 +150,8 @@ pub fn api_pokemon_decoder() {
     dynamic.field("id", dynamic.int),
     dynamic.field("name", dynamic.string),
     dynamic.field("base_experience", dynamic.int),
-    dynamic.field("stats", stats_decoder),
-    dynamic.field("moves", dynamic.list(api_pokemon_move_decoder())),
+    dynamic.field("stats", api_stats_decoder),
+    dynamic.field("moves", dynamic.list(api_pokemon_api_move_decoder())),
   )
 }
 
@@ -172,7 +172,7 @@ pub type Move {
 /// Decode a Move from the PokeAPI.
 ///
 /// Extracts type.name and damage_class.name from the API response.
-pub fn move_decoder() {
+pub fn api_move_decoder() {
   dynamic.decode8(
     Move,
     dynamic.field("id", dynamic.int),
@@ -220,4 +220,41 @@ pub fn encode_pokemon(pokemon: Pokemon) {
     #("base_stats", encode_stats(pokemon.base_stats)),
     #("moves", preprocessed_array(list.map(pokemon.moves, encode_move))),
   ])
+}
+
+fn stats_decoder() {
+  dynamic.decode6(
+    Stats,
+    dynamic.field("hp", dynamic.int),
+    dynamic.field("atk", dynamic.int),
+    dynamic.field("def", dynamic.int),
+    dynamic.field("sp_atk", dynamic.int),
+    dynamic.field("sp_def", dynamic.int),
+    dynamic.field("speed", dynamic.int),
+  )
+}
+
+fn move_decoder() {
+  dynamic.decode8(
+    Move,
+    dynamic.field("id", dynamic.int),
+    dynamic.field("name", dynamic.string),
+    dynamic.field("accuracy", dynamic.optional(dynamic.int)),
+    dynamic.field("pp", dynamic.int),
+    dynamic.field("priority", dynamic.int),
+    dynamic.field("power", dynamic.optional(dynamic.int)),
+    dynamic.field("type", dynamic.string),
+    dynamic.field("damage_class", dynamic.string),
+  )
+}
+
+pub fn pokemon_decoder() {
+  dynamic.decode5(
+    Pokemon,
+    dynamic.field("id", dynamic.int),
+    dynamic.field("name", dynamic.string),
+    dynamic.field("base_experience", dynamic.int),
+    dynamic.field("base_stats", stats_decoder()),
+    dynamic.field("moves", dynamic.list(move_decoder())),
+  )
 }

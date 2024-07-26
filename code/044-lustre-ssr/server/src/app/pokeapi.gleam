@@ -5,9 +5,6 @@
 //// work with the data in the rest of the application.
 
 import app/cache.{type Cache}
-import app/pokemon.{
-  type ApiPokemon, type Move, api_pokemon_decoder, move_decoder,
-}
 import gleam/http/request
 import gleam/http/response.{type Response}
 import gleam/httpc
@@ -17,6 +14,9 @@ import gleam/json
 import gleam/list
 import gleam/otp/task
 import gleam/result
+import shared/pokemon.{
+  type ApiPokemon, type Move, api_pokemon_decoder, move_decoder,
+}
 
 const pokeapi_url = "https://pokeapi.co/api/v2"
 

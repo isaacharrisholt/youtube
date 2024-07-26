@@ -7,12 +7,12 @@
 //// Only attack and defense stats are considered. Speed and priority are not implemented.
 //// The first Pokemon to attack each turn will always be the first Pokemon in the battle.
 
-import app/pokemon.{type Move, type Pokemon}
 import gleam/float
 import gleam/int
 import gleam/list
 import gleam/option.{Some}
 import gleam/result
+import shared/pokemon.{type Move, type Pokemon}
 import wisp
 
 /// The level of the Pokemon in the battle

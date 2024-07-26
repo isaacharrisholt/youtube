@@ -2,7 +2,7 @@ import gleam/dynamic
 import gleam/string
 import lustre/effect
 import lustre_http.{type HttpError}
-import client/pokemon.{type Pokemon, pokemon_decoder}
+import shared/pokemon.{type Pokemon, pokemon_decoder}
 
 const api_root = "http://localhost:8000"
 

@@ -1,10 +1,10 @@
-import gleam/erlang/process
-import mist
-import wisp
 import app/battle/manager
 import app/cache
 import app/context.{Context}
 import app/router
+import gleam/erlang/process
+import mist
+import wisp
 
 pub fn main() {
   // Set up the Wisp logger for Erlang

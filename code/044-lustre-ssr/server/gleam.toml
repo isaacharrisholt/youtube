@@ -24,6 +24,7 @@ gleam_otp = "~> 0.10"
 birl = "~> 1.6"
 lustre = ">= 4.3.1 and < 5.0.0"
 client = { path = "../client" }
+shared = { path = "../shared" }
 
 [dev-dependencies]
 gleeunit = "~> 1.0"

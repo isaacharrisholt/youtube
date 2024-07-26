@@ -8,7 +8,6 @@ import app/battle
 import app/cache
 import app/context.{type Context}
 import app/pokeapi.{get_moves_for_pokemon, get_pokemon}
-import app/pokemon.{Pokemon, encode_pokemon}
 import client.{Model}
 import client/api.{Loaded}
 import gleam/http.{Options}
@@ -18,6 +17,7 @@ import gleam/result
 import lustre/attribute
 import lustre/element
 import lustre/element/html.{html}
+import shared/pokemon.{Pokemon, encode_pokemon}
 import wisp.{type Request, type Response}
 
 fn cors_middleware(req: Request, fun: fn() -> Response) -> Response {

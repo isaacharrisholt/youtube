@@ -1,7 +1,6 @@
 import client/api.{
   type CanLoad, LoadError, Loaded, Loading, fetch_all_pokemon, fetch_pokemon,
 }
-import client/pokemon.{type Pokemon}
 import client/shared.{button, header, pokemon_search}
 import gleam/dynamic
 import gleam/int
@@ -18,6 +17,7 @@ import lustre/element/html
 import lustre_http
 import plinth/browser/document
 import plinth/browser/element as browser_element
+import shared/pokemon.{type Pokemon}
 
 pub fn main() {
   let assert Ok(json_string) =
@@ -50,7 +50,7 @@ fn init(initial_pokemon) -> #(Model, effect.Effect(Msg)) {
       all_pokemon: initial_pokemon,
       pokemon_search: "",
     ),
-    fetch_all_pokemon(ApiReturnedAllPokemon),
+    effect.none(),
   )
 }
 
