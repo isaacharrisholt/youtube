@@ -1,7 +1,7 @@
-import app/battle/manager
-import app/cache
-import app/context.{Context}
-import app/router
+import server/battle/manager
+import server/cache
+import server/context.{Context}
+import server/router
 import gleam/erlang/process
 import mist
 import wisp

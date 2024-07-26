@@ -4,10 +4,10 @@
 //// based on the path segments. This allows us to keep all of our
 //// application logic in one place, and to easily add new routes.
 
-import app/battle
-import app/cache
-import app/context.{type Context}
-import app/pokeapi.{get_moves_for_pokemon, get_pokemon}
+import server/battle
+import server/cache
+import server/context.{type Context}
+import server/pokeapi.{get_moves_for_pokemon, get_pokemon}
 import client.{Model}
 import client/api.{Loaded}
 import gleam/http.{Options}

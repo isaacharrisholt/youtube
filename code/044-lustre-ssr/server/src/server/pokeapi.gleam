@@ -4,7 +4,6 @@
 //// types defined in the `shared/pokemon` module, to make it easier to
 //// work with the data in the rest of the application.
 
-import app/cache.{type Cache}
 import gleam/http/request
 import gleam/http/response.{type Response}
 import gleam/httpc
@@ -14,8 +13,9 @@ import gleam/json
 import gleam/list
 import gleam/otp/task
 import gleam/result
+import server/cache.{type Cache}
 import shared/pokemon.{
-  type ApiPokemon, type Move, api_pokemon_decoder, move_decoder,
+  type ApiPokemon, type Move, api_move_decoder, api_pokemon_decoder,
 }
 
 const pokeapi_url = "https://pokeapi.co/api/v2"
@@ -64,7 +64,7 @@ pub fn get_move(name: String, move_cache: Cache(Move)) -> Result(Move, String) {
     Error(_) -> {
       use resp <- result.try(make_request("/move/" <> name))
 
-      case json.decode(from: resp.body, using: move_decoder()) {
+      case json.decode(from: resp.body, using: api_move_decoder()) {
         Ok(move) -> {
           cache.set(move_cache, name, move)
           Ok(move)

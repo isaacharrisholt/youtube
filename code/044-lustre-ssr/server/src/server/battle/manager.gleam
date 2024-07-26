@@ -3,8 +3,8 @@
 ////
 //// It's designed as an OTP task that runs indefinitely.
 
-import app/battle
-import app/cache.{type Cache}
+import server/battle
+import server/cache.{type Cache}
 import birl
 import birl/duration
 import gleam/erlang/process

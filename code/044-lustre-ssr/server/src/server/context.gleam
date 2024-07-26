@@ -1,4 +1,4 @@
-import app/cache.{type Cache}
+import server/cache.{type Cache}
 import shared/pokemon.{type Move, type Pokemon}
 
 /// A simple context type that can be attached to
