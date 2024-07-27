@@ -5,6 +5,7 @@
 	import update_animation from '$lib/animations/update.json'
 	import api_animation from '$lib/animations/api.json'
 	import html_animation from '$lib/animations/html.json'
+	import copy_animation from '$lib/animations/copy.json'
 	import { tween, all } from '@animotion/motion'
 	import { cubicInOut } from 'svelte/easing'
 	import PageSpeed from '$lib/page-speed.svelte'
@@ -53,6 +54,39 @@
 		duration: 500,
 		easing: cubicInOut
 	})
+
+	const SLIDE_31_DEFAULTS = {
+		code_el: undefined as Code | undefined
+	}
+	let slide_31 = $state({ ...SLIDE_31_DEFAULTS })
+
+	const SLIDE_34_DEFAULTS = {
+		code_el: undefined as Code | undefined
+	}
+	let slide_34 = $state({ ...SLIDE_34_DEFAULTS })
+
+	const SLIDE_40_DEFAULTS = {
+		copy_blurred: true,
+		show_copy: true,
+		build_blurred: true,
+		code_el: undefined as Code | undefined
+	}
+	let slide_40 = $state({ ...SLIDE_40_DEFAULTS })
+
+	const SLIDE_46_DEFAULTS = {
+		code_el: undefined as Code | undefined
+	}
+	let slide_46 = $state({ ...SLIDE_46_DEFAULTS })
+
+	const SLIDE_52_DEFAULTS = {
+		code_el: undefined as Code | undefined
+	}
+	let slide_52 = $state({ ...SLIDE_52_DEFAULTS })
+
+	const SLIDE_53_DEFAULTS = {
+		code_el: undefined as Code | undefined
+	}
+	let slide_53 = $state({ ...SLIDE_53_DEFAULTS })
 </script>
 
 <Presentation options={{ transition: 'none', controls: false, progress: false, hash: true }}>
@@ -356,6 +390,449 @@
 	</Slide>
 
 	<!-- 24: Rendering our page HTML -->
+	<Slide class="h-full place-content-center place-items-center">
+		<img src="/logos/wisp-cover.png" alt="" class="mb-12 w-[50vw] rounded-xl shadow-2xl" />
+		<h1 class="font-mono text-6xl">gleam-wisp/wisp</h1>
+	</Slide>
+
+	<!-- 25 -->
+	<Slide class="h-full place-content-center place-items-center">
+		<img
+			src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExaXhpZzV6NWduaXF0ZXJ3aXgzZm1nZXFnZjI1YmN0MHFhcHBuYXN0MCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/ycMyoblTi3nGGWnzrV/giphy.webp"
+			alt=""
+		/>
+	</Slide>
+
+	<!-- 26 -->
+	<Slide class="h-full place-content-center place-items-center">
+		<div class="w-fit">
+			<Code
+				lang="bash"
+				class="w-fit p-4 !text-6xl"
+				theme="catppuccin-mocha"
+				code="gleam add lustre"
+			/>
+		</div>
+	</Slide>
+
+	<!-- 27 -->
+	<Slide class="h-full place-content-center place-items-center">
+		<img src="https://media1.tenor.com/m/aTsxCf5envUAAAAd/caida-fall.gif" alt="" />
+	</Slide>
+
+	<!-- 28 -->
+	<Slide class="h-full place-content-center place-items-center">
+		<img
+			src="/screenshots/lustre-to-html-converter.png"
+			alt=""
+			class="mb-12 w-[50vw] rounded-xl shadow-xl"
+		/>
+		<h1 class="font-mono text-6xl">lpil/html-lustre-converter</h1>
+	</Slide>
+
+	<!-- 29 -->
+	<Slide class="h-full place-content-center place-items-center">
+		<img src="/screenshots/lustre-page-scaffold.png" alt="" />
+	</Slide>
+
+	<!-- 30 -->
+	<Slide class="h-full place-content-center place-items-center">
+		<img
+			src="https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExcGVzMjRmbTZleGh6OHEzc2J6dGVkejRqamdtNHl0YTh1ZXdxaTR3NyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/N2JaONOG63aMM/giphy.webp"
+			alt=""
+			class="w-[50vw]"
+		/>
+	</Slide>
+
+	<!-- 31 -->
+	<Slide class="h-full place-content-center place-items-center">
+		<div class="flex flex-col gap-12">
+			<div class="w-full">
+				<Code
+					lang="text"
+					class="w-80 !leading-tight"
+					theme="catppuccin-mocha"
+					code={`
+repo/
+├── project_a/
+└── project_b/
+				`.trim()}
+					bind:this={slide_31.code_el}
+				/>
+			</div>
+
+			<Action
+				do={async () => {
+					await slide_31.code_el!.update`repo/
+├── client/
+└── server/`
+				}}
+			/>
+		</div>
+	</Slide>
+
+	<!-- 32 -->
+	<Slide class="h-full place-content-center place-items-center">
+		<img src="/logos/github-white.png" alt="" class="mb-16 w-[40vw]" />
+		<h1 class="font-mono text-6xl">isaacharrisholt/youtube</h1>
+	</Slide>
+
+	<!-- 33 -->
+	<Slide class="h-full place-content-center place-items-center">
+		<div class="w-fit">
+			<Code
+				lang="gleam"
+				class="w-fit p-4 !text-6xl !leading-loose"
+				theme="catppuccin-mocha"
+				code={`
+request("/subscribe")
+|> post(you)
+				`.trim()}
+			/>
+		</div>
+	</Slide>
+
+	<!-- 34 -->
+	<Slide class="h-full place-content-center place-items-center">
+		<div class="flex flex-col gap-12">
+			<Transition visible>
+				<div class="w-full">
+					<Code
+						lang="toml"
+						class="w-full"
+						theme="catppuccin-mocha"
+						code={`
+[dependencies]
+gleam_stdlib = "~> 0.34 or ~> 1.0"
+# ...
+lustre = ">= 4.3.1 and < 5.0.0"
+client = { path = "../client" }
+				`.trim()}
+						bind:this={slide_34.code_el}
+					/>
+				</div>
+			</Transition>
+
+			<Action
+				do={async () => {
+					await slide_34.code_el!.selectLines`5`
+				}}
+			/>
+
+			<Transition>
+				<div class="w-full">
+					<Code
+						lang="text"
+						class="w-full !leading-tight"
+						theme="catppuccin-mocha"
+						code={`
+repo/
+├── client/
+└── server/
+    └── gleam.toml
+    			`.trim()}
+					/>
+				</div>
+			</Transition>
+		</div>
+	</Slide>
+
+	<!-- 35 -->
+	<Slide class="h-full place-content-center place-items-center">
+		<div class="w-fit">
+			<Code
+				lang="bash"
+				class="w-fit p-4 !text-6xl"
+				theme="catppuccin-mocha"
+				code="gleam deps update"
+			/>
+		</div>
+	</Slide>
+
+	<!-- 36 -->
+	<Slide class="h-full place-content-center place-items-center">
+		<img
+			src="https://media1.tenor.com/m/tVy1iyr9AMQAAAAC/mr-bean-thumbs-up.gif"
+			alt=""
+			class="w-[50vh]"
+		/>
+	</Slide>
+
+	<!-- 37 -->
+	<Slide class="h-full place-content-center place-items-center">
+		<img
+			src="https://media1.tenor.com/m/XQLVLptLIBEAAAAd/maes-b-lost-in-a-field.gif"
+			alt=""
+			class="w-[50vh]"
+		/>
+	</Slide>
+
+	<!-- 38 -->
+	<Slide class="h-full place-content-center place-items-center">
+		<img
+			src="https://media1.tenor.com/m/8ZzMFRsV58MAAAAC/youve-been-served-mcjuggernuggets.gif"
+			alt=""
+			class="w-[50vw]"
+		/>
+	</Slide>
+
+	<!-- 39 -->
+	<Slide class="h-full place-content-center place-items-center">
+		<img
+			src="https://media1.tenor.com/m/Pas_bgTFBX4AAAAC/harrison-ford-staring.gif"
+			alt=""
+			class="w-[50vw]"
+		/>
+	</Slide>
+
+	<!-- 40 -->
+	<Slide
+		class="h-full place-content-center place-items-center"
+		out={() => {
+			slide_40 = { ...SLIDE_40_DEFAULTS, code_el: slide_40.code_el }
+		}}
+	>
+		<div class="flex items-center justify-between gap-32">
+			{#if slide_40.show_copy}
+				<Transition visible>
+					<div
+						class:blur-xl={slide_40.copy_blurred}
+						class="w-fit transition-all duration-300 ease-in-out"
+					>
+						<Lottie animation={copy_animation} class="h-96" />
+					</div>
+				</Transition>
+			{/if}
+
+			<Transition visible>
+				<div
+					class="w-fit transition-all duration-300 ease-in-out"
+					class:blur-xl={slide_40.build_blurred}
+				>
+					<Code
+						lang="bash"
+						class="w-fit !text-4xl"
+						theme="catppuccin-mocha"
+						code="gleam run -m lustre/dev build"
+						bind:this={slide_40.code_el}
+					/>
+				</div>
+			</Transition>
+
+			<Action
+				do={async () => {
+					slide_40.copy_blurred = false
+				}}
+			/>
+
+			<Transition
+				do={async () => {
+					slide_40.build_blurred = false
+					slide_40.show_copy = false
+				}}
+			/>
+
+			<Action
+				do={async () => {
+					slide_40.code_el!.update`gleam run -m lustre/dev build --outdir=/priv`
+				}}
+			/>
+
+			<Action
+				do={async () => {
+					slide_40.code_el!.selectToken`--outdir=/priv`
+				}}
+			/>
+		</div>
+	</Slide>
+
+	<!-- 41 -->
+	<Slide class="h-full place-content-center place-items-center">
+		<img
+			src="https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExamxsZGRvNWM1aGk3OXMxMnpzbWtoYjBtN3NnZWQ5NmVtemh0bzd6ZiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/nrXif9YExO9EI/giphy.webp"
+			alt=""
+		/>
+	</Slide>
+
+	<!-- 42 -->
+	<Slide class="h-full place-content-center place-items-center">
+		<img
+			src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExcHZqY3J3MHd4dmMwdWRmeXJlOXpycjh1c3U3cm8wczl4a2cxdWgxayZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/9o9dh1JRGThC1qxGTJ/giphy.webp"
+			alt=""
+			class="w-[40vw]"
+		/>
+	</Slide>
+
+	<!-- 43 -->
+	<Slide class="h-full place-content-center place-items-center">
+		<img src="https://media1.tenor.com/m/hckC4-rXFxIAAAAd/meme-puzzle.gif" alt="" />
+	</Slide>
+
+	<!-- 44 -->
+	<Slide class="h-full place-content-center place-items-center">
+		<img
+			src="https://media1.tenor.com/m/CeY5T_QDMekAAAAC/pokemon-anime.gif"
+			alt=""
+			class="w-[50vw]"
+		/>
+	</Slide>
+
+	<!-- 45 -->
+	<Slide class="h-full place-content-center place-items-center">
+		<img src="https://media1.tenor.com/m/_ydT_dPwE8AAAAAd/watering-flower-thirsty.gif" alt="" />
+	</Slide>
+
+	<!-- 46 -->
+	<Slide class="h-full place-content-center place-items-center">
+		<div class="w-fit">
+			<Code
+				lang="json"
+				class="w-fit"
+				theme="catppuccin-mocha"
+				code={`{ "current_pokemon": "zorua" }`}
+				bind:this={slide_46.code_el}
+			/>
+		</div>
+
+		<Action
+			do={async () => {
+				await slide_46.code_el!.update`<​script id="model" type="application/json">
+  { "current_pokemon": "zorua" }
+</script>`
+			}}
+		/>
+
+		<Action
+			do={async () => {
+				await slide_46.code_el!.update`{ "current_pokemon": "zorua" }`
+			}}
+		/>
+	</Slide>
+
+	<!-- 47 -->
+	<Slide class="h-full place-content-center place-items-center">
+		<img src="https://media1.tenor.com/m/qhCxxfVk6QMAAAAC/based-hack.gif" alt="" class="w-[50vw]" />
+	</Slide>
+
+	<!-- 48 -->
+	<Slide class="h-full place-content-center place-items-center">
+		<div class="w-fit">
+			<Code
+				lang="gleam"
+				class="w-fit"
+				theme="catppuccin-mocha"
+				code={`
+pub type Model {
+  // ...
+}
+
+pub fn model_decoder() {
+  // ...
+}
+
+pub fn model_encoder() {
+  // ...
+}
+				`.trim()}
+			/>
+		</div>
+	</Slide>
+
+	<!-- 49 -->
+	<Slide class="h-full place-content-center place-items-center">
+		<img src="https://media1.tenor.com/m/rRkuzxG-jVoAAAAd/sweeping-cleaning.gif" alt="" />
+	</Slide>
+
+	<!-- 50 -->
+	<Slide class="h-full place-content-center place-items-center">
+		<div class="flex flex-col gap-12">
+			<Transition>
+				<div class="w-full">
+					<Code
+						lang="gleam"
+						class="w-[60vw]"
+						theme="catppuccin-mocha"
+						code={`
+pub type Pokemon {
+  Pokemon(
+    id: Int,
+    name: String,
+    base_experience: Int,
+    base_stats: Stats,
+    moves: List(Move),
+  )
+}
+				`.trim()}
+					/>
+				</div>
+			</Transition>
+
+			<Transition>
+				<div class="w-full">
+					<Code
+						lang="gleam"
+						class="w-[60vw]"
+						theme="catppuccin-mocha"
+						code={`
+pub type Pokemon {
+  Pokemon(id: Int, name: String, base_experience: Int, base_stats: Stats)
+}
+					`.trim()}
+					/>
+				</div>
+			</Transition>
+		</div>
+	</Slide>
+
+	<!-- 51 -->
+	<Slide class="h-full place-content-center place-items-center">
+		<img src="https://media1.tenor.com/m/Eo6pFHjtakMAAAAd/baywatch-on-my-way.gif" alt="" />
+	</Slide>
+
+	<!-- 52 -->
+	<Slide class="h-full place-content-center place-items-center">
+		<div class="w-fit">
+			<Code
+				lang="text"
+				class="w-fit !text-4xl !leading-tight"
+				theme="catppuccin-mocha"
+				code={`
+repo/
+├── client/
+└── server/
+    			`.trim()}
+				bind:this={slide_52.code_el}
+			/>
+
+			<Action
+				do={async () => {
+					await slide_52.code_el!.update`repo/
+├── client/
+├── server/
+└── shared/`
+				}}
+			/>
+		</div>
+	</Slide>
+
+	<!-- 53 -->
+	<Slide class="h-full place-content-center place-items-center">
+		<div class="w-fit">
+			<Code
+				lang="gleam"
+				class="w-fit !text-4xl"
+				theme="catppuccin-mocha"
+				code={`import server/pokemon.{Pokemon}`}
+				bind:this={slide_53.code_el}
+			/>
+		</div>
+
+		<Action
+			do={async () => {
+				await slide_53.code_el!.update`import shared/pokemon.{Pokemon}`
+			}}
+		/>
+	</Slide>
 </Presentation>
 
 <style>
