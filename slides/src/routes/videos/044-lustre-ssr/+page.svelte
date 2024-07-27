@@ -87,6 +87,11 @@
 		code_el: undefined as Code | undefined
 	}
 	let slide_53 = $state({ ...SLIDE_53_DEFAULTS })
+
+	const SLIDE_57_DEFAULTS = {
+		code_el: undefined as Code | undefined
+	}
+	let slide_57 = $state({ ...SLIDE_57_DEFAULTS })
 </script>
 
 <Presentation options={{ transition: 'none', controls: false, progress: false, hash: true }}>
@@ -833,6 +838,108 @@ repo/
 			}}
 		/>
 	</Slide>
+
+	<!-- 54 -->
+	<Slide class="h-full place-content-center place-items-center">
+		<img
+			src="https://media1.tenor.com/m/xXk7Hf_ufxcAAAAd/feel-so-clean-like-a-monkey-machine.gif"
+			alt=""
+		/>
+	</Slide>
+
+	<!-- 55 -->
+	<Slide class="h-full place-content-center place-items-center">
+		<img src="https://media1.tenor.com/m/STewTAE3eCYAAAAC/fancy-woody.gif" alt="" />
+	</Slide>
+
+	<!-- 56 -->
+	<Slide class="h-full place-content-center place-items-center">
+		<h1 class="text-6xl font-bold">SSR 🤝 CSR</h1>
+	</Slide>
+
+	<!-- 57 -->
+	<Slide class="h-full place-content-center place-items-center">
+		<div class="w-fit">
+			<Code
+				lang="dockerfile"
+				class="w-fit"
+				theme="catppuccin-mocha"
+				code={`
+FROM ghcr.io/gleam-lang/gleam:v1.3.2-erlang-alpine
+
+WORKDIR /build
+
+COPY ./client /build/client
+COPY ./server /build/server
+RUN mkdir -p /build/server/priv
+
+# Compile frontend
+RUN cd /build/client \\
+  && gleam clean \\
+  && gleam deps download \\
+  && gleam run -m lustre/dev build --outdir=/build/server/priv
+
+# Compile the project
+RUN cd /build/server \\
+  && gleam export erlang-shipment \\
+  && mv build/erlang-shipment /app \\
+  && rm -r /build
+
+# Run the server
+WORKDIR /app
+ENTRYPOINT ["/app/entrypoint.sh"]
+CMD ["run"]
+				`.trim()}
+				bind:this={slide_57.code_el}
+			/>
+		</div>
+
+		<Action
+			do={async () => {
+				await slide_57.code_el!.selectLines`1`
+			}}
+		/>
+
+		<Action
+			do={async () => {
+				await slide_57.code_el!.selectLines`9-13`
+			}}
+		/>
+
+		<Action
+			do={async () => {
+				await slide_57.code_el!.selectLines`15-19`
+			}}
+		/>
+
+		<Action
+			do={async () => {
+				await slide_57.code_el!.selectLines`21-24`
+			}}
+		/>
+
+		<Action
+			do={async () => {
+				await slide_57.code_el!.selectLines`*`
+			}}
+		/>
+	</Slide>
+
+	<!-- 58 -->
+	<Slide class="h-full place-content-center place-items-center">
+		<img
+			src="https://media1.tenor.com/m/hWtovfyLjNAAAAAd/captain-planet-let-our-powers-combine.gif"
+			alt=""
+		/>
+	</Slide>
+
+	<!-- 59 -->
+	<Slide class="h-full place-content-center place-items-center">
+		<img src="https://media1.tenor.com/m/kqXJzGr5cnIAAAAd/simpol-khaby-lame.gif" alt="" />
+	</Slide>
+
+	<!-- 60 -->
+	<Slide class="h-full place-content-center place-items-center"></Slide>
 </Presentation>
 
 <style>
