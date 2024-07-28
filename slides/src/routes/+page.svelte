@@ -10,6 +10,9 @@
 			<li>
 				<a href="/videos/043-error-handling-in-gleam" class="text-white">Error handling in Gleam</a>
 			</li>
+			<li>
+				<a href="/videos/044-lustre-ssr" class="text-white">Lustre SSR</a>
+			</li>
 		</ul>
 	</Slide>
 </Presentation>

@@ -8,8 +8,8 @@ run the code.
 
 ## Videos
 
-| Video                                                                                   | Folder                                                                          |
-| --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| Video                                                                                   | Folder                                                                               |
+| --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
 | [The Secret Weapon Every Software Engineer Needs](https://youtu.be/G0DB5fVqbeg)         | [why-learn-sql](./code/001-why-learn-sql)                                            |
 | [Python - To OOP or to FP?](https://youtu.be/lNRBF6l8Jh4)                               | [oop-vs-fp](./code/002-oop-vs-fp)                                                    |
 | [Creating Rock-Solid CLI Apps With Typer](https://youtu.be/8-i3U_3Gxko)                 | [create-clis-with-typer](./code/003-create-clis-with-typer)                          |
@@ -30,3 +30,4 @@ run the code.
 | [Using Rust to write scalable Python APIs](https://youtu.be/t08OA4CfRFs)                | [robyn-web-framework](./code/036-robyn-web-framework/)                               |
 | [Simplify your backend with Gleam](https://youtu.be/D88S_RdagP8)                        | [gleam-webservers](./code/039-gleam-webservers/)                                     |
 | [Create Robust Web Apps in Gleam with Lustre](https://youtu.be/3kr4Ydx6GGU)             | [gleam-web-apps-with-lustre](./code/041-gleam-web-apps-with-lustre/)                 |
+| [Slash Lustre Load Times with Server Side Rendering](https://youtu.be/q9j5V8CDPQY)      | [lustre-ssr](./code/044-lustre-ssr/)                                                 |
