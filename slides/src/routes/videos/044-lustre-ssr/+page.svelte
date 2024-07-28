@@ -455,7 +455,7 @@
 			<div class="w-full">
 				<Code
 					lang="text"
-					class="w-80 !leading-tight"
+					class="w-80 !text-4xl !leading-tight"
 					theme="catppuccin-mocha"
 					code={`
 repo/
@@ -504,7 +504,7 @@ request("/subscribe")
 				<div class="w-full">
 					<Code
 						lang="toml"
-						class="w-full"
+						class="w-full !text-4xl !leading-tight"
 						theme="catppuccin-mocha"
 						code={`
 [dependencies]
@@ -528,7 +528,7 @@ client = { path = "../client" }
 				<div class="w-full">
 					<Code
 						lang="text"
-						class="w-full !leading-tight"
+						class="w-full !text-4xl !leading-tight"
 						theme="catppuccin-mocha"
 						code={`
 repo/
@@ -639,13 +639,13 @@ repo/
 
 			<Action
 				do={async () => {
-					slide_40.code_el!.update`gleam run -m lustre/dev build --outdir=/priv`
+					slide_40.code_el!.update`gleam run -m lustre/dev build --outdir=../priv`
 				}}
 			/>
 
 			<Action
 				do={async () => {
-					slide_40.code_el!.selectToken`--outdir=/priv`
+					slide_40.code_el!.selectToken`--outdir=../priv`
 				}}
 			/>
 		</div>
