@@ -4,6 +4,7 @@ WORKDIR /build
 
 COPY ./client /build/client
 COPY ./server /build/server
+COPY ./shared /build/shared
 
 RUN mkdir -p /build/server/priv
 
