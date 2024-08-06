@@ -3,8 +3,8 @@ import gleam/int
 import gleam/io
 import gleam/list
 
-@external(erlang, "deploy_ffi", "wait")
-@external(javascript, "./deploy_ffi.mjs", "wait")
+@external(erlang, "primes_ffi", "wait")
+@external(javascript, "./primes_ffi.mjs", "wait")
 fn wait(ms: Int) -> Nil
 
 fn is_prime(n: Int) -> Bool {

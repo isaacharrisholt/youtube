@@ -1,4 +1,4 @@
--module(deploy_ffi).
+-module(primes_ffi).
 
 -export([wait/1]).
 
