@@ -1,25 +1,22 @@
-#
+# How to Deploy Gleam Apps Anywhere
 
-[![Package Version](https://img.shields.io/hexpm/v/deploy)](https://hex.pm/packages/deploy)
-[![Hex Docs](https://img.shields.io/badge/hex-docs-ffaff3)](https://hexdocs.pm/deploy/)
+Deploying Gleam is fairly simple, but it's not obvious how to do it at first glance.
+This video will cover how to deploy your apps locally, regionally and globally!
 
-```sh
-gleam add deploy@1
-```
+## Deploying the app
 
-```gleam
-import deploy
-
-pub fn main() {
-  // TODO: An example of the project in use
-}
-```
-
-Further documentation can be found at <https://hexdocs.pm/deploy>.
-
-## Development
+Build either Dockerfile:
 
 ```sh
-gleam run   # Run the project
-gleam test  # Run the tests
+docker build -f erlang.Dockerfile -t primes .
+# or
+docker build -f javascript.Dockerfile -t primes .
+```
+
+Deploy to Fly.io:
+
+```sh
+fly launch --dockerfile erlang.Dockerfile
+# or
+fly launch --dockerfile javascript.Dockerfile
 ```
