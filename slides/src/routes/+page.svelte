@@ -13,6 +13,9 @@
 			<li>
 				<a href="/videos/044-lustre-ssr" class="text-white">Lustre SSR</a>
 			</li>
+			<li>
+				<a href="/videos/045-deploying-gleam" class="text-white">Deploying Gleam</a>
+			</li>
 		</ul>
 	</Slide>
 </Presentation>

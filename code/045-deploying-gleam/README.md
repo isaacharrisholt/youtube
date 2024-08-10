@@ -1,4 +1,4 @@
-# deploy
+#
 
 [![Package Version](https://img.shields.io/hexpm/v/deploy)](https://hex.pm/packages/deploy)
 [![Hex Docs](https://img.shields.io/badge/hex-docs-ffaff3)](https://hexdocs.pm/deploy/)
@@ -6,6 +6,7 @@
 ```sh
 gleam add deploy@1
 ```
+
 ```gleam
 import deploy
 
