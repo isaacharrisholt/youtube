@@ -5,16 +5,18 @@
 	let animation_container: HTMLDivElement
 
 	type Props = {
-		class?: string
 		animation: object
+		class?: string
+		options?: Omit<Parameters<typeof lottie.loadAnimation>[0], 'container' | 'animationData'>
 	}
 
-	let { class: classes, animation }: Props = $props()
+	let { class: classes, animation, options }: Props = $props()
 
 	onMount(() => {
 		lottie.loadAnimation({
 			container: animation_container,
-			animationData: animation
+			animationData: animation,
+			...options
 		})
 	})
 </script>
