@@ -21,11 +21,11 @@
 /* defaults */
 :root {
 	--r-background-color: oklch(20% 0.01 272);
-	--r-main-font: 'Lexend Variable';
+	--r-main-font: 'Lexend Variable', sans-serif;
 	--r-main-font-size: 42px;
 	--r-main-color: oklch(98% 0.02 272);
-	--r-heading-font: 'Lexend Variable';
-	--r-code-font: 'JetBrains Mono Variable';
+	--r-heading-font: 'Lexend Variable', sans-serif;
+	--r-code-font: 'JetBrains Mono Variable', monospace;
 	--r-link-color: oklch(90.54% 0.15 194);
 	--ease: linear(0 0%,
 			0.0036 9.62%,
