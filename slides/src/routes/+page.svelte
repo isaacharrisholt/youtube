@@ -1,5 +1,13 @@
 <script lang="ts">
 	import { Presentation, Slide } from '@animotion/core'
+
+	const links = [
+		{ href: '/videos/043-error-handling-in-gleam', text: 'Error handling in Gleam' },
+		{ href: '/videos/044-lustre-ssr', text: 'Lustre SSR' },
+		{ href: '/videos/045-deploying-gleam', text: 'Deploying Gleam' },
+		{ href: '/videos/046-gleam-is-not-rust', text: 'Gleam is not Rust' },
+		{ href: '/videos/047-polar-for-impatient-devs', text: 'Polar for Impatient Devs' }
+	]
 </script>
 
 <Presentation options={{ transition: 'none', controls: false, progress: false, hash: false }}>
@@ -7,18 +15,11 @@
 		<h1 class="text-4xl">Isaac Harris-Holt's video slides</h1>
 
 		<ul class="flex list-none flex-col items-start text-base">
-			<li>
-				<a href="/videos/043-error-handling-in-gleam" class="text-white">Error handling in Gleam</a>
-			</li>
-			<li>
-				<a href="/videos/044-lustre-ssr" class="text-white">Lustre SSR</a>
-			</li>
-			<li>
-				<a href="/videos/045-deploying-gleam" class="text-white">Deploying Gleam</a>
-			</li>
-			<li>
-				<a href="/videos/046-gleam-is-not-rust" class="text-white">Gleam is not Rust</a>
-			</li>
+			{#each links as link}
+				<li>
+					<a href={link.href} class="text-white">{link.text}</a>
+				</li>
+			{/each}
 		</ul>
 	</Slide>
 </Presentation>

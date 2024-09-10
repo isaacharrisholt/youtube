@@ -11,14 +11,20 @@
 	}
 
 	let { class: classes, animation, options }: Props = $props()
+	let animation_item: ReturnType<typeof lottie.loadAnimation>
 
 	onMount(() => {
-		lottie.loadAnimation({
+		animation_item = lottie.loadAnimation({
 			container: animation_container,
 			animationData: animation,
 			...options
 		})
 	})
+
+	export function play() {
+		// lottie.play(options?.name)
+		animation_item.play()
+	}
 </script>
 
 <div bind:this={animation_container} class={classes}></div>
