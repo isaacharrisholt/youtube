@@ -92,12 +92,12 @@ var BitArray = class _BitArray {
     return this.buffer[index3];
   }
   // @internal
-  floatAt(index3) {
-    return byteArrayToFloat(this.buffer.slice(index3, index3 + 8));
+  floatFromSlice(start4, end, isBigEndian) {
+    return byteArrayToFloat(this.buffer, start4, end, isBigEndian);
   }
   // @internal
-  intFromSlice(start4, end) {
-    return byteArrayToInt(this.buffer.slice(start4, end));
+  intFromSlice(start4, end, isBigEndian, isSigned) {
+    return byteArrayToInt(this.buffer, start4, end, isBigEndian, isSigned);
   }
   // @internal
   binaryFromSlice(start4, end) {
@@ -113,16 +113,37 @@ var UtfCodepoint = class {
     this.value = value4;
   }
 };
-function byteArrayToInt(byteArray) {
-  byteArray = byteArray.reverse();
+function byteArrayToInt(byteArray, start4, end, isBigEndian, isSigned) {
   let value4 = 0;
-  for (let i = byteArray.length - 1; i >= 0; i--) {
-    value4 = value4 * 256 + byteArray[i];
+  if (isBigEndian) {
+    for (let i = start4; i < end; i++) {
+      value4 = value4 * 256 + byteArray[i];
+    }
+  } else {
+    for (let i = end - 1; i >= start4; i--) {
+      value4 = value4 * 256 + byteArray[i];
+    }
+  }
+  if (isSigned) {
+    const byteSize = end - start4;
+    const highBit = 2 ** (byteSize * 8 - 1);
+    if (value4 >= highBit) {
+      value4 -= highBit * 2;
+    }
   }
   return value4;
 }
-function byteArrayToFloat(byteArray) {
-  return new Float64Array(byteArray.reverse().buffer)[0];
+function byteArrayToFloat(byteArray, start4, end, isBigEndian) {
+  const view2 = new DataView(byteArray.buffer);
+  const byteSize = end - start4;
+  if (byteSize === 8) {
+    return view2.getFloat64(start4, !isBigEndian);
+  } else if (byteSize === 4) {
+    return view2.getFloat32(start4, !isBigEndian);
+  } else {
+    const msg = `Sized floats must be 32-bit or 64-bit on JavaScript, got size of ${byteSize * 8} bits`;
+    throw new globalThis.Error(msg);
+  }
 }
 var Result = class _Result extends CustomType {
   // @internal
@@ -3572,7 +3593,7 @@ var LoadError = class extends CustomType {
     this[0] = x0;
   }
 };
-var api_root = "http://localhost:8000";
+var api_root = "https://mon.ihh.dev";
 function fetch_pokemon(search, on_result_msg) {
   let expect = expect_json(pokemon_decoder(), on_result_msg);
   return get2(
