@@ -1,9 +1,8 @@
-import client/api.{
-  type CanLoad, LoadError, Loaded, Loading, fetch_all_pokemon, fetch_pokemon,
-}
-import client/shared.{button, header, pokemon_search}
+import client/api.{type CanLoad, LoadError, Loaded, Loading, fetch_pokemon}
+import client/shared.{header, pokemon_search}
 import gleam/dynamic
 import gleam/int
+import gleam/io
 import gleam/json
 import gleam/list
 import gleam/option.{type Option, None, Some}
@@ -14,9 +13,12 @@ import lustre/attribute.{class}
 import lustre/effect
 import lustre/element
 import lustre/element/html
+import lustre/event
+import lustre/server_component
 import lustre_http
 import plinth/browser/document
 import plinth/browser/element as browser_element
+import shared/components/pokemon_list
 import shared/pokemon.{type Pokemon}
 
 pub fn main() {
@@ -25,9 +27,9 @@ pub fn main() {
     |> result.map(browser_element.inner_text)
 
   let initial_pokemon =
-    json.decode(json_string, dynamic.list(dynamic.string))
-    |> result.map(fn(lst) { Loaded(lst) })
-    |> result.unwrap(Loading)
+    json.decode(json_string, dynamic.list(pokemon.pokemon_decoder()))
+    |> result.unwrap([])
+    |> io.debug
 
   let app = lustre.application(init, update, view)
   let assert Ok(_) = lustre.start(app, "#app", initial_pokemon)
@@ -38,17 +40,18 @@ pub fn main() {
 pub type Model {
   Model(
     current_pokemon: CanLoad(Option(Pokemon), String),
-    all_pokemon: CanLoad(List(String), String),
     pokemon_search: String,
+    all_pokemon: List(Pokemon),
   )
 }
 
-fn init(initial_pokemon) -> #(Model, effect.Effect(Msg)) {
+fn init(initial_pokemon: List(Pokemon)) -> #(Model, effect.Effect(Msg)) {
   #(
     Model(
       current_pokemon: Loaded(None),
-      all_pokemon: initial_pokemon,
       pokemon_search: "",
+      all_pokemon: initial_pokemon
+        |> list.sort(fn(a, b) { int.compare(a.id, b.id) }),
     ),
     effect.none(),
   )
@@ -60,9 +63,6 @@ pub type Msg {
   UserClickedSearchButton
 
   ApiReturnedPokemon(Result(Pokemon, lustre_http.HttpError))
-  ApiReturnedAllPokemon(Result(List(String), lustre_http.HttpError))
-
-  AppRequestedAllPokemon
 }
 
 pub fn view(model: Model) -> element.Element(Msg) {
@@ -82,40 +82,15 @@ fn update(model: Model, msg: Msg) -> #(Model, effect.Effect(Msg)) {
     )
     UserClickedSearchButton -> handle_user_clicked_search_button(model)
 
-    AppRequestedAllPokemon -> #(
-      Model(..model, all_pokemon: Loading),
-      fetch_all_pokemon(ApiReturnedAllPokemon),
+    ApiReturnedPokemon(Ok(pokemon)) -> #(
+      Model(..model, current_pokemon: Loaded(Some(pokemon))),
+      effect.none(),
     )
-
-    ApiReturnedPokemon(Ok(pokemon)) ->
-      handle_api_returned_pokemon_ok(model, pokemon)
     ApiReturnedPokemon(Error(err)) -> {
       #(
         Model(
           ..model,
           current_pokemon: LoadError(
-            "Error fetching Pokemon: " <> string.inspect(err),
-          ),
-        ),
-        effect.none(),
-      )
-    }
-
-    ApiReturnedAllPokemon(Ok(pokemon_names)) -> #(
-      Model(
-        ..model,
-        all_pokemon: Loaded(
-          pokemon_names
-          |> list.sort(string.compare),
-        ),
-      ),
-      effect.none(),
-    )
-    ApiReturnedAllPokemon(Error(err)) -> {
-      #(
-        Model(
-          ..model,
-          all_pokemon: LoadError(
             "Error fetching Pokemon: " <> string.inspect(err),
           ),
         ),
@@ -164,47 +139,40 @@ fn handle_user_clicked_search_button(
   }
 }
 
-fn handle_api_returned_pokemon_ok(
-  model: Model,
-  pokemon: Pokemon,
-) -> #(Model, effect.Effect(Msg)) {
-  let default_return = #(
-    Model(..model, current_pokemon: Loaded(Some(pokemon))),
-    effect.none(),
-  )
-  case model.all_pokemon {
-    Loaded(pokemon_names) -> {
-      case list.contains(pokemon_names, pokemon.name) {
-        // If the pokemon is not in the list, we need to fetch the list again
-        False -> #(default_return.0, fetch_all_pokemon(ApiReturnedAllPokemon))
-        // If it is, we just update the current pokemon as before
-        True -> default_return
-      }
-    }
-    _ -> default_return
-  }
-}
-
 //
 // UI bits
 //
 fn main_content(
   pokemon_search_term: String,
   current_pokemon: CanLoad(Option(Pokemon), String),
-  all_pokemon: CanLoad(List(String), String),
+  all_pokemon: List(Pokemon),
 ) -> element.Element(Msg) {
   html.main([class("px-4")], [
-    html.div([class("flex flex-col gap-8 w-full max-w-screen-xl mx-auto")], [
+    html.div([class("flex flex-col gap-8 w-full max-w-screen-lg mx-auto")], [
       pokemon_search(
         pokemon_search_term,
         UserUpdatedPokemonSearchTerm,
         UserClickedSearchButton,
       ),
       html.div([class("flex flex-col-reverse sm:flex-row gap-16 w-full")], [
-        pokemon_details(current_pokemon, all_pokemon),
-        html.div(
-          [class("flex flex-col gap-4 min-w-[25dvw] lg:min-w-[20dvw]")],
-          pokemon_list(all_pokemon),
+        pokemon_details(current_pokemon),
+        element.element(
+          "lustre-server-component",
+          [
+            server_component.route("/pokemon-list"),
+            event.on("select", fn(v) {
+              io.debug("Received pokemon list event")
+              use name <- result.try(
+                v |> dynamic.field(named: "detail", of: dynamic.string),
+              )
+              Ok(UserSelectedPokemon(name))
+            }),
+          ],
+          [
+            pokemon_list.prerender(all_pokemon, fn(pokemon) {
+              UserSelectedPokemon(pokemon.name)
+            }),
+          ],
         ),
       ]),
     ]),
@@ -213,16 +181,10 @@ fn main_content(
 
 fn pokemon_details(
   maybe_pokemon: CanLoad(Option(Pokemon), String),
-  all_pokemon: CanLoad(List(String), String),
 ) -> element.Element(Msg) {
-  let message = case all_pokemon {
-    Loaded([]) -> "Search for a Pokémon to view details"
-    Loaded(_) -> "Select a Pokémon to view details"
-    LoadError(err) -> "Error loading Pokémon: " <> err
-    Loading -> "Loading Pokémon selection..."
-  }
   let content = case maybe_pokemon {
-    Loaded(None) -> html.p([], [html.text(message)])
+    Loaded(None) ->
+      html.p([], [html.text("Search for a Pokémon to view details")])
     Loaded(Some(pokemon)) ->
       html.div([], [
         html.h2([], [html.text(pokemon.name)]),
@@ -247,19 +209,4 @@ fn pokemon_details(
     Loading -> html.p([], [html.text("Loading Pokémon...")])
   }
   html.div([class("flex-grow")], [content])
-}
-
-fn pokemon_list(
-  pokemon: CanLoad(List(String), String),
-) -> List(element.Element(Msg)) {
-  case pokemon {
-    Loaded(pokemon) ->
-      list.map(pokemon, fn(p) {
-        button(p, UserSelectedPokemon(string.lowercase(p)))
-      })
-    LoadError(err) -> [
-      html.p([], [html.text("Error loading Pokémon: " <> err)]),
-    ]
-    Loading -> [html.p([], [html.text("Loading Pokémon...")])]
-  }
 }

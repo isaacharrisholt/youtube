@@ -27,6 +27,12 @@ pub fn pokemon_search(
         <> "focus-visible:ring-2 focus-visible:ring-red-500 "
         <> "focus-visible:ring-offset-2",
       ),
+      event.on_keydown(fn(key) {
+        case key {
+          "Enter" -> on_click_msg
+          _ -> on_input_msg(value)
+        }
+      }),
       event.on_input(on_input_msg),
     ]),
     html.button(
@@ -42,19 +48,4 @@ pub fn pokemon_search(
       [html.text("Search")],
     ),
   ])
-}
-
-pub fn button(text: String, on_click_msg: a) -> element.Element(a) {
-  html.button(
-    [
-      event.on_click(on_click_msg),
-      class(
-        "w-full text-left bg-red-500 text-white text-semibold rounded-lg "
-        <> "hover:bg-red-600 px-2 py-1 "
-        <> "focus-visible:outline-none focus-visible:ring-2 "
-        <> "focus-visible:ring-red-500 focus-visible:ring-offset-2",
-      ),
-    ],
-    [html.text(text)],
-  )
 }

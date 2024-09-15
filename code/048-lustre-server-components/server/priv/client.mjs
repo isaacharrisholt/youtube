@@ -40,17 +40,17 @@ var List = class {
     return desired === 0;
   }
   countLength() {
-    let length4 = 0;
+    let length5 = 0;
     for (let _ of this)
-      length4++;
-    return length4;
+      length5++;
+    return length5;
   }
 };
-function prepend(element2, tail) {
-  return new NonEmpty(element2, tail);
+function prepend(element3, tail) {
+  return new NonEmpty(element3, tail);
 }
-function toList(elements, tail) {
-  return List.fromArray(elements, tail);
+function toList(elements2, tail) {
+  return List.fromArray(elements2, tail);
 }
 var ListIterator = class {
   #current;
@@ -92,16 +92,16 @@ var BitArray = class _BitArray {
     return this.buffer[index3];
   }
   // @internal
-  floatFromSlice(start4, end, isBigEndian) {
-    return byteArrayToFloat(this.buffer, start4, end, isBigEndian);
+  floatFromSlice(start3, end, isBigEndian) {
+    return byteArrayToFloat(this.buffer, start3, end, isBigEndian);
   }
   // @internal
-  intFromSlice(start4, end, isBigEndian, isSigned) {
-    return byteArrayToInt(this.buffer, start4, end, isBigEndian, isSigned);
+  intFromSlice(start3, end, isBigEndian, isSigned) {
+    return byteArrayToInt(this.buffer, start3, end, isBigEndian, isSigned);
   }
   // @internal
-  binaryFromSlice(start4, end) {
-    return new _BitArray(this.buffer.slice(start4, end));
+  binaryFromSlice(start3, end) {
+    return new _BitArray(this.buffer.slice(start3, end));
   }
   // @internal
   sliceAfter(index3) {
@@ -113,19 +113,19 @@ var UtfCodepoint = class {
     this.value = value4;
   }
 };
-function byteArrayToInt(byteArray, start4, end, isBigEndian, isSigned) {
+function byteArrayToInt(byteArray, start3, end, isBigEndian, isSigned) {
   let value4 = 0;
   if (isBigEndian) {
-    for (let i = start4; i < end; i++) {
+    for (let i = start3; i < end; i++) {
       value4 = value4 * 256 + byteArray[i];
     }
   } else {
-    for (let i = end - 1; i >= start4; i--) {
+    for (let i = end - 1; i >= start3; i--) {
       value4 = value4 * 256 + byteArray[i];
     }
   }
   if (isSigned) {
-    const byteSize = end - start4;
+    const byteSize = end - start3;
     const highBit = 2 ** (byteSize * 8 - 1);
     if (value4 >= highBit) {
       value4 -= highBit * 2;
@@ -133,13 +133,13 @@ function byteArrayToInt(byteArray, start4, end, isBigEndian, isSigned) {
   }
   return value4;
 }
-function byteArrayToFloat(byteArray, start4, end, isBigEndian) {
+function byteArrayToFloat(byteArray, start3, end, isBigEndian) {
   const view2 = new DataView(byteArray.buffer);
-  const byteSize = end - start4;
+  const byteSize = end - start3;
   if (byteSize === 8) {
-    return view2.getFloat64(start4, !isBigEndian);
+    return view2.getFloat64(start3, !isBigEndian);
   } else if (byteSize === 4) {
-    return view2.getFloat32(start4, !isBigEndian);
+    return view2.getFloat32(start3, !isBigEndian);
   } else {
     const msg = `Sized floats must be 32-bit or 64-bit on JavaScript, got size of ${byteSize * 8} bits`;
     throw new globalThis.Error(msg);
@@ -237,6 +237,23 @@ function structurallyCompatibleObjects(a, b) {
     return false;
   return a.constructor === b.constructor;
 }
+function remainderInt(a, b) {
+  if (b === 0) {
+    return 0;
+  } else {
+    return a % b;
+  }
+}
+function divideInt(a, b) {
+  return Math.trunc(divideFloat(a, b));
+}
+function divideFloat(a, b) {
+  if (b === 0) {
+    return 0;
+  } else {
+    return a / b;
+  }
+}
 function makeError(variant, module, line, fn, message, extra) {
   let error = new globalThis.Error(message);
   error.gleam_error = variant;
@@ -328,11 +345,32 @@ var Gt = class extends CustomType {
 };
 
 // build/dev/javascript/gleam_stdlib/gleam/int.mjs
+function absolute_value(x) {
+  let $ = x >= 0;
+  if ($) {
+    return x;
+  } else {
+    return x * -1;
+  }
+}
 function parse(string3) {
   return parse_int(string3);
 }
 function to_string2(x) {
   return to_string(x);
+}
+function compare(a, b) {
+  let $ = a === b;
+  if ($) {
+    return new Eq();
+  } else {
+    let $1 = a < b;
+    if ($1) {
+      return new Lt();
+    } else {
+      return new Gt();
+    }
+  }
 }
 
 // build/dev/javascript/gleam_stdlib/gleam/pair.mjs
@@ -363,22 +401,6 @@ function do_reverse(loop$remaining, loop$accumulator) {
 function reverse(xs) {
   return do_reverse(xs, toList([]));
 }
-function contains(loop$list, loop$elem) {
-  while (true) {
-    let list2 = loop$list;
-    let elem = loop$elem;
-    if (list2.hasLength(0)) {
-      return false;
-    } else if (list2.atLeastLength(1) && isEqual(list2.head, elem)) {
-      let first$1 = list2.head;
-      return true;
-    } else {
-      let rest$1 = list2.tail;
-      loop$list = rest$1;
-      loop$elem = elem;
-    }
-  }
-}
 function first(list2) {
   if (list2.hasLength(0)) {
     return new Error(void 0);
@@ -406,6 +428,28 @@ function do_map(loop$list, loop$fun, loop$acc) {
 function map2(list2, fun) {
   return do_map(list2, fun, toList([]));
 }
+function do_index_map(loop$list, loop$fun, loop$index, loop$acc) {
+  while (true) {
+    let list2 = loop$list;
+    let fun = loop$fun;
+    let index3 = loop$index;
+    let acc = loop$acc;
+    if (list2.hasLength(0)) {
+      return reverse(acc);
+    } else {
+      let x = list2.head;
+      let xs = list2.tail;
+      let acc$1 = prepend(fun(x, index3), acc);
+      loop$list = xs;
+      loop$fun = fun;
+      loop$index = index3 + 1;
+      loop$acc = acc$1;
+    }
+  }
+}
+function index_map(list2, fun) {
+  return do_index_map(list2, fun, 0, toList([]));
+}
 function do_try_map(loop$list, loop$fun, loop$acc) {
   while (true) {
     let list2 = loop$list;
@@ -431,6 +475,48 @@ function do_try_map(loop$list, loop$fun, loop$acc) {
 }
 function try_map(list2, fun) {
   return do_try_map(list2, fun, toList([]));
+}
+function drop(loop$list, loop$n) {
+  while (true) {
+    let list2 = loop$list;
+    let n = loop$n;
+    let $ = n <= 0;
+    if ($) {
+      return list2;
+    } else {
+      if (list2.hasLength(0)) {
+        return toList([]);
+      } else {
+        let xs = list2.tail;
+        loop$list = xs;
+        loop$n = n - 1;
+      }
+    }
+  }
+}
+function do_take(loop$list, loop$n, loop$acc) {
+  while (true) {
+    let list2 = loop$list;
+    let n = loop$n;
+    let acc = loop$acc;
+    let $ = n <= 0;
+    if ($) {
+      return reverse(acc);
+    } else {
+      if (list2.hasLength(0)) {
+        return reverse(acc);
+      } else {
+        let x = list2.head;
+        let xs = list2.tail;
+        loop$list = xs;
+        loop$n = n - 1;
+        loop$acc = prepend(x, acc);
+      }
+    }
+  }
+}
+function take(list2, n) {
+  return do_take(list2, n, toList([]));
 }
 function do_append(loop$first, loop$second) {
   while (true) {
@@ -480,10 +566,47 @@ function do_concat(loop$lists, loop$acc) {
 function concat(lists) {
   return do_concat(lists, toList([]));
 }
+function fold(loop$list, loop$initial, loop$fun) {
+  while (true) {
+    let list2 = loop$list;
+    let initial = loop$initial;
+    let fun = loop$fun;
+    if (list2.hasLength(0)) {
+      return initial;
+    } else {
+      let x = list2.head;
+      let rest$1 = list2.tail;
+      loop$list = rest$1;
+      loop$initial = fun(initial, x);
+      loop$fun = fun;
+    }
+  }
+}
+function do_index_fold(loop$over, loop$acc, loop$with, loop$index) {
+  while (true) {
+    let over = loop$over;
+    let acc = loop$acc;
+    let with$ = loop$with;
+    let index3 = loop$index;
+    if (over.hasLength(0)) {
+      return acc;
+    } else {
+      let first$1 = over.head;
+      let rest$1 = over.tail;
+      loop$over = rest$1;
+      loop$acc = with$(acc, first$1, index3);
+      loop$with = with$;
+      loop$index = index3 + 1;
+    }
+  }
+}
+function index_fold(over, initial, fun) {
+  return do_index_fold(over, initial, fun, 0);
+}
 function sequences(loop$list, loop$compare, loop$growing, loop$direction, loop$prev, loop$acc) {
   while (true) {
     let list2 = loop$list;
-    let compare4 = loop$compare;
+    let compare3 = loop$compare;
     let growing = loop$growing;
     let direction = loop$direction;
     let prev = loop$prev;
@@ -498,24 +621,24 @@ function sequences(loop$list, loop$compare, loop$growing, loop$direction, loop$p
     } else {
       let new$1 = list2.head;
       let rest$1 = list2.tail;
-      let $ = compare4(prev, new$1);
+      let $ = compare3(prev, new$1);
       if ($ instanceof Gt && direction instanceof Descending) {
         loop$list = rest$1;
-        loop$compare = compare4;
+        loop$compare = compare3;
         loop$growing = growing$1;
         loop$direction = direction;
         loop$prev = new$1;
         loop$acc = acc;
       } else if ($ instanceof Lt && direction instanceof Ascending) {
         loop$list = rest$1;
-        loop$compare = compare4;
+        loop$compare = compare3;
         loop$growing = growing$1;
         loop$direction = direction;
         loop$prev = new$1;
         loop$acc = acc;
       } else if ($ instanceof Eq && direction instanceof Ascending) {
         loop$list = rest$1;
-        loop$compare = compare4;
+        loop$compare = compare3;
         loop$growing = growing$1;
         loop$direction = direction;
         loop$prev = new$1;
@@ -534,7 +657,7 @@ function sequences(loop$list, loop$compare, loop$growing, loop$direction, loop$p
           let next = rest$1.head;
           let rest$2 = rest$1.tail;
           let direction$1 = (() => {
-            let $1 = compare4(new$1, next);
+            let $1 = compare3(new$1, next);
             if ($1 instanceof Lt) {
               return new Ascending();
             } else if ($1 instanceof Eq) {
@@ -544,7 +667,7 @@ function sequences(loop$list, loop$compare, loop$growing, loop$direction, loop$p
             }
           })();
           loop$list = rest$2;
-          loop$compare = compare4;
+          loop$compare = compare3;
           loop$growing = toList([new$1]);
           loop$direction = direction$1;
           loop$prev = next;
@@ -564,7 +687,7 @@ function sequences(loop$list, loop$compare, loop$growing, loop$direction, loop$p
           let next = rest$1.head;
           let rest$2 = rest$1.tail;
           let direction$1 = (() => {
-            let $1 = compare4(new$1, next);
+            let $1 = compare3(new$1, next);
             if ($1 instanceof Lt) {
               return new Ascending();
             } else if ($1 instanceof Eq) {
@@ -574,7 +697,7 @@ function sequences(loop$list, loop$compare, loop$growing, loop$direction, loop$p
             }
           })();
           loop$list = rest$2;
-          loop$compare = compare4;
+          loop$compare = compare3;
           loop$growing = toList([new$1]);
           loop$direction = direction$1;
           loop$prev = next;
@@ -594,7 +717,7 @@ function sequences(loop$list, loop$compare, loop$growing, loop$direction, loop$p
           let next = rest$1.head;
           let rest$2 = rest$1.tail;
           let direction$1 = (() => {
-            let $1 = compare4(new$1, next);
+            let $1 = compare3(new$1, next);
             if ($1 instanceof Lt) {
               return new Ascending();
             } else if ($1 instanceof Eq) {
@@ -604,7 +727,7 @@ function sequences(loop$list, loop$compare, loop$growing, loop$direction, loop$p
             }
           })();
           loop$list = rest$2;
-          loop$compare = compare4;
+          loop$compare = compare3;
           loop$growing = toList([new$1]);
           loop$direction = direction$1;
           loop$prev = next;
@@ -618,7 +741,7 @@ function merge_ascendings(loop$list1, loop$list2, loop$compare, loop$acc) {
   while (true) {
     let list1 = loop$list1;
     let list2 = loop$list2;
-    let compare4 = loop$compare;
+    let compare3 = loop$compare;
     let acc = loop$acc;
     if (list1.hasLength(0)) {
       let list3 = list2;
@@ -631,21 +754,21 @@ function merge_ascendings(loop$list1, loop$list2, loop$compare, loop$acc) {
       let rest1 = list1.tail;
       let first22 = list2.head;
       let rest2 = list2.tail;
-      let $ = compare4(first1, first22);
+      let $ = compare3(first1, first22);
       if ($ instanceof Lt) {
         loop$list1 = rest1;
         loop$list2 = list2;
-        loop$compare = compare4;
+        loop$compare = compare3;
         loop$acc = prepend(first1, acc);
       } else if ($ instanceof Gt) {
         loop$list1 = list1;
         loop$list2 = rest2;
-        loop$compare = compare4;
+        loop$compare = compare3;
         loop$acc = prepend(first22, acc);
       } else {
         loop$list1 = list1;
         loop$list2 = rest2;
-        loop$compare = compare4;
+        loop$compare = compare3;
         loop$acc = prepend(first22, acc);
       }
     }
@@ -654,7 +777,7 @@ function merge_ascendings(loop$list1, loop$list2, loop$compare, loop$acc) {
 function merge_ascending_pairs(loop$sequences, loop$compare, loop$acc) {
   while (true) {
     let sequences2 = loop$sequences;
-    let compare4 = loop$compare;
+    let compare3 = loop$compare;
     let acc = loop$acc;
     if (sequences2.hasLength(0)) {
       return do_reverse(acc, toList([]));
@@ -671,11 +794,11 @@ function merge_ascending_pairs(loop$sequences, loop$compare, loop$acc) {
       let descending = merge_ascendings(
         ascending1,
         ascending2,
-        compare4,
+        compare3,
         toList([])
       );
       loop$sequences = rest$1;
-      loop$compare = compare4;
+      loop$compare = compare3;
       loop$acc = prepend(descending, acc);
     }
   }
@@ -684,7 +807,7 @@ function merge_descendings(loop$list1, loop$list2, loop$compare, loop$acc) {
   while (true) {
     let list1 = loop$list1;
     let list2 = loop$list2;
-    let compare4 = loop$compare;
+    let compare3 = loop$compare;
     let acc = loop$acc;
     if (list1.hasLength(0)) {
       let list3 = list2;
@@ -697,21 +820,21 @@ function merge_descendings(loop$list1, loop$list2, loop$compare, loop$acc) {
       let rest1 = list1.tail;
       let first22 = list2.head;
       let rest2 = list2.tail;
-      let $ = compare4(first1, first22);
+      let $ = compare3(first1, first22);
       if ($ instanceof Lt) {
         loop$list1 = list1;
         loop$list2 = rest2;
-        loop$compare = compare4;
+        loop$compare = compare3;
         loop$acc = prepend(first22, acc);
       } else if ($ instanceof Gt) {
         loop$list1 = rest1;
         loop$list2 = list2;
-        loop$compare = compare4;
+        loop$compare = compare3;
         loop$acc = prepend(first1, acc);
       } else {
         loop$list1 = rest1;
         loop$list2 = list2;
-        loop$compare = compare4;
+        loop$compare = compare3;
         loop$acc = prepend(first1, acc);
       }
     }
@@ -720,7 +843,7 @@ function merge_descendings(loop$list1, loop$list2, loop$compare, loop$acc) {
 function merge_descending_pairs(loop$sequences, loop$compare, loop$acc) {
   while (true) {
     let sequences2 = loop$sequences;
-    let compare4 = loop$compare;
+    let compare3 = loop$compare;
     let acc = loop$acc;
     if (sequences2.hasLength(0)) {
       return do_reverse(acc, toList([]));
@@ -737,11 +860,11 @@ function merge_descending_pairs(loop$sequences, loop$compare, loop$acc) {
       let ascending = merge_descendings(
         descending1,
         descending2,
-        compare4,
+        compare3,
         toList([])
       );
       loop$sequences = rest$1;
-      loop$compare = compare4;
+      loop$compare = compare3;
       loop$acc = prepend(ascending, acc);
     }
   }
@@ -750,7 +873,7 @@ function merge_all(loop$sequences, loop$direction, loop$compare) {
   while (true) {
     let sequences2 = loop$sequences;
     let direction = loop$direction;
-    let compare4 = loop$compare;
+    let compare3 = loop$compare;
     if (sequences2.hasLength(0)) {
       return toList([]);
     } else if (sequences2.hasLength(1) && direction instanceof Ascending) {
@@ -760,19 +883,19 @@ function merge_all(loop$sequences, loop$direction, loop$compare) {
       let sequence = sequences2.head;
       return do_reverse(sequence, toList([]));
     } else if (direction instanceof Ascending) {
-      let sequences$1 = merge_ascending_pairs(sequences2, compare4, toList([]));
+      let sequences$1 = merge_ascending_pairs(sequences2, compare3, toList([]));
       loop$sequences = sequences$1;
       loop$direction = new Descending();
-      loop$compare = compare4;
+      loop$compare = compare3;
     } else {
-      let sequences$1 = merge_descending_pairs(sequences2, compare4, toList([]));
+      let sequences$1 = merge_descending_pairs(sequences2, compare3, toList([]));
       loop$sequences = sequences$1;
       loop$direction = new Ascending();
-      loop$compare = compare4;
+      loop$compare = compare3;
     }
   }
 }
-function sort(list2, compare4) {
+function sort(list2, compare3) {
   if (list2.hasLength(0)) {
     return toList([]);
   } else if (list2.hasLength(1)) {
@@ -783,7 +906,7 @@ function sort(list2, compare4) {
     let y = list2.tail.head;
     let rest$1 = list2.tail.tail;
     let direction = (() => {
-      let $ = compare4(x, y);
+      let $ = compare3(x, y);
       if ($ instanceof Lt) {
         return new Ascending();
       } else if ($ instanceof Eq) {
@@ -794,13 +917,13 @@ function sort(list2, compare4) {
     })();
     let sequences$1 = sequences(
       rest$1,
-      compare4,
+      compare3,
       toList([x]),
       direction,
       y,
       toList([])
     );
-    return merge_all(sequences$1, new Ascending(), compare4);
+    return merge_all(sequences$1, new Ascending(), compare3);
   }
 }
 function do_repeat(loop$a, loop$times, loop$acc) {
@@ -901,6 +1024,27 @@ function optional(decode4) {
     return decode_option(value4, decode4);
   };
 }
+function at_least_decode_tuple_error(size, data) {
+  let s = (() => {
+    if (size === 1) {
+      return "";
+    } else {
+      return "s";
+    }
+  })();
+  let error = (() => {
+    let _pipe = toList([
+      "Tuple of at least ",
+      to_string2(size),
+      " element",
+      s
+    ]);
+    let _pipe$1 = from_strings(_pipe);
+    let _pipe$2 = to_string3(_pipe$1);
+    return new DecodeError(_pipe$2, classify(data), toList([]));
+  })();
+  return new Error(toList([error]));
+}
 function any(decoders) {
   return (data) => {
     if (decoders.hasLength(0)) {
@@ -949,9 +1093,9 @@ function push_path(error, name) {
   return error.withFields({ path: prepend(name$2, error.path) });
 }
 function list(decoder_type) {
-  return (dynamic) => {
+  return (dynamic2) => {
     return try$(
-      shallow_list(dynamic),
+      shallow_list(dynamic2),
       (list2) => {
         let _pipe = list2;
         let _pipe$1 = try_map(_pipe, decoder_type);
@@ -995,37 +1139,60 @@ function field(name, inner_type) {
     );
   };
 }
-function decode5(constructor, t1, t2, t3, t4, t5) {
-  return (x) => {
-    let $ = t1(x);
-    let $1 = t2(x);
-    let $2 = t3(x);
-    let $3 = t4(x);
-    let $4 = t5(x);
-    if ($.isOk() && $1.isOk() && $2.isOk() && $3.isOk() && $4.isOk()) {
+function element(index3, inner_type) {
+  return (data) => {
+    return try$(
+      decode_tuple(data),
+      (tuple) => {
+        let size = length(tuple);
+        return try$(
+          (() => {
+            let $ = index3 >= 0;
+            if ($) {
+              let $1 = index3 < size;
+              if ($1) {
+                return tuple_get(tuple, index3);
+              } else {
+                return at_least_decode_tuple_error(index3 + 1, data);
+              }
+            } else {
+              let $1 = absolute_value(index3) <= size;
+              if ($1) {
+                return tuple_get(tuple, size + index3);
+              } else {
+                return at_least_decode_tuple_error(
+                  absolute_value(index3),
+                  data
+                );
+              }
+            }
+          })(),
+          (data2) => {
+            let _pipe = inner_type(data2);
+            return map_errors(
+              _pipe,
+              (_capture) => {
+                return push_path(_capture, index3);
+              }
+            );
+          }
+        );
+      }
+    );
+  };
+}
+function decode2(constructor, t1, t2) {
+  return (value4) => {
+    let $ = t1(value4);
+    let $1 = t2(value4);
+    if ($.isOk() && $1.isOk()) {
       let a = $[0];
       let b = $1[0];
-      let c = $2[0];
-      let d = $3[0];
-      let e = $4[0];
-      return new Ok(constructor(a, b, c, d, e));
+      return new Ok(constructor(a, b));
     } else {
       let a = $;
       let b = $1;
-      let c = $2;
-      let d = $3;
-      let e = $4;
-      return new Error(
-        concat(
-          toList([
-            all_errors(a),
-            all_errors(b),
-            all_errors(c),
-            all_errors(d),
-            all_errors(e)
-          ])
-        )
-      );
+      return new Error(concat(toList([all_errors(a), all_errors(b)])));
     }
   };
 }
@@ -1309,36 +1476,36 @@ function createNode(shift, key1, val1, key2hash, key2, val2) {
     addedLeaf
   );
 }
-function assoc(root2, shift, hash, key2, val, addedLeaf) {
-  switch (root2.type) {
+function assoc(root, shift, hash, key2, val, addedLeaf) {
+  switch (root.type) {
     case ARRAY_NODE:
-      return assocArray(root2, shift, hash, key2, val, addedLeaf);
+      return assocArray(root, shift, hash, key2, val, addedLeaf);
     case INDEX_NODE:
-      return assocIndex(root2, shift, hash, key2, val, addedLeaf);
+      return assocIndex(root, shift, hash, key2, val, addedLeaf);
     case COLLISION_NODE:
-      return assocCollision(root2, shift, hash, key2, val, addedLeaf);
+      return assocCollision(root, shift, hash, key2, val, addedLeaf);
   }
 }
-function assocArray(root2, shift, hash, key2, val, addedLeaf) {
+function assocArray(root, shift, hash, key2, val, addedLeaf) {
   const idx = mask(hash, shift);
-  const node = root2.array[idx];
+  const node = root.array[idx];
   if (node === void 0) {
     addedLeaf.val = true;
     return {
       type: ARRAY_NODE,
-      size: root2.size + 1,
-      array: cloneAndSet(root2.array, idx, { type: ENTRY, k: key2, v: val })
+      size: root.size + 1,
+      array: cloneAndSet(root.array, idx, { type: ENTRY, k: key2, v: val })
     };
   }
   if (node.type === ENTRY) {
     if (isEqual(key2, node.k)) {
       if (val === node.v) {
-        return root2;
+        return root;
       }
       return {
         type: ARRAY_NODE,
-        size: root2.size,
-        array: cloneAndSet(root2.array, idx, {
+        size: root.size,
+        array: cloneAndSet(root.array, idx, {
           type: ENTRY,
           k: key2,
           v: val
@@ -1348,9 +1515,9 @@ function assocArray(root2, shift, hash, key2, val, addedLeaf) {
     addedLeaf.val = true;
     return {
       type: ARRAY_NODE,
-      size: root2.size,
+      size: root.size,
       array: cloneAndSet(
-        root2.array,
+        root.array,
         idx,
         createNode(shift + SHIFT, node.k, node.v, hash, key2, val)
       )
@@ -1358,39 +1525,39 @@ function assocArray(root2, shift, hash, key2, val, addedLeaf) {
   }
   const n = assoc(node, shift + SHIFT, hash, key2, val, addedLeaf);
   if (n === node) {
-    return root2;
+    return root;
   }
   return {
     type: ARRAY_NODE,
-    size: root2.size,
-    array: cloneAndSet(root2.array, idx, n)
+    size: root.size,
+    array: cloneAndSet(root.array, idx, n)
   };
 }
-function assocIndex(root2, shift, hash, key2, val, addedLeaf) {
+function assocIndex(root, shift, hash, key2, val, addedLeaf) {
   const bit = bitpos(hash, shift);
-  const idx = index(root2.bitmap, bit);
-  if ((root2.bitmap & bit) !== 0) {
-    const node = root2.array[idx];
+  const idx = index(root.bitmap, bit);
+  if ((root.bitmap & bit) !== 0) {
+    const node = root.array[idx];
     if (node.type !== ENTRY) {
       const n = assoc(node, shift + SHIFT, hash, key2, val, addedLeaf);
       if (n === node) {
-        return root2;
+        return root;
       }
       return {
         type: INDEX_NODE,
-        bitmap: root2.bitmap,
-        array: cloneAndSet(root2.array, idx, n)
+        bitmap: root.bitmap,
+        array: cloneAndSet(root.array, idx, n)
       };
     }
     const nodeKey = node.k;
     if (isEqual(key2, nodeKey)) {
       if (val === node.v) {
-        return root2;
+        return root;
       }
       return {
         type: INDEX_NODE,
-        bitmap: root2.bitmap,
-        array: cloneAndSet(root2.array, idx, {
+        bitmap: root.bitmap,
+        array: cloneAndSet(root.array, idx, {
           type: ENTRY,
           k: key2,
           v: val
@@ -1400,24 +1567,24 @@ function assocIndex(root2, shift, hash, key2, val, addedLeaf) {
     addedLeaf.val = true;
     return {
       type: INDEX_NODE,
-      bitmap: root2.bitmap,
+      bitmap: root.bitmap,
       array: cloneAndSet(
-        root2.array,
+        root.array,
         idx,
         createNode(shift + SHIFT, nodeKey, node.v, hash, key2, val)
       )
     };
   } else {
-    const n = root2.array.length;
+    const n = root.array.length;
     if (n >= MAX_INDEX_NODE) {
       const nodes = new Array(32);
       const jdx = mask(hash, shift);
       nodes[jdx] = assocIndex(EMPTY, shift + SHIFT, hash, key2, val, addedLeaf);
       let j = 0;
-      let bitmap = root2.bitmap;
+      let bitmap = root.bitmap;
       for (let i = 0; i < 32; i++) {
         if ((bitmap & 1) !== 0) {
-          const node = root2.array[j++];
+          const node = root.array[j++];
           nodes[i] = node;
         }
         bitmap = bitmap >>> 1;
@@ -1428,7 +1595,7 @@ function assocIndex(root2, shift, hash, key2, val, addedLeaf) {
         array: nodes
       };
     } else {
-      const newArray = spliceIn(root2.array, idx, {
+      const newArray = spliceIn(root.array, idx, {
         type: ENTRY,
         k: key2,
         v: val
@@ -1436,39 +1603,39 @@ function assocIndex(root2, shift, hash, key2, val, addedLeaf) {
       addedLeaf.val = true;
       return {
         type: INDEX_NODE,
-        bitmap: root2.bitmap | bit,
+        bitmap: root.bitmap | bit,
         array: newArray
       };
     }
   }
 }
-function assocCollision(root2, shift, hash, key2, val, addedLeaf) {
-  if (hash === root2.hash) {
-    const idx = collisionIndexOf(root2, key2);
+function assocCollision(root, shift, hash, key2, val, addedLeaf) {
+  if (hash === root.hash) {
+    const idx = collisionIndexOf(root, key2);
     if (idx !== -1) {
-      const entry = root2.array[idx];
+      const entry = root.array[idx];
       if (entry.v === val) {
-        return root2;
+        return root;
       }
       return {
         type: COLLISION_NODE,
         hash,
-        array: cloneAndSet(root2.array, idx, { type: ENTRY, k: key2, v: val })
+        array: cloneAndSet(root.array, idx, { type: ENTRY, k: key2, v: val })
       };
     }
-    const size = root2.array.length;
+    const size = root.array.length;
     addedLeaf.val = true;
     return {
       type: COLLISION_NODE,
       hash,
-      array: cloneAndSet(root2.array, size, { type: ENTRY, k: key2, v: val })
+      array: cloneAndSet(root.array, size, { type: ENTRY, k: key2, v: val })
     };
   }
   return assoc(
     {
       type: INDEX_NODE,
-      bitmap: bitpos(root2.hash, shift),
-      array: [root2]
+      bitmap: bitpos(root.hash, shift),
+      array: [root]
     },
     shift,
     hash,
@@ -1477,28 +1644,28 @@ function assocCollision(root2, shift, hash, key2, val, addedLeaf) {
     addedLeaf
   );
 }
-function collisionIndexOf(root2, key2) {
-  const size = root2.array.length;
+function collisionIndexOf(root, key2) {
+  const size = root.array.length;
   for (let i = 0; i < size; i++) {
-    if (isEqual(key2, root2.array[i].k)) {
+    if (isEqual(key2, root.array[i].k)) {
       return i;
     }
   }
   return -1;
 }
-function find(root2, shift, hash, key2) {
-  switch (root2.type) {
+function find(root, shift, hash, key2) {
+  switch (root.type) {
     case ARRAY_NODE:
-      return findArray(root2, shift, hash, key2);
+      return findArray(root, shift, hash, key2);
     case INDEX_NODE:
-      return findIndex(root2, shift, hash, key2);
+      return findIndex(root, shift, hash, key2);
     case COLLISION_NODE:
-      return findCollision(root2, key2);
+      return findCollision(root, key2);
   }
 }
-function findArray(root2, shift, hash, key2) {
+function findArray(root, shift, hash, key2) {
   const idx = mask(hash, shift);
-  const node = root2.array[idx];
+  const node = root.array[idx];
   if (node === void 0) {
     return void 0;
   }
@@ -1510,13 +1677,13 @@ function findArray(root2, shift, hash, key2) {
   }
   return void 0;
 }
-function findIndex(root2, shift, hash, key2) {
+function findIndex(root, shift, hash, key2) {
   const bit = bitpos(hash, shift);
-  if ((root2.bitmap & bit) === 0) {
+  if ((root.bitmap & bit) === 0) {
     return void 0;
   }
-  const idx = index(root2.bitmap, bit);
-  const node = root2.array[idx];
+  const idx = index(root.bitmap, bit);
+  const node = root.array[idx];
   if (node.type !== ENTRY) {
     return find(node, shift + SHIFT, hash, key2);
   }
@@ -1525,44 +1692,44 @@ function findIndex(root2, shift, hash, key2) {
   }
   return void 0;
 }
-function findCollision(root2, key2) {
-  const idx = collisionIndexOf(root2, key2);
+function findCollision(root, key2) {
+  const idx = collisionIndexOf(root, key2);
   if (idx < 0) {
     return void 0;
   }
-  return root2.array[idx];
+  return root.array[idx];
 }
-function without(root2, shift, hash, key2) {
-  switch (root2.type) {
+function without(root, shift, hash, key2) {
+  switch (root.type) {
     case ARRAY_NODE:
-      return withoutArray(root2, shift, hash, key2);
+      return withoutArray(root, shift, hash, key2);
     case INDEX_NODE:
-      return withoutIndex(root2, shift, hash, key2);
+      return withoutIndex(root, shift, hash, key2);
     case COLLISION_NODE:
-      return withoutCollision(root2, key2);
+      return withoutCollision(root, key2);
   }
 }
-function withoutArray(root2, shift, hash, key2) {
+function withoutArray(root, shift, hash, key2) {
   const idx = mask(hash, shift);
-  const node = root2.array[idx];
+  const node = root.array[idx];
   if (node === void 0) {
-    return root2;
+    return root;
   }
   let n = void 0;
   if (node.type === ENTRY) {
     if (!isEqual(node.k, key2)) {
-      return root2;
+      return root;
     }
   } else {
     n = without(node, shift + SHIFT, hash, key2);
     if (n === node) {
-      return root2;
+      return root;
     }
   }
   if (n === void 0) {
-    if (root2.size <= MIN_ARRAY_NODE) {
-      const arr = root2.array;
-      const out = new Array(root2.size - 1);
+    if (root.size <= MIN_ARRAY_NODE) {
+      const arr = root.array;
+      const out = new Array(root.size - 1);
       let i = 0;
       let j = 0;
       let bitmap = 0;
@@ -1593,75 +1760,75 @@ function withoutArray(root2, shift, hash, key2) {
     }
     return {
       type: ARRAY_NODE,
-      size: root2.size - 1,
-      array: cloneAndSet(root2.array, idx, n)
+      size: root.size - 1,
+      array: cloneAndSet(root.array, idx, n)
     };
   }
   return {
     type: ARRAY_NODE,
-    size: root2.size,
-    array: cloneAndSet(root2.array, idx, n)
+    size: root.size,
+    array: cloneAndSet(root.array, idx, n)
   };
 }
-function withoutIndex(root2, shift, hash, key2) {
+function withoutIndex(root, shift, hash, key2) {
   const bit = bitpos(hash, shift);
-  if ((root2.bitmap & bit) === 0) {
-    return root2;
+  if ((root.bitmap & bit) === 0) {
+    return root;
   }
-  const idx = index(root2.bitmap, bit);
-  const node = root2.array[idx];
+  const idx = index(root.bitmap, bit);
+  const node = root.array[idx];
   if (node.type !== ENTRY) {
     const n = without(node, shift + SHIFT, hash, key2);
     if (n === node) {
-      return root2;
+      return root;
     }
     if (n !== void 0) {
       return {
         type: INDEX_NODE,
-        bitmap: root2.bitmap,
-        array: cloneAndSet(root2.array, idx, n)
+        bitmap: root.bitmap,
+        array: cloneAndSet(root.array, idx, n)
       };
     }
-    if (root2.bitmap === bit) {
+    if (root.bitmap === bit) {
       return void 0;
     }
     return {
       type: INDEX_NODE,
-      bitmap: root2.bitmap ^ bit,
-      array: spliceOut(root2.array, idx)
+      bitmap: root.bitmap ^ bit,
+      array: spliceOut(root.array, idx)
     };
   }
   if (isEqual(key2, node.k)) {
-    if (root2.bitmap === bit) {
+    if (root.bitmap === bit) {
       return void 0;
     }
     return {
       type: INDEX_NODE,
-      bitmap: root2.bitmap ^ bit,
-      array: spliceOut(root2.array, idx)
+      bitmap: root.bitmap ^ bit,
+      array: spliceOut(root.array, idx)
     };
   }
-  return root2;
+  return root;
 }
-function withoutCollision(root2, key2) {
-  const idx = collisionIndexOf(root2, key2);
+function withoutCollision(root, key2) {
+  const idx = collisionIndexOf(root, key2);
   if (idx < 0) {
-    return root2;
+    return root;
   }
-  if (root2.array.length === 1) {
+  if (root.array.length === 1) {
     return void 0;
   }
   return {
     type: COLLISION_NODE,
-    hash: root2.hash,
-    array: spliceOut(root2.array, idx)
+    hash: root.hash,
+    array: spliceOut(root.array, idx)
   };
 }
-function forEach(root2, fn) {
-  if (root2 === void 0) {
+function forEach(root, fn) {
+  if (root === void 0) {
     return;
   }
-  const items = root2.array;
+  const items = root.array;
   const size = items.length;
   for (let i = 0; i < size; i++) {
     const item = items[i];
@@ -1709,8 +1876,8 @@ var Dict = class _Dict {
    * @param {undefined | Node<K,V>} root
    * @param {number} size
    */
-  constructor(root2, size) {
-    this.root = root2;
+  constructor(root, size) {
+    this.root = root;
     this.size = size;
   }
   /**
@@ -1736,8 +1903,8 @@ var Dict = class _Dict {
    */
   set(key2, val) {
     const addedLeaf = { val: false };
-    const root2 = this.root === void 0 ? EMPTY : this.root;
-    const newRoot = assoc(root2, 0, getHash(key2), key2, val, addedLeaf);
+    const root = this.root === void 0 ? EMPTY : this.root;
+    const newRoot = assoc(root, 0, getHash(key2), key2, val, addedLeaf);
     if (newRoot === this.root) {
       return this;
     }
@@ -1827,6 +1994,29 @@ function parse_int(value4) {
 function to_string(term) {
   return term.toString();
 }
+function string_length(string3) {
+  if (string3 === "") {
+    return 0;
+  }
+  const iterator = graphemes_iterator(string3);
+  if (iterator) {
+    let i = 0;
+    for (const _ of iterator) {
+      i++;
+    }
+    return i;
+  } else {
+    return string3.match(/./gsu).length;
+  }
+}
+function graphemes(string3) {
+  const iterator = graphemes_iterator(string3);
+  if (iterator) {
+    return List.fromArray(Array.from(iterator).map((item) => item.segment));
+  } else {
+    return List.fromArray(string3.match(/./gsu));
+  }
+}
 function graphemes_iterator(string3) {
   if (Intl && Intl.Segmenter) {
     return new Intl.Segmenter().segment(string3)[Symbol.iterator]();
@@ -1849,8 +2039,15 @@ function pop_grapheme(string3) {
 function lowercase(string3) {
   return string3.toLowerCase();
 }
-function less_than(a, b) {
-  return a < b;
+function join(xs, separator) {
+  const iterator = xs[Symbol.iterator]();
+  let result = iterator.next().value || "";
+  let current = iterator.next();
+  while (!current.done) {
+    result = result + separator + current.value;
+    current = iterator.next();
+  }
+  return result;
 }
 function concat2(xs) {
   let result = "";
@@ -1858,6 +2055,9 @@ function concat2(xs) {
     result = result + x;
   }
   return result;
+}
+function length(data) {
+  return data.length;
 }
 function starts_with(haystack, needle) {
   return haystack.startsWith(needle);
@@ -1893,6 +2093,15 @@ function trim_left(string3) {
 function trim_right(string3) {
   return string3.replace(right_trim_regex, "");
 }
+function print_debug(string3) {
+  if (typeof process === "object" && process.stderr?.write) {
+    process.stderr.write(string3 + "\n");
+  } else if (typeof Deno === "object") {
+    Deno.stderr.writeSync(new TextEncoder().encode(string3 + "\n"));
+  } else {
+    console.log(string3);
+  }
+}
 function compile_regex(pattern, options) {
   try {
     let flags = "gu";
@@ -1923,12 +2132,21 @@ function regex_scan(regex, string3) {
   });
   return List.fromArray(matches);
 }
+function new_map() {
+  return Dict.new();
+}
+function map_to_list(map6) {
+  return List.fromArray(map6.entries());
+}
 function map_get(map6, key2) {
   const value4 = map6.get(key2, NOT_FOUND);
   if (value4 === NOT_FOUND) {
     return new Error(Nil);
   }
   return new Ok(value4);
+}
+function map_insert(key2, value4, map6) {
+  return map6.set(key2, value4);
 }
 function classify_dynamic(data) {
   if (typeof data === "string") {
@@ -1971,6 +2189,12 @@ function decode_string(data) {
 }
 function decode_int(data) {
   return Number.isInteger(data) ? new Ok(data) : decoder_error("Int", data);
+}
+function decode_tuple(data) {
+  return Array.isArray(data) ? new Ok(data) : decoder_error("Tuple", data);
+}
+function tuple_get(data, index3) {
+  return index3 >= 0 && data.length > index3 ? new Ok(data[index3]) : new Error(Nil);
 }
 function decode_list(data) {
   if (Array.isArray(data)) {
@@ -2122,22 +2346,192 @@ function inspectUtfCodepoint(codepoint2) {
   return `//utfcodepoint(${String.fromCodePoint(codepoint2.value)})`;
 }
 
-// build/dev/javascript/gleam_stdlib/gleam/string.mjs
-function lowercase2(string3) {
-  return lowercase(string3);
+// build/dev/javascript/gleam_stdlib/gleam/dict.mjs
+function new$() {
+  return new_map();
 }
-function compare3(a, b) {
-  let $ = a === b;
-  if ($) {
-    return new Eq();
-  } else {
-    let $1 = less_than(a, b);
-    if ($1) {
-      return new Lt();
+function insert(dict, key2, value4) {
+  return map_insert(key2, value4, dict);
+}
+function reverse_and_concat(loop$remaining, loop$accumulator) {
+  while (true) {
+    let remaining = loop$remaining;
+    let accumulator = loop$accumulator;
+    if (remaining.hasLength(0)) {
+      return accumulator;
     } else {
-      return new Gt();
+      let item = remaining.head;
+      let rest = remaining.tail;
+      loop$remaining = rest;
+      loop$accumulator = prepend(item, accumulator);
     }
   }
+}
+function do_keys_acc(loop$list, loop$acc) {
+  while (true) {
+    let list2 = loop$list;
+    let acc = loop$acc;
+    if (list2.hasLength(0)) {
+      return reverse_and_concat(acc, toList([]));
+    } else {
+      let x = list2.head;
+      let xs = list2.tail;
+      loop$list = xs;
+      loop$acc = prepend(x[0], acc);
+    }
+  }
+}
+function do_keys(dict) {
+  let list_of_pairs = map_to_list(dict);
+  return do_keys_acc(list_of_pairs, toList([]));
+}
+function keys(dict) {
+  return do_keys(dict);
+}
+
+// build/dev/javascript/gleam_stdlib/gleam/iterator.mjs
+var Stop = class extends CustomType {
+};
+var Continue2 = class extends CustomType {
+  constructor(x0, x1) {
+    super();
+    this[0] = x0;
+    this[1] = x1;
+  }
+};
+var Iterator = class extends CustomType {
+  constructor(continuation) {
+    super();
+    this.continuation = continuation;
+  }
+};
+var Next = class extends CustomType {
+  constructor(element3, accumulator) {
+    super();
+    this.element = element3;
+    this.accumulator = accumulator;
+  }
+};
+function stop() {
+  return new Stop();
+}
+function do_unfold(initial, f) {
+  return () => {
+    let $ = f(initial);
+    if ($ instanceof Next) {
+      let x = $.element;
+      let acc = $.accumulator;
+      return new Continue2(x, do_unfold(acc, f));
+    } else {
+      return new Stop();
+    }
+  };
+}
+function unfold(initial, f) {
+  let _pipe = initial;
+  let _pipe$1 = do_unfold(_pipe, f);
+  return new Iterator(_pipe$1);
+}
+function repeatedly(f) {
+  return unfold(void 0, (_) => {
+    return new Next(f(), void 0);
+  });
+}
+function repeat2(x) {
+  return repeatedly(() => {
+    return x;
+  });
+}
+function do_fold(loop$continuation, loop$f, loop$accumulator) {
+  while (true) {
+    let continuation = loop$continuation;
+    let f = loop$f;
+    let accumulator = loop$accumulator;
+    let $ = continuation();
+    if ($ instanceof Continue2) {
+      let elem = $[0];
+      let next = $[1];
+      loop$continuation = next;
+      loop$f = f;
+      loop$accumulator = f(accumulator, elem);
+    } else {
+      return accumulator;
+    }
+  }
+}
+function fold2(iterator, initial, f) {
+  let _pipe = iterator.continuation;
+  return do_fold(_pipe, f, initial);
+}
+function to_list(iterator) {
+  let _pipe = iterator;
+  let _pipe$1 = fold2(
+    _pipe,
+    toList([]),
+    (acc, e) => {
+      return prepend(e, acc);
+    }
+  );
+  return reverse(_pipe$1);
+}
+function do_take2(continuation, desired) {
+  return () => {
+    let $ = desired > 0;
+    if (!$) {
+      return new Stop();
+    } else {
+      let $1 = continuation();
+      if ($1 instanceof Stop) {
+        return new Stop();
+      } else {
+        let e = $1[0];
+        let next = $1[1];
+        return new Continue2(e, do_take2(next, desired - 1));
+      }
+    }
+  };
+}
+function take2(iterator, desired) {
+  let _pipe = iterator.continuation;
+  let _pipe$1 = do_take2(_pipe, desired);
+  return new Iterator(_pipe$1);
+}
+function do_append2(first3, second2) {
+  let $ = first3();
+  if ($ instanceof Continue2) {
+    let e = $[0];
+    let first$1 = $[1];
+    return new Continue2(e, () => {
+      return do_append2(first$1, second2);
+    });
+  } else {
+    return second2();
+  }
+}
+function append2(first3, second2) {
+  let _pipe = () => {
+    return do_append2(first3.continuation, second2.continuation);
+  };
+  return new Iterator(_pipe);
+}
+function once(f) {
+  let _pipe = () => {
+    return new Continue2(f(), stop);
+  };
+  return new Iterator(_pipe);
+}
+function single(elem) {
+  return once(() => {
+    return elem;
+  });
+}
+
+// build/dev/javascript/gleam_stdlib/gleam/string.mjs
+function length2(string3) {
+  return string_length(string3);
+}
+function lowercase2(string3) {
+  return lowercase(string3);
 }
 function starts_with2(string3, prefix) {
   return starts_with(string3, prefix);
@@ -2147,11 +2541,67 @@ function concat3(strings) {
   let _pipe$1 = from_strings(_pipe);
   return to_string3(_pipe$1);
 }
+function join2(strings, separator) {
+  return join(strings, separator);
+}
 function trim2(string3) {
   return trim(string3);
 }
 function pop_grapheme2(string3) {
   return pop_grapheme(string3);
+}
+function do_slice(string3, idx, len) {
+  let _pipe = string3;
+  let _pipe$1 = graphemes(_pipe);
+  let _pipe$2 = drop(_pipe$1, idx);
+  let _pipe$3 = take(_pipe$2, len);
+  return concat3(_pipe$3);
+}
+function slice(string3, idx, len) {
+  let $ = len < 0;
+  if ($) {
+    return "";
+  } else {
+    let $1 = idx < 0;
+    if ($1) {
+      let translated_idx = length2(string3) + idx;
+      let $2 = translated_idx < 0;
+      if ($2) {
+        return "";
+      } else {
+        return do_slice(string3, translated_idx, len);
+      }
+    } else {
+      return do_slice(string3, idx, len);
+    }
+  }
+}
+function drop_left(string3, num_graphemes) {
+  let $ = num_graphemes < 0;
+  if ($) {
+    return string3;
+  } else {
+    return slice(string3, num_graphemes, length2(string3) - num_graphemes);
+  }
+}
+function padding(size, pad_string) {
+  let pad_length = length2(pad_string);
+  let num_pads = divideInt(size, pad_length);
+  let extra = remainderInt(size, pad_length);
+  let _pipe = repeat2(pad_string);
+  let _pipe$1 = take2(_pipe, num_pads);
+  return append2(
+    _pipe$1,
+    single(slice(pad_string, 0, extra))
+  );
+}
+function pad_left(string3, desired_length, pad_string) {
+  let current_length = length2(string3);
+  let to_pad_length = desired_length - current_length;
+  let _pipe = padding(to_pad_length, pad_string);
+  let _pipe$1 = append2(_pipe, single(string3));
+  let _pipe$2 = to_list(_pipe$1);
+  return concat3(_pipe$2);
 }
 function inspect2(term) {
   let _pipe = inspect(term);
@@ -2276,8 +2726,16 @@ function do_decode(json, decoder) {
     }
   );
 }
-function decode2(json, decoder) {
+function decode3(json, decoder) {
   return do_decode(json, decoder);
+}
+
+// build/dev/javascript/gleam_stdlib/gleam/io.mjs
+function debug(term) {
+  let _pipe = term;
+  let _pipe$1 = inspect2(_pipe);
+  print_debug(_pipe$1);
+  return term;
 }
 
 // build/dev/javascript/gleam_stdlib/gleam/bool.mjs
@@ -2296,10 +2754,19 @@ var Effect = class extends CustomType {
     this.all = all;
   }
 };
+function custom(run) {
+  return new Effect(
+    toList([
+      (actions) => {
+        return run(actions.dispatch, actions.emit, actions.select);
+      }
+    ])
+  );
+}
 function from2(effect) {
-  return new Effect(toList([(dispatch, _) => {
+  return custom((dispatch, _, _1) => {
     return effect(dispatch);
-  }]));
+  });
 }
 function none() {
   return new Effect(toList([]));
@@ -2313,15 +2780,28 @@ var Text = class extends CustomType {
   }
 };
 var Element = class extends CustomType {
-  constructor(key2, namespace, tag, attrs, children, self_closing, void$) {
+  constructor(key2, namespace, tag, attrs2, children2, self_closing, void$) {
     super();
     this.key = key2;
     this.namespace = namespace;
     this.tag = tag;
-    this.attrs = attrs;
-    this.children = children;
+    this.attrs = attrs2;
+    this.children = children2;
     this.self_closing = self_closing;
     this.void = void$;
+  }
+};
+var Map2 = class extends CustomType {
+  constructor(subtree) {
+    super();
+    this.subtree = subtree;
+  }
+};
+var Fragment = class extends CustomType {
+  constructor(elements2, key2) {
+    super();
+    this.elements = elements2;
+    this.key = key2;
   }
 };
 var Attribute = class extends CustomType {
@@ -2339,6 +2819,65 @@ var Event = class extends CustomType {
     this[1] = x1;
   }
 };
+function attribute_to_event_handler(attribute2) {
+  if (attribute2 instanceof Attribute) {
+    return new Error(void 0);
+  } else {
+    let name = attribute2[0];
+    let handler = attribute2[1];
+    let name$1 = drop_left(name, 2);
+    return new Ok([name$1, handler]);
+  }
+}
+function do_element_list_handlers(elements2, handlers2, key2) {
+  return index_fold(
+    elements2,
+    handlers2,
+    (handlers3, element3, index3) => {
+      let key$1 = key2 + "-" + to_string2(index3);
+      return do_handlers(element3, handlers3, key$1);
+    }
+  );
+}
+function do_handlers(loop$element, loop$handlers, loop$key) {
+  while (true) {
+    let element3 = loop$element;
+    let handlers2 = loop$handlers;
+    let key2 = loop$key;
+    if (element3 instanceof Text) {
+      return handlers2;
+    } else if (element3 instanceof Map2) {
+      let subtree = element3.subtree;
+      loop$element = subtree();
+      loop$handlers = handlers2;
+      loop$key = key2;
+    } else if (element3 instanceof Element) {
+      let attrs2 = element3.attrs;
+      let children2 = element3.children;
+      let handlers$1 = fold(
+        attrs2,
+        handlers2,
+        (handlers3, attr) => {
+          let $ = attribute_to_event_handler(attr);
+          if ($.isOk()) {
+            let name = $[0][0];
+            let handler = $[0][1];
+            return insert(handlers3, key2 + "-" + name, handler);
+          } else {
+            return handlers3;
+          }
+        }
+      );
+      return do_element_list_handlers(children2, handlers$1, key2);
+    } else {
+      let elements2 = element3.elements;
+      return do_element_list_handlers(elements2, handlers2, key2);
+    }
+  }
+}
+function handlers(element3) {
+  return do_handlers(element3, new$(), "0");
+}
 
 // build/dev/javascript/lustre/lustre/attribute.mjs
 function attribute(name, value4) {
@@ -2359,46 +2898,164 @@ function value(val) {
 function placeholder(text3) {
   return attribute("placeholder", text3);
 }
+function src(uri) {
+  return attribute("src", uri);
+}
+function alt(text3) {
+  return attribute("alt", text3);
+}
 
 // build/dev/javascript/lustre/lustre/element.mjs
-function element(tag, attrs, children) {
+function element2(tag, attrs2, children2) {
   if (tag === "area") {
-    return new Element("", "", tag, attrs, toList([]), false, true);
+    return new Element("", "", tag, attrs2, toList([]), false, true);
   } else if (tag === "base") {
-    return new Element("", "", tag, attrs, toList([]), false, true);
+    return new Element("", "", tag, attrs2, toList([]), false, true);
   } else if (tag === "br") {
-    return new Element("", "", tag, attrs, toList([]), false, true);
+    return new Element("", "", tag, attrs2, toList([]), false, true);
   } else if (tag === "col") {
-    return new Element("", "", tag, attrs, toList([]), false, true);
+    return new Element("", "", tag, attrs2, toList([]), false, true);
   } else if (tag === "embed") {
-    return new Element("", "", tag, attrs, toList([]), false, true);
+    return new Element("", "", tag, attrs2, toList([]), false, true);
   } else if (tag === "hr") {
-    return new Element("", "", tag, attrs, toList([]), false, true);
+    return new Element("", "", tag, attrs2, toList([]), false, true);
   } else if (tag === "img") {
-    return new Element("", "", tag, attrs, toList([]), false, true);
+    return new Element("", "", tag, attrs2, toList([]), false, true);
   } else if (tag === "input") {
-    return new Element("", "", tag, attrs, toList([]), false, true);
+    return new Element("", "", tag, attrs2, toList([]), false, true);
   } else if (tag === "link") {
-    return new Element("", "", tag, attrs, toList([]), false, true);
+    return new Element("", "", tag, attrs2, toList([]), false, true);
   } else if (tag === "meta") {
-    return new Element("", "", tag, attrs, toList([]), false, true);
+    return new Element("", "", tag, attrs2, toList([]), false, true);
   } else if (tag === "param") {
-    return new Element("", "", tag, attrs, toList([]), false, true);
+    return new Element("", "", tag, attrs2, toList([]), false, true);
   } else if (tag === "source") {
-    return new Element("", "", tag, attrs, toList([]), false, true);
+    return new Element("", "", tag, attrs2, toList([]), false, true);
   } else if (tag === "track") {
-    return new Element("", "", tag, attrs, toList([]), false, true);
+    return new Element("", "", tag, attrs2, toList([]), false, true);
   } else if (tag === "wbr") {
-    return new Element("", "", tag, attrs, toList([]), false, true);
+    return new Element("", "", tag, attrs2, toList([]), false, true);
   } else {
-    return new Element("", "", tag, attrs, children, false, false);
+    return new Element("", "", tag, attrs2, children2, false, false);
   }
+}
+function do_keyed(el2, key2) {
+  if (el2 instanceof Element) {
+    let namespace = el2.namespace;
+    let tag = el2.tag;
+    let attrs2 = el2.attrs;
+    let children2 = el2.children;
+    let self_closing = el2.self_closing;
+    let void$ = el2.void;
+    return new Element(
+      key2,
+      namespace,
+      tag,
+      attrs2,
+      children2,
+      self_closing,
+      void$
+    );
+  } else if (el2 instanceof Map2) {
+    let subtree = el2.subtree;
+    return new Map2(() => {
+      return do_keyed(subtree(), key2);
+    });
+  } else if (el2 instanceof Fragment) {
+    let elements2 = el2.elements;
+    let _pipe = elements2;
+    let _pipe$1 = index_map(
+      _pipe,
+      (element3, idx) => {
+        if (element3 instanceof Element) {
+          let el_key = element3.key;
+          let new_key = (() => {
+            if (el_key === "") {
+              return key2 + "-" + to_string2(idx);
+            } else {
+              return key2 + "-" + el_key;
+            }
+          })();
+          return do_keyed(element3, new_key);
+        } else {
+          return do_keyed(element3, key2);
+        }
+      }
+    );
+    return new Fragment(_pipe$1, key2);
+  } else {
+    return el2;
+  }
+}
+function keyed(el2, children2) {
+  return el2(
+    map2(
+      children2,
+      (_use0) => {
+        let key2 = _use0[0];
+        let child = _use0[1];
+        return do_keyed(child, key2);
+      }
+    )
+  );
 }
 function text(content) {
   return new Text(content);
 }
 
+// build/dev/javascript/gleam_stdlib/gleam/set.mjs
+var Set2 = class extends CustomType {
+  constructor(dict) {
+    super();
+    this.dict = dict;
+  }
+};
+function new$3() {
+  return new Set2(new$());
+}
+
+// build/dev/javascript/lustre/lustre/internals/patch.mjs
+var Diff = class extends CustomType {
+  constructor(x0) {
+    super();
+    this[0] = x0;
+  }
+};
+var Emit = class extends CustomType {
+  constructor(x0, x1) {
+    super();
+    this[0] = x0;
+    this[1] = x1;
+  }
+};
+var Init = class extends CustomType {
+  constructor(x0, x1) {
+    super();
+    this[0] = x0;
+    this[1] = x1;
+  }
+};
+function is_empty_element_diff(diff2) {
+  return isEqual(diff2.created, new$()) && isEqual(
+    diff2.removed,
+    new$3()
+  ) && isEqual(diff2.updated, new$());
+}
+
 // build/dev/javascript/lustre/lustre/internals/runtime.mjs
+var Attrs = class extends CustomType {
+  constructor(x0) {
+    super();
+    this[0] = x0;
+  }
+};
+var Batch = class extends CustomType {
+  constructor(x0, x1) {
+    super();
+    this[0] = x0;
+    this[1] = x1;
+  }
+};
 var Debug = class extends CustomType {
   constructor(x0) {
     super();
@@ -2411,7 +3068,34 @@ var Dispatch = class extends CustomType {
     this[0] = x0;
   }
 };
+var Emit2 = class extends CustomType {
+  constructor(x0, x1) {
+    super();
+    this[0] = x0;
+    this[1] = x1;
+  }
+};
+var Event2 = class extends CustomType {
+  constructor(x0, x1) {
+    super();
+    this[0] = x0;
+    this[1] = x1;
+  }
+};
 var Shutdown = class extends CustomType {
+};
+var Subscribe = class extends CustomType {
+  constructor(x0, x1) {
+    super();
+    this[0] = x0;
+    this[1] = x1;
+  }
+};
+var Unsubscribe = class extends CustomType {
+  constructor(x0) {
+    super();
+    this[0] = x0;
+  }
 };
 var ForceModel = class extends CustomType {
   constructor(x0) {
@@ -2421,12 +3105,12 @@ var ForceModel = class extends CustomType {
 };
 
 // build/dev/javascript/lustre/vdom.ffi.mjs
-function morph(prev, next, dispatch, isComponent = false) {
+function morph(prev, next, dispatch) {
   let out;
   let stack = [{ prev, next, parent: prev.parentNode }];
   while (stack.length) {
     let { prev: prev2, next: next2, parent } = stack.pop();
-    if (next2.subtree !== void 0)
+    while (next2.subtree !== void 0)
       next2 = next2.subtree();
     if (next2.content !== void 0) {
       if (!prev2) {
@@ -2447,8 +3131,7 @@ function morph(prev, next, dispatch, isComponent = false) {
         prev: prev2,
         next: next2,
         dispatch,
-        stack,
-        isComponent
+        stack
       });
       if (!prev2) {
         parent.appendChild(created);
@@ -2457,12 +3140,10 @@ function morph(prev, next, dispatch, isComponent = false) {
       }
       out ??= created;
     } else if (next2.elements !== void 0) {
-      iterateElement(next2, (fragmentElement) => {
+      for (const fragmentElement of forceChild(next2)) {
         stack.unshift({ prev: prev2, next: fragmentElement, parent });
         prev2 = prev2?.nextSibling;
-      });
-    } else if (next2.subtree !== void 0) {
-      stack.push({ prev: prev2, next: next2, parent });
+      }
     }
   }
   return out;
@@ -2484,6 +3165,11 @@ function createElementNode({ prev, next, dispatch, stack }) {
   let className = null;
   let style = null;
   let innerHTML = null;
+  if (canMorph && next.tag === "textarea") {
+    const innertText = next.children[Symbol.iterator]().next().value?.content;
+    if (innertText !== void 0)
+      el2.value = innertText;
+  }
   for (const attr of next.attrs) {
     const name = attr[0];
     const value4 = attr[1];
@@ -2494,7 +3180,7 @@ function createElementNode({ prev, next, dispatch, stack }) {
         prevAttributes.delete(name);
     } else if (name.startsWith("on")) {
       const eventName = name.slice(2);
-      const callback = dispatch(value4);
+      const callback = dispatch(value4, eventName === "input");
       if (!handlersForEl.has(eventName)) {
         el2.addEventListener(eventName, lustreGenericEventHandler);
       }
@@ -2553,31 +3239,29 @@ function createElementNode({ prev, next, dispatch, stack }) {
   let seenKeys = null;
   let keyedChildren = null;
   let incomingKeyedChildren = null;
-  let firstChild = next.children[Symbol.iterator]().next().value;
+  let firstChild = children(next).next().value;
   if (canMorph && firstChild !== void 0 && // Explicit checks are more verbose but truthy checks force a bunch of comparisons
   // we don't care about: it's never gonna be a number etc.
   firstChild.key !== void 0 && firstChild.key !== "") {
     seenKeys = /* @__PURE__ */ new Set();
     keyedChildren = getKeyedChildren(prev);
     incomingKeyedChildren = getKeyedChildren(next);
-  }
-  for (const child of next.children) {
-    iterateElement(child, (currElement) => {
-      if (currElement.key !== void 0 && seenKeys !== null) {
-        prevChild = diffKeyedChild(
-          prevChild,
-          currElement,
-          el2,
-          stack,
-          incomingKeyedChildren,
-          keyedChildren,
-          seenKeys
-        );
-      } else {
-        stack.unshift({ prev: prevChild, next: currElement, parent: el2 });
-        prevChild = prevChild?.nextSibling;
-      }
-    });
+    for (const child of children(next)) {
+      prevChild = diffKeyedChild(
+        prevChild,
+        child,
+        el2,
+        stack,
+        incomingKeyedChildren,
+        keyedChildren,
+        seenKeys
+      );
+    }
+  } else {
+    for (const child of children(next)) {
+      stack.unshift({ prev: prevChild, next: child, parent: el2 });
+      prevChild = prevChild?.nextSibling;
+    }
   }
   while (prevChild) {
     const next2 = prevChild.nextSibling;
@@ -2587,25 +3271,25 @@ function createElementNode({ prev, next, dispatch, stack }) {
   return el2;
 }
 var registeredHandlers = /* @__PURE__ */ new WeakMap();
-function lustreGenericEventHandler(event2) {
-  const target2 = event2.currentTarget;
+function lustreGenericEventHandler(event3) {
+  const target2 = event3.currentTarget;
   if (!registeredHandlers.has(target2)) {
-    target2.removeEventListener(event2.type, lustreGenericEventHandler);
+    target2.removeEventListener(event3.type, lustreGenericEventHandler);
     return;
   }
   const handlersForEventTarget = registeredHandlers.get(target2);
-  if (!handlersForEventTarget.has(event2.type)) {
-    target2.removeEventListener(event2.type, lustreGenericEventHandler);
+  if (!handlersForEventTarget.has(event3.type)) {
+    target2.removeEventListener(event3.type, lustreGenericEventHandler);
     return;
   }
-  handlersForEventTarget.get(event2.type)(event2);
+  handlersForEventTarget.get(event3.type)(event3);
 }
-function lustreServerEventHandler(event2) {
-  const el2 = event2.currentTarget;
-  const tag = el2.getAttribute(`data-lustre-on-${event2.type}`);
+function lustreServerEventHandler(event3) {
+  const el2 = event3.currentTarget;
+  const tag = el2.getAttribute(`data-lustre-on-${event3.type}`);
   const data = JSON.parse(el2.getAttribute("data-lustre-data") || "{}");
   const include = JSON.parse(el2.getAttribute("data-lustre-include") || "[]");
-  switch (event2.type) {
+  switch (event3.type) {
     case "input":
     case "change":
       include.push("target.value");
@@ -2616,7 +3300,7 @@ function lustreServerEventHandler(event2) {
     data: include.reduce(
       (data2, property) => {
         const path = property.split(".");
-        for (let i = 0, o = data2, e = event2; i < path.length; i++) {
+        for (let i = 0, o = data2, e = event3; i < path.length; i++) {
           if (i === path.length - 1) {
             o[path[i]] = e[path[i]];
           } else {
@@ -2634,12 +3318,10 @@ function lustreServerEventHandler(event2) {
 function getKeyedChildren(el2) {
   const keyedChildren = /* @__PURE__ */ new Map();
   if (el2) {
-    for (const child of el2.children) {
-      iterateElement(child, (currElement) => {
-        const key2 = currElement?.key || currElement?.getAttribute?.("data-lustre-key");
-        if (key2)
-          keyedChildren.set(key2, currElement);
-      });
+    for (const child of children(el2)) {
+      const key2 = child?.key || child?.getAttribute?.("data-lustre-key");
+      if (key2)
+        keyedChildren.set(key2, child);
     }
   }
   return keyedChildren;
@@ -2651,10 +3333,10 @@ function diffKeyedChild(prevChild, child, el2, stack, incomingKeyedChildren, key
     prevChild = nextChild;
   }
   if (keyedChildren.size === 0) {
-    iterateElement(child, (currChild) => {
+    for (const currChild of children(child)) {
       stack.unshift({ prev: prevChild, next: currChild, parent: el2 });
       prevChild = prevChild?.nextSibling;
-    });
+    }
     return prevChild;
   }
   if (seenKeys.has(child.key)) {
@@ -2683,145 +3365,289 @@ function diffKeyedChild(prevChild, child, el2, stack, incomingKeyedChildren, key
   stack.unshift({ prev: keyedChild, next: child, parent: el2 });
   return prevChild;
 }
-function iterateElement(element2, processElement) {
-  if (element2.elements !== void 0) {
-    for (const currElement of element2.elements) {
-      processElement(currElement);
+function* children(element3) {
+  for (const child of element3.children) {
+    yield* forceChild(child);
+  }
+}
+function* forceChild(element3) {
+  if (element3.elements !== void 0) {
+    for (const inner of element3.elements) {
+      yield* forceChild(inner);
     }
+  } else if (element3.subtree !== void 0) {
+    yield* forceChild(element3.subtree());
   } else {
-    processElement(element2);
+    yield element3;
   }
 }
 
-// build/dev/javascript/lustre/client-runtime.ffi.mjs
-var LustreClientApplication2 = class _LustreClientApplication {
-  #root = null;
-  #queue = [];
-  #effects = [];
-  #didUpdate = false;
-  #isComponent = false;
-  #model = null;
-  #update = null;
-  #view = null;
-  static start(flags, selector, init3, update2, view2) {
+// build/dev/javascript/lustre/lustre.ffi.mjs
+var LustreClientApplication = class _LustreClientApplication {
+  /**
+   * @template Flags
+   *
+   * @param {object} app
+   * @param {(flags: Flags) => [Model, Lustre.Effect<Msg>]} app.init
+   * @param {(msg: Msg, model: Model) => [Model, Lustre.Effect<Msg>]} app.update
+   * @param {(model: Model) => Lustre.Element<Msg>} app.view
+   * @param {string | HTMLElement} selector
+   * @param {Flags} flags
+   *
+   * @returns {Gleam.Ok<(action: Lustre.Action<Lustre.Client, Msg>>) => void>}
+   */
+  static start({ init: init3, update: update2, view: view2 }, selector, flags) {
     if (!is_browser())
       return new Error(new NotABrowser());
-    const root2 = selector instanceof HTMLElement ? selector : document.querySelector(selector);
-    if (!root2)
+    const root = selector instanceof HTMLElement ? selector : document.querySelector(selector);
+    if (!root)
       return new Error(new ElementNotFound(selector));
-    const app = new _LustreClientApplication(init3(flags), update2, view2, root2);
-    return new Ok((msg) => app.send(msg));
+    const app = new _LustreClientApplication(root, init3(flags), update2, view2);
+    return new Ok((action) => app.send(action));
   }
-  constructor([model, effects], update2, view2, root2 = document.body, isComponent = false) {
+  /**
+   * @param {Element} root
+   * @param {[Model, Lustre.Effect<Msg>]} init
+   * @param {(model: Model, msg: Msg) => [Model, Lustre.Effect<Msg>]} update
+   * @param {(model: Model) => Lustre.Element<Msg>} view
+   *
+   * @returns {LustreClientApplication}
+   */
+  constructor(root, [init3, effects], update2, view2) {
+    this.root = root;
+    this.#model = init3;
+    this.#update = update2;
+    this.#view = view2;
+    this.#tickScheduled = window.requestAnimationFrame(
+      () => this.#tick(effects.all.toArray(), true)
+    );
+  }
+  /** @type {Element} */
+  root;
+  /**
+   * @param {Lustre.Action<Lustre.Client, Msg>} action
+   *
+   * @returns {void}
+   */
+  send(action) {
+    if (action instanceof Debug) {
+      if (action[0] instanceof ForceModel) {
+        this.#tickScheduled = window.cancelAnimationFrame(this.#tickScheduled);
+        this.#queue = [];
+        this.#model = action[0][0];
+        const vdom = this.#view(this.#model);
+        const dispatch = (handler, immediate = false) => (event3) => {
+          const result = handler(event3);
+          if (result instanceof Ok) {
+            this.send(new Dispatch(result[0], immediate));
+          }
+        };
+        const prev = this.root.firstChild ?? this.root.appendChild(document.createTextNode(""));
+        morph(prev, vdom, dispatch);
+      }
+    } else if (action instanceof Dispatch) {
+      const msg = action[0];
+      const immediate = action[1] ?? false;
+      this.#queue.push(msg);
+      if (immediate) {
+        this.#tickScheduled = window.cancelAnimationFrame(this.#tickScheduled);
+        this.#tick();
+      } else if (!this.#tickScheduled) {
+        this.#tickScheduled = window.requestAnimationFrame(() => this.#tick());
+      }
+    } else if (action instanceof Emit2) {
+      const event3 = action[0];
+      const data = action[1];
+      this.root.dispatchEvent(
+        new CustomEvent(event3, {
+          detail: data,
+          bubbles: true,
+          composed: true
+        })
+      );
+    } else if (action instanceof Shutdown) {
+      this.#tickScheduled = window.cancelAnimationFrame(this.#tickScheduled);
+      this.#model = null;
+      this.#update = null;
+      this.#view = null;
+      this.#queue = null;
+      while (this.root.firstChild) {
+        this.root.firstChild.remove();
+      }
+    }
+  }
+  /** @type {Model} */
+  #model;
+  /** @type {(model: Model, msg: Msg) => [Model, Lustre.Effect<Msg>]} */
+  #update;
+  /** @type {(model: Model) => Lustre.Element<Msg>} */
+  #view;
+  /** @type {Array<Msg>} */
+  #queue = [];
+  /** @type {number | undefined} */
+  #tickScheduled;
+  /**
+   * @param {Lustre.Effect<Msg>[]} effects
+   * @param {boolean} isFirstRender
+   */
+  #tick(effects = [], isFirstRender = false) {
+    this.#tickScheduled = void 0;
+    if (!this.#flush(effects, isFirstRender))
+      return;
+    const vdom = this.#view(this.#model);
+    const dispatch = (handler, immediate = false) => (event3) => {
+      const result = handler(event3);
+      if (result instanceof Ok) {
+        this.send(new Dispatch(result[0], immediate));
+      }
+    };
+    const prev = this.root.firstChild ?? this.root.appendChild(document.createTextNode(""));
+    morph(prev, vdom, dispatch);
+  }
+  #flush(effects = [], didUpdate = false) {
+    while (this.#queue.length > 0) {
+      const msg = this.#queue.shift();
+      const [next, effect] = this.#update(this.#model, msg);
+      didUpdate ||= this.#model !== next;
+      effects = effects.concat(effect.all.toArray());
+      this.#model = next;
+    }
+    while (effects.length > 0) {
+      const effect = effects.shift();
+      const dispatch = (msg) => this.send(new Dispatch(msg));
+      const emit3 = (event3, data) => this.root.dispatchEvent(
+        new CustomEvent(event3, {
+          detail: data,
+          bubbles: true,
+          composed: true
+        })
+      );
+      const select = () => {
+      };
+      effect({ dispatch, emit: emit3, select });
+    }
+    if (this.#queue.length > 0) {
+      return this.#flush(effects, didUpdate);
+    } else {
+      return didUpdate;
+    }
+  }
+};
+var start = LustreClientApplication.start;
+var LustreServerApplication = class _LustreServerApplication {
+  static start({ init: init3, update: update2, view: view2, on_attribute_change }, flags) {
+    const app = new _LustreServerApplication(
+      init3(flags),
+      update2,
+      view2,
+      on_attribute_change
+    );
+    return new Ok((action) => app.send(action));
+  }
+  constructor([model, effects], update2, view2, on_attribute_change) {
     this.#model = model;
     this.#update = update2;
     this.#view = view2;
-    this.#root = root2;
-    this.#effects = effects.all.toArray();
-    this.#didUpdate = true;
-    this.#isComponent = isComponent;
-    window.requestAnimationFrame(() => this.#tick());
+    this.#html = view2(model);
+    this.#onAttributeChange = on_attribute_change;
+    this.#renderers = /* @__PURE__ */ new Map();
+    this.#handlers = handlers(this.#html);
+    this.#tick(effects.all.toArray());
   }
   send(action) {
-    switch (true) {
-      case action instanceof Dispatch: {
-        this.#queue.push(action[0]);
-        this.#tick();
-        return;
+    if (action instanceof Attrs) {
+      for (const attr of action[0]) {
+        const decoder = this.#onAttributeChange.get(attr[0]);
+        if (!decoder)
+          continue;
+        const msg = decoder(attr[1]);
+        if (msg instanceof Error)
+          continue;
+        this.#queue.push(msg);
       }
-      case action instanceof Shutdown: {
-        this.#shutdown();
-        return;
+      this.#tick();
+    } else if (action instanceof Batch) {
+      this.#queue = this.#queue.concat(action[0].toArray());
+      this.#tick(action[1].all.toArray());
+    } else if (action instanceof Debug) {
+    } else if (action instanceof Dispatch) {
+      this.#queue.push(action[0]);
+      this.#tick();
+    } else if (action instanceof Emit2) {
+      const event3 = new Emit(action[0], action[1]);
+      for (const [_, renderer] of this.#renderers) {
+        renderer(event3);
       }
-      case action instanceof Debug: {
-        this.#debug(action[0]);
+    } else if (action instanceof Event2) {
+      const handler = this.#handlers.get(action[0]);
+      if (!handler)
         return;
-      }
-      default:
+      const msg = handler(action[1]);
+      if (msg instanceof Error)
         return;
+      this.#queue.push(msg[0]);
+      this.#tick();
+    } else if (action instanceof Subscribe) {
+      const attrs2 = keys(this.#onAttributeChange);
+      const patch = new Init(attrs2, this.#html);
+      this.#renderers = this.#renderers.set(action[0], action[1]);
+      action[1](patch);
+    } else if (action instanceof Unsubscribe) {
+      this.#renderers = this.#renderers.delete(action[0]);
     }
   }
-  emit(event2, data) {
-    this.#root.dispatchEvent(
-      new CustomEvent(event2, {
-        bubbles: true,
-        detail: data,
-        composed: true
-      })
-    );
-  }
-  #tick() {
-    this.#flush_queue();
-    if (this.#didUpdate) {
-      const vdom = this.#view(this.#model);
-      const dispatch = (handler) => (e) => {
-        const result = handler(e);
-        if (result instanceof Ok) {
-          this.send(new Dispatch(result[0]));
-        }
-      };
-      this.#didUpdate = false;
-      this.#root = morph(this.#root, vdom, dispatch, this.#isComponent);
+  #model;
+  #update;
+  #queue;
+  #view;
+  #html;
+  #renderers;
+  #handlers;
+  #onAttributeChange;
+  #tick(effects = []) {
+    if (!this.#flush(false, effects))
+      return;
+    const vdom = this.#view(this.#model);
+    const diff2 = elements(this.#html, vdom);
+    if (!is_empty_element_diff(diff2)) {
+      const patch = new Diff(diff2);
+      for (const [_, renderer] of this.#renderers) {
+        renderer(patch);
+      }
     }
+    this.#html = vdom;
+    this.#handlers = diff2.handlers;
   }
-  #flush_queue(iterations = 0) {
-    while (this.#queue.length) {
-      const [next, effects] = this.#update(this.#model, this.#queue.shift());
-      this.#didUpdate ||= this.#model !== next;
+  #flush(didUpdate = false, effects = []) {
+    while (this.#queue.length > 0) {
+      const msg = this.#queue.shift();
+      const [next, effect] = this.#update(this.#model, msg);
+      didUpdate ||= this.#model !== next;
+      effects = effects.concat(effect.all.toArray());
       this.#model = next;
-      this.#effects = this.#effects.concat(effects.all.toArray());
     }
-    while (this.#effects.length) {
-      this.#effects.shift()(
-        (msg) => this.send(new Dispatch(msg)),
-        (event2, data) => this.emit(event2, data)
+    while (effects.length > 0) {
+      const effect = effects.shift();
+      const dispatch = (msg) => this.send(new Dispatch(msg));
+      const emit3 = (event3, data) => this.root.dispatchEvent(
+        new CustomEvent(event3, {
+          detail: data,
+          bubbles: true,
+          composed: true
+        })
       );
+      const select = () => {
+      };
+      effect({ dispatch, emit: emit3, select });
     }
-    if (this.#queue.length) {
-      if (iterations < 5) {
-        this.#flush_queue(++iterations);
-      } else {
-        window.requestAnimationFrame(() => this.#tick());
-      }
+    if (this.#queue.length > 0) {
+      return this.#flush(didUpdate, effects);
+    } else {
+      return didUpdate;
     }
-  }
-  #debug(action) {
-    switch (true) {
-      case action instanceof ForceModel: {
-        const vdom = this.#view(action[0]);
-        const dispatch = (handler) => (e) => {
-          const result = handler(e);
-          if (result instanceof Ok) {
-            this.send(new Dispatch(result[0]));
-          }
-        };
-        this.#queue = [];
-        this.#effects = [];
-        this.#didUpdate = false;
-        this.#root = morph(this.#root, vdom, dispatch, this.#isComponent);
-      }
-    }
-  }
-  #shutdown() {
-    this.#root.remove();
-    this.#root = null;
-    this.#model = null;
-    this.#queue = [];
-    this.#effects = [];
-    this.#didUpdate = false;
-    this.#update = () => {
-    };
-    this.#view = () => {
-    };
   }
 };
-var start = (app, selector, flags) => LustreClientApplication2.start(
-  flags,
-  selector,
-  app.init,
-  app.update,
-  app.view
-);
+var start_server_application = LustreServerApplication.start;
 var is_browser = () => globalThis.window && window.document;
 
 // build/dev/javascript/lustre/lustre.mjs
@@ -2845,7 +3671,7 @@ var NotABrowser = class extends CustomType {
 function application(init3, update2, view2) {
   return new App(init3, update2, view2, new None());
 }
-function start3(app, selector, flags) {
+function start2(app, selector, flags) {
   return guard(
     !is_browser(),
     new Error(new NotABrowser()),
@@ -2859,29 +3685,72 @@ function start3(app, selector, flags) {
 function text2(content) {
   return text(content);
 }
-function header(attrs, children) {
-  return element("header", attrs, children);
+function header(attrs2, children2) {
+  return element2("header", attrs2, children2);
 }
-function h1(attrs, children) {
-  return element("h1", attrs, children);
+function h1(attrs2, children2) {
+  return element2("h1", attrs2, children2);
 }
-function h2(attrs, children) {
-  return element("h2", attrs, children);
+function h2(attrs2, children2) {
+  return element2("h2", attrs2, children2);
 }
-function main(attrs, children) {
-  return element("main", attrs, children);
+function main(attrs2, children2) {
+  return element2("main", attrs2, children2);
 }
-function div(attrs, children) {
-  return element("div", attrs, children);
+function div(attrs2, children2) {
+  return element2("div", attrs2, children2);
 }
-function p(attrs, children) {
-  return element("p", attrs, children);
+function p(attrs2, children2) {
+  return element2("p", attrs2, children2);
 }
-function button(attrs, children) {
-  return element("button", attrs, children);
+function img(attrs2) {
+  return element2("img", attrs2, toList([]));
 }
-function input(attrs) {
-  return element("input", attrs, toList([]));
+function button(attrs2, children2) {
+  return element2("button", attrs2, children2);
+}
+function input(attrs2) {
+  return element2("input", attrs2, toList([]));
+}
+
+// build/dev/javascript/lustre/lustre/event.mjs
+function on2(name, handler) {
+  return on(name, handler);
+}
+function on_click(msg) {
+  return on2("click", (_) => {
+    return new Ok(msg);
+  });
+}
+function on_keydown(msg) {
+  return on2(
+    "keydown",
+    (event3) => {
+      let _pipe = event3;
+      let _pipe$1 = field("key", string)(_pipe);
+      return map3(_pipe$1, msg);
+    }
+  );
+}
+function value2(event3) {
+  let _pipe = event3;
+  return field("target", field("value", string))(
+    _pipe
+  );
+}
+function on_input(msg) {
+  return on2(
+    "input",
+    (event3) => {
+      let _pipe = value2(event3);
+      return map3(_pipe, msg);
+    }
+  );
+}
+
+// build/dev/javascript/lustre/lustre/server_component.mjs
+function route(path) {
+  return attribute("route", path);
 }
 
 // build/dev/javascript/gleam_stdlib/gleam/uri.mjs
@@ -3045,7 +3914,7 @@ function do_parse(uri_string) {
 function parse2(uri_string) {
   return do_parse(uri_string);
 }
-function to_string6(uri) {
+function to_string7(uri) {
   let parts = (() => {
     let $ = uri.fragment;
     if ($ instanceof Some) {
@@ -3271,7 +4140,7 @@ var PromiseLayer = class _PromiseLayer {
 function resolve(value4) {
   return Promise.resolve(PromiseLayer.wrap(value4));
 }
-function then(promise, fn) {
+function then_await(promise, fn) {
   return promise.then((value4) => fn(PromiseLayer.unwrap(value4)));
 }
 function map_promise(promise, fn) {
@@ -3296,7 +4165,7 @@ function tap(promise, callback) {
 }
 function try_await(promise, callback) {
   let _pipe = promise;
-  return then(
+  return then_await(
     _pipe,
     (result) => {
       if (result.isOk()) {
@@ -3326,7 +4195,7 @@ function from_fetch_response(response) {
   );
 }
 function to_fetch_request(request) {
-  let url = to_string6(to_uri(request));
+  let url = to_string7(to_uri(request));
   let method = method_to_string(request.method).toUpperCase();
   let options = {
     headers: make_headers(request.headers),
@@ -3473,7 +4342,7 @@ function expect_json(decoder, to_msg) {
       let _pipe$2 = then$(
         _pipe$1,
         (body2) => {
-          let $ = decode2(body2, decoder);
+          let $ = decode3(body2, decoder);
           if ($.isOk()) {
             let json = $[0];
             return new Ok(json);
@@ -3498,8 +4367,8 @@ function querySelector(query) {
 }
 
 // build/dev/javascript/plinth/element_ffi.mjs
-function innerText(element2) {
-  return element2.innerText;
+function innerText(element3) {
+  return element3.innerText;
 }
 
 // build/dev/javascript/shared/shared/pokemon.mjs
@@ -3527,16 +4396,141 @@ var Move = class extends CustomType {
     this.damage_class = damage_class;
   }
 };
+var Bug = class extends CustomType {
+};
+var Dark = class extends CustomType {
+};
+var Dragon = class extends CustomType {
+};
+var Electric = class extends CustomType {
+};
+var Fairy = class extends CustomType {
+};
+var Fighting = class extends CustomType {
+};
+var Fire = class extends CustomType {
+};
+var Flying = class extends CustomType {
+};
+var Ghost = class extends CustomType {
+};
+var Grass = class extends CustomType {
+};
+var Ground = class extends CustomType {
+};
+var Ice = class extends CustomType {
+};
+var Normal = class extends CustomType {
+};
+var Poison = class extends CustomType {
+};
+var Psychic = class extends CustomType {
+};
+var Rock = class extends CustomType {
+};
+var Steel = class extends CustomType {
+};
+var Water = class extends CustomType {
+};
+var Single = class extends CustomType {
+  constructor(x0) {
+    super();
+    this[0] = x0;
+  }
+};
+var Dual = class extends CustomType {
+  constructor(x0, x1) {
+    super();
+    this[0] = x0;
+    this[1] = x1;
+  }
+};
 var Pokemon = class extends CustomType {
-  constructor(id, name, base_experience, base_stats, moves) {
+  constructor(id, name, base_experience, base_stats, moves, sprite, artwork, types) {
     super();
     this.id = id;
     this.name = name;
     this.base_experience = base_experience;
     this.base_stats = base_stats;
     this.moves = moves;
+    this.sprite = sprite;
+    this.artwork = artwork;
+    this.types = types;
   }
 };
+function pokemon_type_from_string(string3) {
+  if (string3 === "bug") {
+    return new Ok(new Bug());
+  } else if (string3 === "dark") {
+    return new Ok(new Dark());
+  } else if (string3 === "dragon") {
+    return new Ok(new Dragon());
+  } else if (string3 === "electric") {
+    return new Ok(new Electric());
+  } else if (string3 === "fairy") {
+    return new Ok(new Fairy());
+  } else if (string3 === "fighting") {
+    return new Ok(new Fighting());
+  } else if (string3 === "fire") {
+    return new Ok(new Fire());
+  } else if (string3 === "flying") {
+    return new Ok(new Flying());
+  } else if (string3 === "ghost") {
+    return new Ok(new Ghost());
+  } else if (string3 === "grass") {
+    return new Ok(new Grass());
+  } else if (string3 === "ground") {
+    return new Ok(new Ground());
+  } else if (string3 === "ice") {
+    return new Ok(new Ice());
+  } else if (string3 === "normal") {
+    return new Ok(new Normal());
+  } else if (string3 === "poison") {
+    return new Ok(new Poison());
+  } else if (string3 === "psychic") {
+    return new Ok(new Psychic());
+  } else if (string3 === "rock") {
+    return new Ok(new Rock());
+  } else if (string3 === "steel") {
+    return new Ok(new Steel());
+  } else if (string3 === "water") {
+    return new Ok(new Water());
+  } else {
+    return new Error(void 0);
+  }
+}
+function pokemon_type_decoder() {
+  return (dyn) => {
+    return try$(
+      string(dyn),
+      (string3) => {
+        let _pipe = pokemon_type_from_string(string3);
+        return map_error(
+          _pipe,
+          (_) => {
+            return toList([
+              new DecodeError("Valid pokemon type", string3, toList([]))
+            ]);
+          }
+        );
+      }
+    );
+  };
+}
+function pokemon_types_decoder() {
+  return decode2(
+    (type1, type2) => {
+      if (type2 instanceof Some) {
+        let type2$1 = type2[0];
+        return new Dual(type1, type2$1);
+      } else {
+        return new Single(type1);
+      }
+    },
+    element(0, pokemon_type_decoder()),
+    element(1, optional(pokemon_type_decoder()))
+  );
+}
 function stats_decoder() {
   return decode6(
     (var0, var1, var2, var3, var4, var5) => {
@@ -3566,16 +4560,201 @@ function move_decoder() {
   );
 }
 function pokemon_decoder() {
-  return decode5(
-    (var0, var1, var2, var3, var4) => {
-      return new Pokemon(var0, var1, var2, var3, var4);
+  return decode8(
+    (var0, var1, var2, var3, var4, var5, var6, var7) => {
+      return new Pokemon(var0, var1, var2, var3, var4, var5, var6, var7);
     },
     field("id", int),
     field("name", string),
     field("base_experience", int),
     field("base_stats", stats_decoder()),
-    field("moves", list(move_decoder()))
+    field("moves", list(move_decoder())),
+    field("sprite", string),
+    field("artwork", string),
+    field("types", pokemon_types_decoder())
   );
+}
+
+// build/dev/javascript/shared/shared/components/pokemon_list.mjs
+function type_to_background(pokemon_type) {
+  let type_2 = (() => {
+    if (pokemon_type instanceof Single) {
+      let type_3 = pokemon_type[0];
+      return type_3;
+    } else {
+      let type1 = pokemon_type[0];
+      return type1;
+    }
+  })();
+  if (type_2 instanceof Bug) {
+    return "bg-bug";
+  } else if (type_2 instanceof Dark) {
+    return "bg-dark";
+  } else if (type_2 instanceof Dragon) {
+    return "bg-dragon";
+  } else if (type_2 instanceof Electric) {
+    return "bg-electric";
+  } else if (type_2 instanceof Fairy) {
+    return "bg-fairy";
+  } else if (type_2 instanceof Fighting) {
+    return "bg-fighting";
+  } else if (type_2 instanceof Fire) {
+    return "bg-fire";
+  } else if (type_2 instanceof Flying) {
+    return "bg-flying";
+  } else if (type_2 instanceof Ghost) {
+    return "bg-ghost";
+  } else if (type_2 instanceof Grass) {
+    return "bg-grass";
+  } else if (type_2 instanceof Ground) {
+    return "bg-ground";
+  } else if (type_2 instanceof Ice) {
+    return "bg-ice";
+  } else if (type_2 instanceof Normal) {
+    return "bg-normal";
+  } else if (type_2 instanceof Poison) {
+    return "bg-poison";
+  } else if (type_2 instanceof Psychic) {
+    return "bg-psychic";
+  } else if (type_2 instanceof Rock) {
+    return "bg-rock";
+  } else if (type_2 instanceof Steel) {
+    return "bg-steel";
+  } else {
+    return "bg-water";
+  }
+}
+function type_to_ring_colour(pokemon_type) {
+  let type_2 = (() => {
+    if (pokemon_type instanceof Single) {
+      let type_3 = pokemon_type[0];
+      return type_3;
+    } else {
+      let type1 = pokemon_type[0];
+      return type1;
+    }
+  })();
+  if (type_2 instanceof Bug) {
+    return "focus-visible:ring-bug";
+  } else if (type_2 instanceof Dark) {
+    return "focus-visible:ring-dark";
+  } else if (type_2 instanceof Dragon) {
+    return "focus-visible:ring-dragon";
+  } else if (type_2 instanceof Electric) {
+    return "focus-visible:ring-electric";
+  } else if (type_2 instanceof Fairy) {
+    return "focus-visible:ring-fairy";
+  } else if (type_2 instanceof Fighting) {
+    return "focus-visible:ring-fighting";
+  } else if (type_2 instanceof Fire) {
+    return "focus-visible:ring-fire";
+  } else if (type_2 instanceof Flying) {
+    return "focus-visible:ring-flying";
+  } else if (type_2 instanceof Ghost) {
+    return "focus-visible:ring-ghost";
+  } else if (type_2 instanceof Grass) {
+    return "focus-visible:ring-grass";
+  } else if (type_2 instanceof Ground) {
+    return "focus-visible:ring-ground";
+  } else if (type_2 instanceof Ice) {
+    return "focus-visible:ring-ice";
+  } else if (type_2 instanceof Normal) {
+    return "focus-visible:ring-normal";
+  } else if (type_2 instanceof Poison) {
+    return "focus-visible:ring-poison";
+  } else if (type_2 instanceof Psychic) {
+    return "focus-visible:ring-psychic";
+  } else if (type_2 instanceof Rock) {
+    return "focus-visible:ring-rock";
+  } else if (type_2 instanceof Steel) {
+    return "focus-visible:ring-steel";
+  } else {
+    return "focus-visible:ring-water";
+  }
+}
+function pokemon_button(pokemon, on_click2) {
+  return div(
+    toList([]),
+    toList([
+      button(
+        toList([
+          on_click(on_click2(pokemon)),
+          class$(
+            (() => {
+              let _pipe = toList([
+                "w-full text-left text-white text-sm rounded-lg",
+                "p-2 uppercase flex flex-row items-center gap-4",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
+                type_to_background(pokemon.types),
+                type_to_ring_colour(pokemon.types),
+                "hover:bg-opacity-80",
+                "transition-colors duration-300 ease-in-out",
+                "group"
+              ]);
+              return join2(_pipe, " ");
+            })()
+          )
+        ]),
+        toList([
+          img(
+            toList([
+              src(pokemon.sprite),
+              class$(
+                "h-24 w-auto transform group-hover:scale-110 transition-transform duration-300 ease-in-out"
+              ),
+              alt(pokemon.name + "'s sprite")
+            ])
+          ),
+          div(
+            toList([class$("flex flex-col gap-2")]),
+            toList([
+              p(
+                toList([class$("drop-shadow font-press-start-2p")]),
+                toList([text2(pokemon.name)])
+              ),
+              p(
+                toList([class$("text-xs")]),
+                toList([
+                  text2(
+                    "#" + (() => {
+                      let _pipe = pokemon.id;
+                      let _pipe$1 = to_string2(_pipe);
+                      return pad_left(_pipe$1, 4, "0");
+                    })()
+                  )
+                ])
+              )
+            ])
+          )
+        ])
+      )
+    ])
+  );
+}
+function render_pokemon_list(model, on_click2) {
+  return keyed(
+    (_capture) => {
+      return div(
+        toList([class$("flex flex-col gap-4 min-w-[25dvw] lg:min-w-[20dvw]")]),
+        _capture
+      );
+    },
+    map2(
+      model,
+      (pokemon) => {
+        return [
+          (() => {
+            let _pipe = pokemon.id;
+            return to_string2(_pipe);
+          })(),
+          pokemon_button(pokemon, on_click2)
+        ];
+      }
+    )
+  );
+}
+function prerender(model, on_click2) {
+  return render_pokemon_list(model, on_click2);
 }
 
 // build/dev/javascript/client/client/api.mjs
@@ -3593,44 +4772,12 @@ var LoadError = class extends CustomType {
     this[0] = x0;
   }
 };
-var api_root = "https://mon.ihh.dev";
+var api_root = "http://localhost:8000";
 function fetch_pokemon(search, on_result_msg) {
   let expect = expect_json(pokemon_decoder(), on_result_msg);
   return get2(
     api_root + "/pokemon/" + lowercase2(search),
     expect
-  );
-}
-function fetch_all_pokemon(on_result_msg) {
-  let expect = expect_json(
-    list(string),
-    on_result_msg
-  );
-  return get2(api_root + "/pokemon", expect);
-}
-
-// build/dev/javascript/lustre/lustre/event.mjs
-function on2(name, handler) {
-  return on(name, handler);
-}
-function on_click(msg) {
-  return on2("click", (_) => {
-    return new Ok(msg);
-  });
-}
-function value3(event2) {
-  let _pipe = event2;
-  return field("target", field("value", string))(
-    _pipe
-  );
-}
-function on_input(msg) {
-  return on2(
-    "input",
-    (event2) => {
-      let _pipe = value3(event2);
-      return map3(_pipe, msg);
-    }
   );
 }
 
@@ -3658,6 +4805,15 @@ function pokemon_search(value4, on_input_msg, on_click_msg) {
           class$(
             "w-full p-2 flex-grow h-10 border-red-500 border-2 rounded-xl sm:rounded-r-none sm:border-r-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
           ),
+          on_keydown(
+            (key2) => {
+              if (key2 === "Enter") {
+                return on_click_msg;
+              } else {
+                return on_input_msg(value4);
+              }
+            }
+          ),
           on_input(on_input_msg)
         ])
       ),
@@ -3673,25 +4829,14 @@ function pokemon_search(value4, on_input_msg, on_click_msg) {
     ])
   );
 }
-function button2(text3, on_click_msg) {
-  return button(
-    toList([
-      on_click(on_click_msg),
-      class$(
-        "w-full text-left bg-red-500 text-white text-semibold rounded-lg hover:bg-red-600 px-2 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
-      )
-    ]),
-    toList([text2(text3)])
-  );
-}
 
 // build/dev/javascript/client/client.mjs
-var Model = class extends CustomType {
-  constructor(current_pokemon, all_pokemon, pokemon_search2) {
+var Model2 = class extends CustomType {
+  constructor(current_pokemon, pokemon_search2, all_pokemon) {
     super();
     this.current_pokemon = current_pokemon;
-    this.all_pokemon = all_pokemon;
     this.pokemon_search = pokemon_search2;
+    this.all_pokemon = all_pokemon;
   }
 };
 var UserSelectedPokemon = class extends CustomType {
@@ -3714,17 +4859,18 @@ var ApiReturnedPokemon = class extends CustomType {
     this[0] = x0;
   }
 };
-var ApiReturnedAllPokemon = class extends CustomType {
-  constructor(x0) {
-    super();
-    this[0] = x0;
-  }
-};
-var AppRequestedAllPokemon = class extends CustomType {
-};
 function init2(initial_pokemon) {
   return [
-    new Model(new Loaded(new None()), initial_pokemon, ""),
+    new Model2(
+      new Loaded(new None()),
+      "",
+      (() => {
+        let _pipe = initial_pokemon;
+        return sort(_pipe, (a, b) => {
+          return compare(a.id, b.id);
+        });
+      })()
+    ),
     none()
   ];
 }
@@ -3766,29 +4912,6 @@ function handle_user_clicked_search_button(model) {
     return handle_user_selected_pokemon(model$1, cleaned);
   }
 }
-function handle_api_returned_pokemon_ok(model, pokemon) {
-  let default_return = [
-    model.withFields({ current_pokemon: new Loaded(new Some(pokemon)) }),
-    none()
-  ];
-  let $ = model.all_pokemon;
-  if ($ instanceof Loaded) {
-    let pokemon_names = $[0];
-    let $1 = contains(pokemon_names, pokemon.name);
-    if (!$1) {
-      return [
-        default_return[0],
-        fetch_all_pokemon((var0) => {
-          return new ApiReturnedAllPokemon(var0);
-        })
-      ];
-    } else {
-      return default_return;
-    }
-  } else {
-    return default_return;
-  }
-}
 function update(model, msg) {
   if (msg instanceof UserSelectedPokemon) {
     let pokemon_name = msg[0];
@@ -3798,17 +4921,13 @@ function update(model, msg) {
     return [model.withFields({ pokemon_search: search_term }), none()];
   } else if (msg instanceof UserClickedSearchButton) {
     return handle_user_clicked_search_button(model);
-  } else if (msg instanceof AppRequestedAllPokemon) {
-    return [
-      model.withFields({ all_pokemon: new Loading() }),
-      fetch_all_pokemon((var0) => {
-        return new ApiReturnedAllPokemon(var0);
-      })
-    ];
   } else if (msg instanceof ApiReturnedPokemon && msg[0].isOk()) {
     let pokemon = msg[0][0];
-    return handle_api_returned_pokemon_ok(model, pokemon);
-  } else if (msg instanceof ApiReturnedPokemon && !msg[0].isOk()) {
+    return [
+      model.withFields({ current_pokemon: new Loaded(new Some(pokemon)) }),
+      none()
+    ];
+  } else {
     let err = msg[0][0];
     return [
       model.withFields({
@@ -3818,47 +4937,15 @@ function update(model, msg) {
       }),
       none()
     ];
-  } else if (msg instanceof ApiReturnedAllPokemon && msg[0].isOk()) {
-    let pokemon_names = msg[0][0];
-    return [
-      model.withFields({
-        all_pokemon: new Loaded(
-          (() => {
-            let _pipe = pokemon_names;
-            return sort(_pipe, compare3);
-          })()
-        )
-      }),
-      none()
-    ];
-  } else {
-    let err = msg[0][0];
-    return [
-      model.withFields({
-        all_pokemon: new LoadError(
-          "Error fetching Pokemon: " + inspect2(err)
-        )
-      }),
-      none()
-    ];
   }
 }
-function pokemon_details(maybe_pokemon, all_pokemon) {
-  let message = (() => {
-    if (all_pokemon instanceof Loaded && all_pokemon[0].hasLength(0)) {
-      return "Search for a Pok\xE9mon to view details";
-    } else if (all_pokemon instanceof Loaded) {
-      return "Select a Pok\xE9mon to view details";
-    } else if (all_pokemon instanceof LoadError) {
-      let err = all_pokemon[0];
-      return "Error loading Pok\xE9mon: " + err;
-    } else {
-      return "Loading Pok\xE9mon selection...";
-    }
-  })();
+function pokemon_details(maybe_pokemon) {
   let content = (() => {
     if (maybe_pokemon instanceof Loaded && maybe_pokemon[0] instanceof None) {
-      return p(toList([]), toList([text2(message)]));
+      return p(
+        toList([]),
+        toList([text2("Search for a Pok\xE9mon to view details")])
+      );
     } else if (maybe_pokemon instanceof Loaded && maybe_pokemon[0] instanceof Some) {
       let pokemon = maybe_pokemon[0][0];
       return div(
@@ -3917,35 +5004,12 @@ function pokemon_details(maybe_pokemon, all_pokemon) {
   })();
   return div(toList([class$("flex-grow")]), toList([content]));
 }
-function pokemon_list(pokemon) {
-  if (pokemon instanceof Loaded) {
-    let pokemon$1 = pokemon[0];
-    return map2(
-      pokemon$1,
-      (p2) => {
-        return button2(p2, new UserSelectedPokemon(lowercase2(p2)));
-      }
-    );
-  } else if (pokemon instanceof LoadError) {
-    let err = pokemon[0];
-    return toList([
-      p(
-        toList([]),
-        toList([text2("Error loading Pok\xE9mon: " + err)])
-      )
-    ]);
-  } else {
-    return toList([
-      p(toList([]), toList([text2("Loading Pok\xE9mon...")]))
-    ]);
-  }
-}
 function main_content(pokemon_search_term, current_pokemon, all_pokemon) {
   return main(
     toList([class$("px-4")]),
     toList([
       div(
-        toList([class$("flex flex-col gap-8 w-full max-w-screen-xl mx-auto")]),
+        toList([class$("flex flex-col gap-8 w-full max-w-screen-lg mx-auto")]),
         toList([
           pokemon_search(
             pokemon_search_term,
@@ -3957,12 +5021,37 @@ function main_content(pokemon_search_term, current_pokemon, all_pokemon) {
           div(
             toList([class$("flex flex-col-reverse sm:flex-row gap-16 w-full")]),
             toList([
-              pokemon_details(current_pokemon, all_pokemon),
-              div(
+              pokemon_details(current_pokemon),
+              element2(
+                "lustre-server-component",
                 toList([
-                  class$("flex flex-col gap-4 min-w-[25dvw] lg:min-w-[20dvw]")
+                  route("/pokemon-list"),
+                  on2(
+                    "select",
+                    (v) => {
+                      debug("Received pokemon list event");
+                      return try$(
+                        (() => {
+                          let _pipe = v;
+                          return field("detail", string)(
+                            _pipe
+                          );
+                        })(),
+                        (name) => {
+                          return new Ok(new UserSelectedPokemon(name));
+                        }
+                      );
+                    }
+                  )
                 ]),
-                pokemon_list(all_pokemon)
+                toList([
+                  prerender(
+                    all_pokemon,
+                    (pokemon) => {
+                      return new UserSelectedPokemon(pokemon.name);
+                    }
+                  )
+                ])
               )
             ])
           )
@@ -3993,7 +5082,7 @@ function main2() {
     throw makeError(
       "assignment_no_match",
       "client",
-      23,
+      25,
       "main",
       "Assignment pattern did not match",
       { value: $ }
@@ -4001,19 +5090,20 @@ function main2() {
   }
   let json_string = $[0];
   let initial_pokemon = (() => {
-    let _pipe = decode2(json_string, list(string));
-    let _pipe$1 = map3(_pipe, (lst) => {
-      return new Loaded(lst);
-    });
-    return unwrap2(_pipe$1, new Loading());
+    let _pipe = decode3(
+      json_string,
+      list(pokemon_decoder())
+    );
+    let _pipe$1 = unwrap2(_pipe, toList([]));
+    return debug(_pipe$1);
   })();
   let app = application(init2, update, view);
-  let $1 = start3(app, "#app", initial_pokemon);
+  let $1 = start2(app, "#app", initial_pokemon);
   if (!$1.isOk()) {
     throw makeError(
       "assignment_no_match",
       "client",
-      33,
+      35,
       "main",
       "Assignment pattern did not match",
       { value: $1 }

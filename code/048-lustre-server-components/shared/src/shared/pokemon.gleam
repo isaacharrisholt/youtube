@@ -7,10 +7,11 @@
 //// interacting with the PokeAPI. All other types are internal to
 //// our application.
 
-import gleam/dynamic
-import gleam/json.{int, nullable, object, preprocessed_array, string}
+import gleam/dynamic.{DecodeError}
+import gleam/int
+import gleam/json.{int, null, nullable, object, preprocessed_array, string}
 import gleam/list
-import gleam/option.{type Option}
+import gleam/option.{type Option, None, Some}
 import gleam/result
 
 /// Info about a resource
@@ -132,6 +133,52 @@ fn api_pokemon_api_move_decoder() {
   )
 }
 
+pub type ApiPokemonOfficialArtwork {
+  ApiPokemonOfficialArtwork(front_default: String)
+}
+
+fn api_pokemon_official_artwork_decoder() {
+  dynamic.decode1(
+    ApiPokemonOfficialArtwork,
+    dynamic.field("front_default", dynamic.string),
+  )
+}
+
+pub type ApiPokemonOtherSprites {
+  ApiPokemonOtherSprites(official_artwork: ApiPokemonOfficialArtwork)
+}
+
+fn api_pokemon_other_sprites_decoder() {
+  dynamic.decode1(
+    ApiPokemonOtherSprites,
+    dynamic.field("official-artwork", api_pokemon_official_artwork_decoder()),
+  )
+}
+
+pub type ApiPokemonSprites {
+  ApiPokemonSprites(front_default: String, other: ApiPokemonOtherSprites)
+}
+
+fn api_pokemon_sprites_decoder() {
+  dynamic.decode2(
+    ApiPokemonSprites,
+    dynamic.field("front_default", dynamic.string),
+    dynamic.field("other", api_pokemon_other_sprites_decoder()),
+  )
+}
+
+pub type ApiPokemonType {
+  ApiPokemonType(type_: ApiResourceInfo, slot: Int)
+}
+
+fn api_pokemon_type_decoder() {
+  dynamic.decode2(
+    ApiPokemonType,
+    dynamic.field("type", api_resource_info_decoder()),
+    dynamic.field("slot", dynamic.int),
+  )
+}
+
 /// A Pokemon as returned by the PokeAPI
 pub type ApiPokemon {
   ApiPokemon(
@@ -140,18 +187,22 @@ pub type ApiPokemon {
     base_experience: Int,
     base_stats: Stats,
     moves: List(ApiPokemonMove),
+    sprites: ApiPokemonSprites,
+    types: List(ApiPokemonType),
   )
 }
 
 /// Decode a Pokemon from the PokeAPI
 pub fn api_pokemon_decoder() {
-  dynamic.decode5(
+  dynamic.decode7(
     ApiPokemon,
     dynamic.field("id", dynamic.int),
     dynamic.field("name", dynamic.string),
     dynamic.field("base_experience", dynamic.int),
     dynamic.field("stats", api_stats_decoder),
     dynamic.field("moves", dynamic.list(api_pokemon_api_move_decoder())),
+    dynamic.field("sprites", api_pokemon_sprites_decoder()),
+    dynamic.field("types", dynamic.list(api_pokemon_type_decoder())),
   )
 }
 
@@ -200,6 +251,102 @@ fn encode_move(move: Move) {
   ])
 }
 
+pub type PokemonType {
+  Bug
+  Dark
+  Dragon
+  Electric
+  Fairy
+  Fighting
+  Fire
+  Flying
+  Ghost
+  Grass
+  Ground
+  Ice
+  Normal
+  Poison
+  Psychic
+  Rock
+  Steel
+  Water
+}
+
+fn pokemon_type_from_string(string: String) -> Result(PokemonType, Nil) {
+  case string {
+    "bug" -> Ok(Bug)
+    "dark" -> Ok(Dark)
+    "dragon" -> Ok(Dragon)
+    "electric" -> Ok(Electric)
+    "fairy" -> Ok(Fairy)
+    "fighting" -> Ok(Fighting)
+    "fire" -> Ok(Fire)
+    "flying" -> Ok(Flying)
+    "ghost" -> Ok(Ghost)
+    "grass" -> Ok(Grass)
+    "ground" -> Ok(Ground)
+    "ice" -> Ok(Ice)
+    "normal" -> Ok(Normal)
+    "poison" -> Ok(Poison)
+    "psychic" -> Ok(Psychic)
+    "rock" -> Ok(Rock)
+    "steel" -> Ok(Steel)
+    "water" -> Ok(Water)
+    _ -> Error(Nil)
+  }
+}
+
+fn pokemon_type_to_string(pokemon_type: PokemonType) -> String {
+  case pokemon_type {
+    Bug -> "bug"
+    Dark -> "dark"
+    Dragon -> "dragon"
+    Electric -> "electric"
+    Fairy -> "fairy"
+    Fighting -> "fighting"
+    Fire -> "fire"
+    Flying -> "flying"
+    Ghost -> "ghost"
+    Grass -> "grass"
+    Ground -> "ground"
+    Ice -> "ice"
+    Normal -> "normal"
+    Poison -> "poison"
+    Psychic -> "psychic"
+    Rock -> "rock"
+    Steel -> "steel"
+    Water -> "water"
+  }
+}
+
+fn pokemon_type_decoder() -> dynamic.Decoder(PokemonType) {
+  fn(dyn) {
+    use string <- result.try(dynamic.string(dyn))
+    pokemon_type_from_string(string)
+    |> result.map_error(fn(_) {
+      [DecodeError(expected: "Valid pokemon type", found: string, path: [])]
+    })
+  }
+}
+
+pub type PokemonTypes {
+  Single(PokemonType)
+  Dual(PokemonType, PokemonType)
+}
+
+fn pokemon_types_decoder() -> dynamic.Decoder(PokemonTypes) {
+  dynamic.decode2(
+    fn(type1, type2) {
+      case type2 {
+        Some(type2) -> Dual(type1, type2)
+        None -> Single(type1)
+      }
+    },
+    dynamic.element(0, pokemon_type_decoder()),
+    dynamic.element(1, dynamic.optional(pokemon_type_decoder())),
+  )
+}
+
 /// A Pokemon with all its move details
 pub type Pokemon {
   Pokemon(
@@ -208,6 +355,9 @@ pub type Pokemon {
     base_experience: Int,
     base_stats: Stats,
     moves: List(Move),
+    sprite: String,
+    artwork: String,
+    types: PokemonTypes,
   )
 }
 
@@ -219,6 +369,17 @@ pub fn encode_pokemon(pokemon: Pokemon) {
     #("base_experience", int(pokemon.base_experience)),
     #("base_stats", encode_stats(pokemon.base_stats)),
     #("moves", preprocessed_array(list.map(pokemon.moves, encode_move))),
+    #("sprite", string(pokemon.sprite)),
+    #("artwork", string(pokemon.artwork)),
+    #("types", case pokemon.types {
+      Single(type_) ->
+        preprocessed_array([string(type_ |> pokemon_type_to_string), null()])
+      Dual(type1, type2) ->
+        preprocessed_array([
+          string(type1 |> pokemon_type_to_string),
+          string(type2 |> pokemon_type_to_string),
+        ])
+    }),
   ])
 }
 
@@ -249,12 +410,49 @@ fn move_decoder() {
 }
 
 pub fn pokemon_decoder() {
-  dynamic.decode5(
+  dynamic.decode8(
     Pokemon,
     dynamic.field("id", dynamic.int),
     dynamic.field("name", dynamic.string),
     dynamic.field("base_experience", dynamic.int),
     dynamic.field("base_stats", stats_decoder()),
     dynamic.field("moves", dynamic.list(move_decoder())),
+    dynamic.field("sprite", dynamic.string),
+    dynamic.field("artwork", dynamic.string),
+    dynamic.field("types", pokemon_types_decoder()),
   )
+}
+
+pub fn api_pokemon_to_pokemon(
+  pokemon: ApiPokemon,
+  moves: List(Move),
+) -> Result(Pokemon, Nil) {
+  let type_result = case
+    pokemon.types
+    |> list.sort(fn(t1, t2) { int.compare(t1.slot, t2.slot) })
+  {
+    [ApiPokemonType(type_, 1)] -> {
+      use type_name <- result.try(type_.name |> pokemon_type_from_string)
+      Ok(Single(type_name))
+    }
+    [ApiPokemonType(type_, 1), ApiPokemonType(type2, 2)] -> {
+      use type1_name <- result.try(type_.name |> pokemon_type_from_string)
+      use type2_name <- result.try(type2.name |> pokemon_type_from_string)
+      Ok(Dual(type1_name, type2_name))
+    }
+    _ -> Error(Nil)
+  }
+
+  use types <- result.try(type_result)
+
+  Ok(Pokemon(
+    id: pokemon.id,
+    name: pokemon.name,
+    base_experience: pokemon.base_experience,
+    base_stats: pokemon.base_stats,
+    moves: moves,
+    sprite: pokemon.sprites.front_default,
+    artwork: pokemon.sprites.other.official_artwork.front_default,
+    types:,
+  ))
 }

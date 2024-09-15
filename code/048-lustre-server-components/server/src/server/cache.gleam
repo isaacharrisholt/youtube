@@ -23,10 +23,12 @@ pub type Cache(value) =
   Subject(Message(value))
 
 /// Messages that can be sent to the cache actor.
-pub type Message(value) {
+pub opaque type Message(value) {
   Set(key: String, value: value)
   Get(reply_with: Subject(Result(value, Nil)), key: String)
   GetKeys(reply_with: Subject(List(String)))
+  GetValues(reply_with: Subject(List(value)))
+  Delete(key: String)
   Shutdown
 }
 
@@ -47,6 +49,14 @@ fn handle_message(
     }
     GetKeys(client) -> {
       process.send(client, dict.keys(store))
+      actor.continue(store)
+    }
+    GetValues(client) -> {
+      process.send(client, dict.values(store))
+      actor.continue(store)
+    }
+    Delete(key) -> {
+      let store = dict.delete(store, key)
       actor.continue(store)
     }
   }
@@ -70,6 +80,16 @@ pub fn get(cache: Cache(value), key: String) -> Result(value, Nil) {
 /// Get all keys in the cache.
 pub fn get_keys(cache: Cache(value)) -> List(String) {
   actor.call(cache, GetKeys, timeout)
+}
+
+/// Get all values in the cache.
+pub fn get_values(cache: Cache(value)) -> List(value) {
+  actor.call(cache, GetValues, timeout)
+}
+
+/// Delete a value from the cache.
+pub fn delete(cache: Cache(value), key: String) {
+  process.send(cache, Delete(key))
 }
 
 /// Shutdown the cache.

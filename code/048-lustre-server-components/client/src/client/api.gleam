@@ -4,7 +4,7 @@ import lustre/effect
 import lustre_http.{type HttpError}
 import shared/pokemon.{type Pokemon, pokemon_decoder}
 
-const api_root = "https://mon.ihh.dev"
+const api_root = "http://localhost:8000"
 
 pub type CanLoad(value, error) {
   Loading
