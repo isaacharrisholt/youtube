@@ -9,7 +9,7 @@ import lustre/effect
 import lustre/element
 import lustre/element/html
 import lustre/event
-import shared/pokemon.{type Pokemon}
+import shared/pokemon.{type Pokemon, type_to_background, type_to_ring_colour}
 
 pub fn app() {
   lustre.application(init, update, view)
@@ -56,67 +56,22 @@ fn render_pokemon_list(
   on_click: fn(Pokemon) -> a,
 ) -> element.Element(a) {
   element.keyed(
-    html.div([class("flex flex-col gap-4 min-w-[25dvw] lg:min-w-[20dvw]")], _),
+    html.div(
+      [
+        class(
+          [
+            "flex flex-col gap-4 min-w-[25dvw] lg:min-w-[20dvw] overflow-y-auto overflow-x-hidden",
+            "rounded-lg max-h-[23rem] md:max-h-[31rem] lg:max-h-[39rem]",
+          ]
+          |> string.join(" "),
+        ),
+      ],
+      _,
+    ),
     list.map(model, fn(pokemon) {
       #(pokemon.id |> int.to_string, pokemon_button(pokemon, on_click))
     }),
   )
-}
-
-fn type_to_background(pokemon_type: pokemon.PokemonTypes) -> String {
-  let type_ = case pokemon_type {
-    pokemon.Single(type_) -> type_
-    pokemon.Dual(type1, _) -> type1
-  }
-
-  case type_ {
-    pokemon.Bug -> "bg-bug"
-    pokemon.Dark -> "bg-dark"
-    pokemon.Dragon -> "bg-dragon"
-    pokemon.Electric -> "bg-electric"
-    pokemon.Fairy -> "bg-fairy"
-    pokemon.Fighting -> "bg-fighting"
-    pokemon.Fire -> "bg-fire"
-    pokemon.Flying -> "bg-flying"
-    pokemon.Ghost -> "bg-ghost"
-    pokemon.Grass -> "bg-grass"
-    pokemon.Ground -> "bg-ground"
-    pokemon.Ice -> "bg-ice"
-    pokemon.Normal -> "bg-normal"
-    pokemon.Poison -> "bg-poison"
-    pokemon.Psychic -> "bg-psychic"
-    pokemon.Rock -> "bg-rock"
-    pokemon.Steel -> "bg-steel"
-    pokemon.Water -> "bg-water"
-  }
-}
-
-fn type_to_ring_colour(pokemon_type: pokemon.PokemonTypes) -> String {
-  let type_ = case pokemon_type {
-    pokemon.Single(type_) -> type_
-    pokemon.Dual(type1, _) -> type1
-  }
-
-  case type_ {
-    pokemon.Bug -> "focus-visible:ring-bug"
-    pokemon.Dark -> "focus-visible:ring-dark"
-    pokemon.Dragon -> "focus-visible:ring-dragon"
-    pokemon.Electric -> "focus-visible:ring-electric"
-    pokemon.Fairy -> "focus-visible:ring-fairy"
-    pokemon.Fighting -> "focus-visible:ring-fighting"
-    pokemon.Fire -> "focus-visible:ring-fire"
-    pokemon.Flying -> "focus-visible:ring-flying"
-    pokemon.Ghost -> "focus-visible:ring-ghost"
-    pokemon.Grass -> "focus-visible:ring-grass"
-    pokemon.Ground -> "focus-visible:ring-ground"
-    pokemon.Ice -> "focus-visible:ring-ice"
-    pokemon.Normal -> "focus-visible:ring-normal"
-    pokemon.Poison -> "focus-visible:ring-poison"
-    pokemon.Psychic -> "focus-visible:ring-psychic"
-    pokemon.Rock -> "focus-visible:ring-rock"
-    pokemon.Steel -> "focus-visible:ring-steel"
-    pokemon.Water -> "focus-visible:ring-water"
-  }
 }
 
 pub fn pokemon_button(
@@ -153,7 +108,7 @@ pub fn pokemon_button(
           html.p([class("drop-shadow font-press-start-2p")], [
             html.text(pokemon.name),
           ]),
-          html.p([class("text-xs")], [
+          html.p([class("text-xs font-mono")], [
             html.text(
               "#" <> { pokemon.id |> int.to_string |> string.pad_left(4, "0") },
             ),

@@ -296,7 +296,7 @@ fn pokemon_type_from_string(string: String) -> Result(PokemonType, Nil) {
   }
 }
 
-fn pokemon_type_to_string(pokemon_type: PokemonType) -> String {
+pub fn pokemon_type_to_string(pokemon_type: PokemonType) -> String {
   case pokemon_type {
     Bug -> "bug"
     Dark -> "dark"
@@ -455,4 +455,60 @@ pub fn api_pokemon_to_pokemon(
     artwork: pokemon.sprites.other.official_artwork.front_default,
     types:,
   ))
+}
+
+pub fn type_to_background(pokemon_type: PokemonTypes) -> String {
+  let type_ = case pokemon_type {
+    Single(type_) -> type_
+    Dual(type1, _) -> type1
+  }
+
+  case type_ {
+    Bug -> "bg-bug"
+    Dark -> "bg-dark"
+    Dragon -> "bg-dragon"
+    Electric -> "bg-electric"
+    Fairy -> "bg-fairy"
+    Fighting -> "bg-fighting"
+    Fire -> "bg-fire"
+    Flying -> "bg-flying"
+    Ghost -> "bg-ghost"
+    Grass -> "bg-grass"
+    Ground -> "bg-ground"
+    Ice -> "bg-ice"
+    Normal -> "bg-normal"
+    Poison -> "bg-poison"
+    Psychic -> "bg-psychic"
+    Rock -> "bg-rock"
+    Steel -> "bg-steel"
+    Water -> "bg-water"
+  }
+}
+
+pub fn type_to_ring_colour(pokemon_type: PokemonTypes) -> String {
+  let type_ = case pokemon_type {
+    Single(type_) -> type_
+    Dual(type1, _) -> type1
+  }
+
+  case type_ {
+    Bug -> "focus-visible:ring-bug"
+    Dark -> "focus-visible:ring-dark"
+    Dragon -> "focus-visible:ring-dragon"
+    Electric -> "focus-visible:ring-electric"
+    Fairy -> "focus-visible:ring-fairy"
+    Fighting -> "focus-visible:ring-fighting"
+    Fire -> "focus-visible:ring-fire"
+    Flying -> "focus-visible:ring-flying"
+    Ghost -> "focus-visible:ring-ghost"
+    Grass -> "focus-visible:ring-grass"
+    Ground -> "focus-visible:ring-ground"
+    Ice -> "focus-visible:ring-ice"
+    Normal -> "focus-visible:ring-normal"
+    Poison -> "focus-visible:ring-poison"
+    Psychic -> "focus-visible:ring-psychic"
+    Rock -> "focus-visible:ring-rock"
+    Steel -> "focus-visible:ring-steel"
+    Water -> "focus-visible:ring-water"
+  }
 }

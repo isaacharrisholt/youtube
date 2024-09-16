@@ -27,9 +27,9 @@ module.exports = {
         steel: "#B7B7CE",
         fairy: "#D685AD",
       },
-    },
-    fontFamily: {
-      "press-start-2p": ["'Press Start 2P'", "display"],
+      fontFamily: {
+        "press-start-2p": ["'Press Start 2P'", "display"],
+      },
     },
   },
   plugins: [],

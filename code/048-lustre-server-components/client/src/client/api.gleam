@@ -7,7 +7,7 @@ import shared/pokemon.{type Pokemon, pokemon_decoder}
 const api_root = "http://localhost:8000"
 
 pub type CanLoad(value, error) {
-  Loading
+  Loading(current: value)
   Loaded(value)
   LoadError(error)
 }

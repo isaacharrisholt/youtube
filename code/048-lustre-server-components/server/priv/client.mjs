@@ -344,6 +344,11 @@ var Eq = class extends CustomType {
 var Gt = class extends CustomType {
 };
 
+// build/dev/javascript/gleam_stdlib/gleam/float.mjs
+function to_string(x) {
+  return float_to_string(x);
+}
+
 // build/dev/javascript/gleam_stdlib/gleam/int.mjs
 function absolute_value(x) {
   let $ = x >= 0;
@@ -356,8 +361,11 @@ function absolute_value(x) {
 function parse(string3) {
   return parse_int(string3);
 }
-function to_string2(x) {
-  return to_string(x);
+function to_string3(x) {
+  return to_string2(x);
+}
+function to_float(x) {
+  return identity(x);
 }
 function compare(a, b) {
   let $ = a === b;
@@ -370,6 +378,14 @@ function compare(a, b) {
     } else {
       return new Gt();
     }
+  }
+}
+function max(a, b) {
+  let $ = a > b;
+  if ($) {
+    return a;
+  } else {
+    return b;
   }
 }
 
@@ -944,6 +960,15 @@ function do_repeat(loop$a, loop$times, loop$acc) {
 function repeat(a, times) {
   return do_repeat(a, times, toList([]));
 }
+function reduce(list2, fun) {
+  if (list2.hasLength(0)) {
+    return new Error(void 0);
+  } else {
+    let first$1 = list2.head;
+    let rest$1 = list2.tail;
+    return new Ok(fold(rest$1, first$1, fun));
+  }
+}
 
 // build/dev/javascript/gleam_stdlib/gleam/result.mjs
 function map3(result, fun) {
@@ -994,7 +1019,7 @@ function nil_error(result) {
 function from_strings(strings) {
   return concat2(strings);
 }
-function to_string3(builder) {
+function to_string4(builder) {
   return identity(builder);
 }
 
@@ -1035,12 +1060,12 @@ function at_least_decode_tuple_error(size, data) {
   let error = (() => {
     let _pipe = toList([
       "Tuple of at least ",
-      to_string2(size),
+      to_string3(size),
       " element",
       s
     ]);
     let _pipe$1 = from_strings(_pipe);
-    let _pipe$2 = to_string3(_pipe$1);
+    let _pipe$2 = to_string4(_pipe$1);
     return new DecodeError(_pipe$2, classify(data), toList([]));
   })();
   return new Error(toList([error]));
@@ -1076,7 +1101,7 @@ function push_path(error, name) {
   let name$1 = from(name);
   let decoder = any(
     toList([string, (x) => {
-      return map3(int(x), to_string2);
+      return map3(int(x), to_string3);
     }])
   );
   let name$2 = (() => {
@@ -1087,7 +1112,7 @@ function push_path(error, name) {
     } else {
       let _pipe = toList(["<", classify(name$1), ">"]);
       let _pipe$1 = from_strings(_pipe);
-      return to_string3(_pipe$1);
+      return to_string4(_pipe$1);
     }
   })();
   return error.withFields({ path: prepend(name$2, error.path) });
@@ -1991,8 +2016,16 @@ function parse_int(value4) {
     return new Error(Nil);
   }
 }
-function to_string(term) {
+function to_string2(term) {
   return term.toString();
+}
+function float_to_string(float3) {
+  const string3 = float3.toString();
+  if (string3.indexOf(".") >= 0) {
+    return string3;
+  } else {
+    return string3 + ".0";
+  }
 }
 function string_length(string3) {
   if (string3 === "") {
@@ -2539,7 +2572,7 @@ function starts_with2(string3, prefix) {
 function concat3(strings) {
   let _pipe = strings;
   let _pipe$1 = from_strings(_pipe);
-  return to_string3(_pipe$1);
+  return to_string4(_pipe$1);
 }
 function join2(strings, separator) {
   return join(strings, separator);
@@ -2605,7 +2638,7 @@ function pad_left(string3, desired_length, pad_string) {
 }
 function inspect2(term) {
   let _pipe = inspect(term);
-  return to_string3(_pipe);
+  return to_string4(_pipe);
 }
 
 // build/dev/javascript/gleam_json/gleam_json_ffi.mjs
@@ -2834,7 +2867,7 @@ function do_element_list_handlers(elements2, handlers2, key2) {
     elements2,
     handlers2,
     (handlers3, element3, index3) => {
-      let key$1 = key2 + "-" + to_string2(index3);
+      let key$1 = key2 + "-" + to_string3(index3);
       return do_handlers(element3, handlers3, key$1);
     }
   );
@@ -2885,6 +2918,20 @@ function attribute(name, value4) {
 }
 function on(name, handler) {
   return new Event("on" + name, handler);
+}
+function style(properties) {
+  return attribute(
+    "style",
+    fold(
+      properties,
+      "",
+      (styles, _use1) => {
+        let name$1 = _use1[0];
+        let value$1 = _use1[1];
+        return styles + name$1 + ":" + value$1 + ";";
+      }
+    )
+  );
 }
 function class$(name) {
   return attribute("class", name);
@@ -2971,7 +3018,7 @@ function do_keyed(el2, key2) {
           let el_key = element3.key;
           let new_key = (() => {
             if (el_key === "") {
-              return key2 + "-" + to_string2(idx);
+              return key2 + "-" + to_string3(idx);
             } else {
               return key2 + "-" + el_key;
             }
@@ -3163,7 +3210,7 @@ function createElementNode({ prev, next, dispatch, stack }) {
   const prevHandlers = canMorph ? new Set(handlersForEl.keys()) : null;
   const prevAttributes = canMorph ? new Set(Array.from(prev.attributes, (a) => a.name)) : null;
   let className = null;
-  let style = null;
+  let style2 = null;
   let innerHTML = null;
   if (canMorph && next.tag === "textarea") {
     const innertText = next.children[Symbol.iterator]().next().value?.content;
@@ -3198,7 +3245,7 @@ function createElementNode({ prev, next, dispatch, stack }) {
     } else if (name === "class") {
       className = className === null ? value4 : className + " " + value4;
     } else if (name === "style") {
-      style = style === null ? value4 : style + value4;
+      style2 = style2 === null ? value4 : style2 + value4;
     } else if (name === "dangerous-unescaped-html") {
       innerHTML = value4;
     } else {
@@ -3215,8 +3262,8 @@ function createElementNode({ prev, next, dispatch, stack }) {
     if (canMorph)
       prevAttributes.delete("class");
   }
-  if (style !== null) {
-    el2.setAttribute("style", style);
+  if (style2 !== null) {
+    el2.setAttribute("style", style2);
     if (canMorph)
       prevAttributes.delete("style");
   }
@@ -3949,7 +3996,7 @@ function to_string7(uri) {
     let $1 = uri.port;
     if ($ instanceof Some && $1 instanceof Some) {
       let port = $1[0];
-      return prepend(":", prepend(to_string2(port), parts$3));
+      return prepend(":", prepend(to_string3(port), parts$3));
     } else {
       return parts$3;
     }
@@ -4499,6 +4546,45 @@ function pokemon_type_from_string(string3) {
     return new Error(void 0);
   }
 }
+function pokemon_type_to_string(pokemon_type) {
+  if (pokemon_type instanceof Bug) {
+    return "bug";
+  } else if (pokemon_type instanceof Dark) {
+    return "dark";
+  } else if (pokemon_type instanceof Dragon) {
+    return "dragon";
+  } else if (pokemon_type instanceof Electric) {
+    return "electric";
+  } else if (pokemon_type instanceof Fairy) {
+    return "fairy";
+  } else if (pokemon_type instanceof Fighting) {
+    return "fighting";
+  } else if (pokemon_type instanceof Fire) {
+    return "fire";
+  } else if (pokemon_type instanceof Flying) {
+    return "flying";
+  } else if (pokemon_type instanceof Ghost) {
+    return "ghost";
+  } else if (pokemon_type instanceof Grass) {
+    return "grass";
+  } else if (pokemon_type instanceof Ground) {
+    return "ground";
+  } else if (pokemon_type instanceof Ice) {
+    return "ice";
+  } else if (pokemon_type instanceof Normal) {
+    return "normal";
+  } else if (pokemon_type instanceof Poison) {
+    return "poison";
+  } else if (pokemon_type instanceof Psychic) {
+    return "psychic";
+  } else if (pokemon_type instanceof Rock) {
+    return "rock";
+  } else if (pokemon_type instanceof Steel) {
+    return "steel";
+  } else {
+    return "water";
+  }
+}
 function pokemon_type_decoder() {
   return (dyn) => {
     return try$(
@@ -4574,8 +4660,6 @@ function pokemon_decoder() {
     field("types", pokemon_types_decoder())
   );
 }
-
-// build/dev/javascript/shared/shared/components/pokemon_list.mjs
 function type_to_background(pokemon_type) {
   let type_2 = (() => {
     if (pokemon_type instanceof Single) {
@@ -4672,6 +4756,8 @@ function type_to_ring_colour(pokemon_type) {
     return "focus-visible:ring-water";
   }
 }
+
+// build/dev/javascript/shared/shared/components/pokemon_list.mjs
 function pokemon_button(pokemon, on_click2) {
   return div(
     toList([]),
@@ -4713,12 +4799,12 @@ function pokemon_button(pokemon, on_click2) {
                 toList([text2(pokemon.name)])
               ),
               p(
-                toList([class$("text-xs")]),
+                toList([class$("text-xs font-mono")]),
                 toList([
                   text2(
                     "#" + (() => {
                       let _pipe = pokemon.id;
-                      let _pipe$1 = to_string2(_pipe);
+                      let _pipe$1 = to_string3(_pipe);
                       return pad_left(_pipe$1, 4, "0");
                     })()
                   )
@@ -4735,7 +4821,17 @@ function render_pokemon_list(model, on_click2) {
   return keyed(
     (_capture) => {
       return div(
-        toList([class$("flex flex-col gap-4 min-w-[25dvw] lg:min-w-[20dvw]")]),
+        toList([
+          class$(
+            (() => {
+              let _pipe = toList([
+                "flex flex-col gap-4 min-w-[25dvw] lg:min-w-[20dvw] overflow-y-auto overflow-x-hidden",
+                "rounded-lg max-h-[23rem] md:max-h-[31rem] lg:max-h-[39rem]"
+              ]);
+              return join2(_pipe, " ");
+            })()
+          )
+        ]),
         _capture
       );
     },
@@ -4745,7 +4841,7 @@ function render_pokemon_list(model, on_click2) {
         return [
           (() => {
             let _pipe = pokemon.id;
-            return to_string2(_pipe);
+            return to_string3(_pipe);
           })(),
           pokemon_button(pokemon, on_click2)
         ];
@@ -4759,6 +4855,10 @@ function prerender(model, on_click2) {
 
 // build/dev/javascript/client/client/api.mjs
 var Loading = class extends CustomType {
+  constructor(current) {
+    super();
+    this.current = current;
+  }
 };
 var Loaded = class extends CustomType {
   constructor(x0) {
@@ -4875,26 +4975,31 @@ function init2(initial_pokemon) {
   ];
 }
 function handle_user_selected_pokemon(model, pokemon_name) {
-  let default_return = [
-    model.withFields({ current_pokemon: new Loading() }),
-    fetch_pokemon(
-      pokemon_name,
-      (var0) => {
-        return new ApiReturnedPokemon(var0);
-      }
-    )
-  ];
-  let $ = model.current_pokemon;
-  if ($ instanceof Loaded && $[0] instanceof Some) {
-    let current_pokemon = $[0][0];
-    let $1 = current_pokemon.name === pokemon_name;
-    if ($1) {
-      return [model, none()];
-    } else {
-      return default_return;
+  let fetch_effect = fetch_pokemon(
+    pokemon_name,
+    (var0) => {
+      return new ApiReturnedPokemon(var0);
     }
+  );
+  let $ = model.current_pokemon;
+  if ($ instanceof Loaded && $[0] instanceof Some && $[0][0].name === pokemon_name) {
+    let current_pokemon = $[0][0];
+    return [model, none()];
+  } else if ($ instanceof Loaded && $[0] instanceof Some) {
+    let current_pokemon = $[0][0];
+    return [
+      model.withFields({
+        current_pokemon: new Loading(new Some(current_pokemon))
+      }),
+      fetch_effect
+    ];
+  } else if ($ instanceof Loading) {
+    return [model, fetch_effect];
   } else {
-    return default_return;
+    return [
+      model.withFields({ current_pokemon: new Loading(new None()) }),
+      fetch_effect
+    ];
   }
 }
 function handle_user_clicked_search_button(model) {
@@ -4939,6 +5044,88 @@ function update(model, msg) {
     ];
   }
 }
+function type_badge(pokemon_type) {
+  return div(
+    toList([
+      class$(
+        "flex items-center gap-2 rounded text-white px-2 py-1 font-mono font-semibold uppercase " + type_to_background(
+          new Single(pokemon_type)
+        )
+      )
+    ]),
+    toList([
+      text2(
+        (() => {
+          let _pipe = pokemon_type;
+          return pokemon_type_to_string(_pipe);
+        })()
+      )
+    ])
+  );
+}
+function stat_bar(stat, max2) {
+  let stat_percent = (() => {
+    let _pipe = divideFloat(to_float(stat), to_float(max2)) * 100;
+    let _pipe$1 = to_string(_pipe);
+    return debug(_pipe$1);
+  })();
+  return div(
+    toList([
+      class$("rounded bg-red-500 w-full overflow-hidden font-bold")
+    ]),
+    toList([
+      div(
+        toList([
+          class$("h-full rounded bg-green-500 p-2"),
+          style(toList([["width", stat_percent + "%"]]))
+        ]),
+        toList([
+          text2(
+            (() => {
+              let _pipe = stat;
+              return to_string3(_pipe);
+            })()
+          )
+        ])
+      )
+    ])
+  );
+}
+function stat_grid(stats) {
+  let max2 = (() => {
+    let _pipe = toList([
+      stats.hp,
+      stats.atk,
+      stats.def,
+      stats.sp_atk,
+      stats.sp_def,
+      stats.speed
+    ]);
+    let _pipe$1 = reduce(_pipe, max);
+    return unwrap2(_pipe$1, 255);
+  })();
+  return div(
+    toList([
+      class$(
+        "grid grid-cols-[auto_1fr] gap-4 items-center text-sm font-mono font-semibold uppercase"
+      )
+    ]),
+    toList([
+      div(toList([]), toList([text2("HP")])),
+      stat_bar(stats.hp, max2),
+      div(toList([]), toList([text2("Attack")])),
+      stat_bar(stats.atk, max2),
+      div(toList([]), toList([text2("Defense")])),
+      stat_bar(stats.def, max2),
+      div(toList([]), toList([text2("Sp. Atk")])),
+      stat_bar(stats.sp_atk, max2),
+      div(toList([]), toList([text2("Sp. Def")])),
+      stat_bar(stats.sp_def, max2),
+      div(toList([]), toList([text2("Speed")])),
+      stat_bar(stats.speed, max2)
+    ])
+  );
+}
 function pokemon_details(maybe_pokemon) {
   let content = (() => {
     if (maybe_pokemon instanceof Loaded && maybe_pokemon[0] instanceof None) {
@@ -4949,64 +5136,162 @@ function pokemon_details(maybe_pokemon) {
     } else if (maybe_pokemon instanceof Loaded && maybe_pokemon[0] instanceof Some) {
       let pokemon = maybe_pokemon[0][0];
       return div(
-        toList([]),
+        toList([class$("flex flex-col gap-8")]),
         toList([
-          h2(toList([]), toList([text2(pokemon.name)])),
-          p(
-            toList([]),
-            toList([text2("HP: " + to_string2(pokemon.base_stats.hp))])
-          ),
-          p(
-            toList([]),
+          div(
+            toList([class$("flex flex-col gap-2")]),
             toList([
-              text2("Attack: " + to_string2(pokemon.base_stats.atk))
-            ])
-          ),
-          p(
-            toList([]),
-            toList([
-              text2("Defense: " + to_string2(pokemon.base_stats.def))
-            ])
-          ),
-          p(
-            toList([]),
-            toList([
-              text2(
-                "Sp. Atk: " + to_string2(pokemon.base_stats.sp_atk)
+              div(
+                toList([class$("flex gap-2 items-center")]),
+                prepend(
+                  h2(
+                    toList([
+                      class$(
+                        "text-xl font-press-start-2p drop-shadow-lg uppercase"
+                      )
+                    ]),
+                    toList([text2(pokemon.name)])
+                  ),
+                  (() => {
+                    if (maybe_pokemon instanceof Loading) {
+                      return toList([
+                        p(
+                          toList([class$("font-mono animate-spin text-lg")]),
+                          toList([text2("/")])
+                        )
+                      ]);
+                    } else {
+                      return toList([]);
+                    }
+                  })()
+                )
+              ),
+              p(
+                toList([class$("font-mono")]),
+                toList([
+                  text2(
+                    "#" + (() => {
+                      let _pipe = pokemon.id;
+                      let _pipe$1 = to_string3(_pipe);
+                      return pad_left(_pipe$1, 4, "0");
+                    })()
+                  )
+                ])
+              ),
+              div(
+                toList([class$("flex gap-2")]),
+                (() => {
+                  let $ = pokemon.types;
+                  if ($ instanceof Single) {
+                    let type_2 = $[0];
+                    return toList([type_badge(type_2)]);
+                  } else {
+                    let type1 = $[0];
+                    let type2 = $[1];
+                    return toList([type_badge(type1), type_badge(type2)]);
+                  }
+                })()
               )
             ])
           ),
-          p(
-            toList([]),
+          img(
             toList([
-              text2(
-                "Sp. Def: " + to_string2(pokemon.base_stats.sp_def)
+              src(pokemon.artwork),
+              class$(
+                "w-full md:w-1/2 rounded-lg drop-shadow-lg aspect-square"
               )
             ])
           ),
-          p(
-            toList([]),
-            toList([
-              text2("Speed: " + to_string2(pokemon.base_stats.speed))
-            ])
-          )
+          stat_grid(pokemon.base_stats)
         ])
       );
-    } else if (maybe_pokemon instanceof LoadError) {
+    } else if (maybe_pokemon instanceof Loading && maybe_pokemon.current instanceof Some) {
+      let pokemon = maybe_pokemon.current[0];
+      return div(
+        toList([class$("flex flex-col gap-8")]),
+        toList([
+          div(
+            toList([class$("flex flex-col gap-2")]),
+            toList([
+              div(
+                toList([class$("flex gap-2 items-center")]),
+                prepend(
+                  h2(
+                    toList([
+                      class$(
+                        "text-xl font-press-start-2p drop-shadow-lg uppercase"
+                      )
+                    ]),
+                    toList([text2(pokemon.name)])
+                  ),
+                  (() => {
+                    if (maybe_pokemon instanceof Loading) {
+                      return toList([
+                        p(
+                          toList([class$("font-mono animate-spin text-lg")]),
+                          toList([text2("/")])
+                        )
+                      ]);
+                    } else {
+                      return toList([]);
+                    }
+                  })()
+                )
+              ),
+              p(
+                toList([class$("font-mono")]),
+                toList([
+                  text2(
+                    "#" + (() => {
+                      let _pipe = pokemon.id;
+                      let _pipe$1 = to_string3(_pipe);
+                      return pad_left(_pipe$1, 4, "0");
+                    })()
+                  )
+                ])
+              ),
+              div(
+                toList([class$("flex gap-2")]),
+                (() => {
+                  let $ = pokemon.types;
+                  if ($ instanceof Single) {
+                    let type_2 = $[0];
+                    return toList([type_badge(type_2)]);
+                  } else {
+                    let type1 = $[0];
+                    let type2 = $[1];
+                    return toList([type_badge(type1), type_badge(type2)]);
+                  }
+                })()
+              )
+            ])
+          ),
+          img(
+            toList([
+              src(pokemon.artwork),
+              class$(
+                "w-full md:w-1/2 rounded-lg drop-shadow-lg aspect-square"
+              )
+            ])
+          ),
+          stat_grid(pokemon.base_stats)
+        ])
+      );
+    } else if (maybe_pokemon instanceof Loading && maybe_pokemon.current instanceof None) {
+      return p(toList([]), toList([text2("Loading Pok\xE9mon...")]));
+    } else {
       let err = maybe_pokemon[0];
       return p(
         toList([]),
         toList([text2("Error loading Pok\xE9mon: " + err)])
       );
-    } else {
-      return p(toList([]), toList([text2("Loading Pok\xE9mon...")]));
     }
   })();
   return div(toList([class$("flex-grow")]), toList([content]));
 }
 function main_content(pokemon_search_term, current_pokemon, all_pokemon) {
   return main(
-    toList([class$("px-4")]),
+    toList([class$("px-4 pb-24")]),
     toList([
       div(
         toList([class$("flex flex-col gap-8 w-full max-w-screen-lg mx-auto")]),
@@ -5082,7 +5367,7 @@ function main2() {
     throw makeError(
       "assignment_no_match",
       "client",
-      25,
+      26,
       "main",
       "Assignment pattern did not match",
       { value: $ }
@@ -5103,7 +5388,7 @@ function main2() {
     throw makeError(
       "assignment_no_match",
       "client",
-      35,
+      36,
       "main",
       "Assignment pattern did not match",
       { value: $1 }
