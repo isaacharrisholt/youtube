@@ -157,7 +157,9 @@ fn page_scaffold(
       ]),
       server_component.script(),
     ]),
-    html.body([], [html.div([attribute.id("app")], [content])]),
+    html.body([attribute.class("overscroll-none")], [
+      html.div([attribute.id("app")], [content]),
+    ]),
   ])
 }
 
