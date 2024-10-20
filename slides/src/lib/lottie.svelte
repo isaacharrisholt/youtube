@@ -17,7 +17,7 @@
 		animation_item = lottie.loadAnimation({
 			container: animation_container,
 			animationData: animation,
-			...options
+			...options,
 		})
 	})
 

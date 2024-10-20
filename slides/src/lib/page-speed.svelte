@@ -19,33 +19,33 @@
 	const bg_max_colour: Colour = {
 		r: 35,
 		g: 51,
-		b: 40
+		b: 40,
 	}
 	const bg_mid_colour: Colour = {
 		r: 55,
 		g: 48,
-		b: 36
+		b: 36,
 	}
 	const bg_min_colour: Colour = {
 		r: 55,
 		g: 35,
-		b: 36
+		b: 36,
 	}
 
 	const bar_max_colour: Colour = {
 		r: 48,
 		g: 208,
-		b: 100
+		b: 100,
 	}
 	const bar_mid_colour: Colour = {
 		r: 245,
 		g: 175,
-		b: 56
+		b: 56,
 	}
 	const bar_min_colour: Colour = {
 		r: 243,
 		g: 54,
-		b: 58
+		b: 58,
 	}
 
 	function lerp(start: number, stop: number, value: number) {
@@ -61,8 +61,8 @@
 			bg_min_colour.g,
 			bg_mid_colour.g,
 			bg_max_colour.g,
-			value / 100
-		)},${lerp3(bg_min_colour.b, bg_mid_colour.b, bg_max_colour.b, value / 100)})`
+			value / 100,
+		)},${lerp3(bg_min_colour.b, bg_mid_colour.b, bg_max_colour.b, value / 100)})`,
 	)
 
 	let bar = $derived(
@@ -70,8 +70,8 @@
 			bar_min_colour.g,
 			bar_mid_colour.g,
 			bar_max_colour.g,
-			value / 100
-		)},${lerp3(bar_min_colour.b, bar_mid_colour.b, bar_max_colour.b, value / 100)})`
+			value / 100,
+		)},${lerp3(bar_min_colour.b, bar_mid_colour.b, bar_max_colour.b, value / 100)})`,
 	)
 </script>
 

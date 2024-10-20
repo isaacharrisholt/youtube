@@ -11,57 +11,57 @@
 	import PageSpeed from '$lib/page-speed.svelte'
 
 	const SLIDE_1_DEFAULTS = {
-		cycle_font: false
+		cycle_font: false,
 	}
 	let slide_1 = $state({ ...SLIDE_1_DEFAULTS })
 
 	const slide_4_left = tween(10, {
 		duration: 1000,
-		easing: cubicInOut
+		easing: cubicInOut,
 	})
 
 	const slide_6_value_1 = tween(100, {
 		duration: 1000,
-		easing: cubicInOut
+		easing: cubicInOut,
 	})
 	const slide_6_value_2 = tween(100, {
 		duration: 1000,
 		delay: 100,
-		easing: cubicInOut
+		easing: cubicInOut,
 	})
 	const slide_6_value_3 = tween(100, {
 		duration: 1000,
 		delay: 200,
-		easing: cubicInOut
+		easing: cubicInOut,
 	})
 	const slide_6_value_4 = tween(100, {
 		duration: 1000,
 		delay: 300,
-		easing: cubicInOut
+		easing: cubicInOut,
 	})
 
 	const slide_8_m_left = tween(0, {
 		duration: 500,
-		easing: cubicInOut
+		easing: cubicInOut,
 	})
 
 	const SLIDE_16_DEFAULTS = {
-		html_code_el: undefined as Code | undefined
+		html_code_el: undefined as Code | undefined,
 	}
 	let slide_16 = $state({ ...SLIDE_16_DEFAULTS })
 
 	const slide_22_left = tween(0, {
 		duration: 500,
-		easing: cubicInOut
+		easing: cubicInOut,
 	})
 
 	const SLIDE_31_DEFAULTS = {
-		code_el: undefined as Code | undefined
+		code_el: undefined as Code | undefined,
 	}
 	let slide_31 = $state({ ...SLIDE_31_DEFAULTS })
 
 	const SLIDE_34_DEFAULTS = {
-		code_el: undefined as Code | undefined
+		code_el: undefined as Code | undefined,
 	}
 	let slide_34 = $state({ ...SLIDE_34_DEFAULTS })
 
@@ -69,27 +69,27 @@
 		copy_blurred: true,
 		show_copy: true,
 		build_blurred: true,
-		code_el: undefined as Code | undefined
+		code_el: undefined as Code | undefined,
 	}
 	let slide_40 = $state({ ...SLIDE_40_DEFAULTS })
 
 	const SLIDE_46_DEFAULTS = {
-		code_el: undefined as Code | undefined
+		code_el: undefined as Code | undefined,
 	}
 	let slide_46 = $state({ ...SLIDE_46_DEFAULTS })
 
 	const SLIDE_52_DEFAULTS = {
-		code_el: undefined as Code | undefined
+		code_el: undefined as Code | undefined,
 	}
 	let slide_52 = $state({ ...SLIDE_52_DEFAULTS })
 
 	const SLIDE_53_DEFAULTS = {
-		code_el: undefined as Code | undefined
+		code_el: undefined as Code | undefined,
 	}
 	let slide_53 = $state({ ...SLIDE_53_DEFAULTS })
 
 	const SLIDE_57_DEFAULTS = {
-		code_el: undefined as Code | undefined
+		code_el: undefined as Code | undefined,
 	}
 	let slide_57 = $state({ ...SLIDE_57_DEFAULTS })
 </script>
@@ -179,7 +179,7 @@
 					slide_6_value_1.to(29),
 					slide_6_value_2.to(82),
 					slide_6_value_3.to(54),
-					slide_6_value_4.to(13)
+					slide_6_value_4.to(13),
 				)
 			}}
 		/>

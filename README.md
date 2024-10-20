@@ -32,3 +32,4 @@ run the code.
 | [Create Robust Web Apps in Gleam with Lustre](https://youtu.be/3kr4Ydx6GGU)             | [gleam-web-apps-with-lustre](./code/041-gleam-web-apps-with-lustre/)                 |
 | [Slash Lustre Load Times with Server Side Rendering](https://youtu.be/q9j5V8CDPQY)      | [lustre-ssr](./code/044-lustre-ssr/)                                                 |
 | [How to Deploy Gleam Apps Anywhere](https://youtu.be/SheuSu3Slzw)                       | [deploying-gleam](./code/045-deploying-gleam/)                                       |
+| [Simple Realtime in Gleam with Lustre Server Components](https://youtu.be/bzvYJHRrin0)  | [lustre-server-components](./code/048-lustre-server-components/)                     |

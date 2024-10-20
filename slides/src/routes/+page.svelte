@@ -6,7 +6,8 @@
 		{ href: '/videos/044-lustre-ssr', text: 'Lustre SSR' },
 		{ href: '/videos/045-deploying-gleam', text: 'Deploying Gleam' },
 		{ href: '/videos/046-gleam-is-not-rust', text: 'Gleam is not Rust' },
-		{ href: '/videos/047-polar-for-impatient-devs', text: 'Polar for Impatient Devs' }
+		{ href: '/videos/047-polar-for-impatient-devs', text: 'Polar for Impatient Devs' },
+		{ href: '/videos/048-lustre-server-components', text: 'Lustre Server Components' },
 	]
 </script>
 

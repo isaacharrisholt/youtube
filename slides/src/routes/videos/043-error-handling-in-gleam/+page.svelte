@@ -3,7 +3,7 @@
 
 	const SLIDE_2_DEFAULTS = {
 		logo_1_visible: false,
-		logo_3_visible: false
+		logo_3_visible: false,
 	}
 	let slide_2 = $state({ ...SLIDE_2_DEFAULTS })
 
@@ -11,12 +11,12 @@
 		lucy_layout:
 			'grid grid-cols-1 grid-rows-1 place-items-center [&>*]:col-start-1 [&>*]:row-start-1',
 		lucy_size: 360,
-		servers_visible: false
+		servers_visible: false,
 	}
 	let slide_9 = $state({ ...SLIDE_9_DEFAULTS })
 
 	const SLIDE_23_DEFAULTS = {
-		code_el: undefined as Code | undefined
+		code_el: undefined as Code | undefined,
 	}
 	let slide_23 = $state({ ...SLIDE_23_DEFAULTS })
 
@@ -29,32 +29,32 @@ case fibs {
   [one, _, two, ..rest] -> do_something()
   _ -> panic as "Invalid fibs!"
 }
-		`.trim()
+		`.trim(),
 	}
 	let slide_24 = $state({ ...SLIDE_24_DEFAULTS })
 
 	const SLIDE_27_DEFAULTS = {
-		code_el: undefined as Code | undefined
+		code_el: undefined as Code | undefined,
 	}
 	let slide_27 = $state({ ...SLIDE_27_DEFAULTS })
 
 	const SLIDE_28_DEFAULTS = {
-		code_el: undefined as Code | undefined
+		code_el: undefined as Code | undefined,
 	}
 	let slide_28 = $state({ ...SLIDE_28_DEFAULTS })
 
 	const SLIDE_46_DEFAULTS = {
-		code_el: undefined as Code | undefined
+		code_el: undefined as Code | undefined,
 	}
 	let slide_46 = $state({ ...SLIDE_46_DEFAULTS })
 
 	const SLIDE_55_DEFAULTS = {
-		code_el: undefined as Code | undefined
+		code_el: undefined as Code | undefined,
 	}
 	let slide_55 = $state({ ...SLIDE_55_DEFAULTS })
 
 	const SLIDE_56_DEFAULTS = {
-		code_el: undefined as Code | undefined
+		code_el: undefined as Code | undefined,
 	}
 	let slide_56 = $state({ ...SLIDE_56_DEFAULTS })
 </script>
