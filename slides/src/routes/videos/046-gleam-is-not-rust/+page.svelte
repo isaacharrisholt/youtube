@@ -807,9 +807,9 @@ error[E0382]: borrow of moved value: \`val\`
 			<Transition visible>
 				<div
 					class="grid aspect-square h-[70vh] place-items-center rounded-full border-2 transition-colors duration-500 ease-in-out"
-					class:border-white={$slide_58.border}
-					class:border-transparent={!$slide_58.border}
-					style:margin-right="{$slide_58.margin}rem"
+					class:border-white={slide_58.border}
+					class:border-transparent={!slide_58.border}
+					style:margin-right="{slide_58.margin}rem"
 				>
 					<img src="/logos/lucy/gleam-lucy.svg" alt="" class="w-[20rem]" />
 				</div>
@@ -818,9 +818,9 @@ error[E0382]: borrow of moved value: \`val\`
 			<Transition visible>
 				<div
 					class="grid aspect-square h-[70vh] place-items-center rounded-full border-2 transition-colors duration-500 ease-in-out"
-					class:border-white={$slide_58.border}
-					class:border-transparent={!$slide_58.border}
-					style:margin-left="{$slide_58.margin}rem"
+					class:border-white={slide_58.border}
+					class:border-transparent={!slide_58.border}
+					style:margin-left="{slide_58.margin}rem"
 				>
 					<img src="/logos/rust-logo-white.png" alt="" class="w-[20rem]" />
 				</div>
