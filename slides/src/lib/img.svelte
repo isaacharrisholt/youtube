@@ -3,9 +3,10 @@
 	type Props = {
 		src: string
 		class?: string
+		default?: boolean
 	}
 
-	let { src, class: classes }: Props = $props()
+	let { src, class: classes, default: def = false }: Props = $props()
 </script>
 
-<img {src} alt="" class={twMerge('w-full rounded-xl shadow-2xl', classes)} />
+<img {src} alt="" class={twMerge('h-[70vh] w-full', !def && 'rounded-xl shadow-2xl', classes)} />

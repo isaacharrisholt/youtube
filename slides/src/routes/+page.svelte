@@ -8,6 +8,7 @@
 		{ href: '/videos/046-gleam-is-not-rust', text: 'Gleam is not Rust' },
 		{ href: '/videos/047-polar-for-impatient-devs', text: 'Polar for Impatient Devs' },
 		{ href: '/videos/048-lustre-server-components', text: 'Lustre Server Components' },
+		{ href: '/videos/049-you-dont-need-loops', text: "You Don't Need Loops" },
 	]
 </script>
 
