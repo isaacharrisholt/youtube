@@ -1145,17 +1145,13 @@ fn find(tree: Option(Tree(Email)), id: Int) -> Result(Email, Nil) {
 				class="w-fit !text-4xl !leading-tight"
 				theme="catppuccin-mocha"
 				code={`
-fn delete(tree: Option(Tree(a))) -> Nil {
+fn delete(tree: Option(Tree(a))) {
   case tree {
-    None -> Nil
+    None -> None
     Some(tree) -> {
-      delete(tree.lesser)
-      delete(tree.greater)
-
-      tree.lesser = None
-      tree.greater = None
-
-      Nil
+      let tree = option.unwrap(delete(tree.lesser), tree)
+  		let tree = option.unwrap(delete(tree.greater), tree)
+      Tree(..tree, lesser: None, greater: None)
     }
 	}
 }
