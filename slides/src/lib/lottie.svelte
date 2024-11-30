@@ -1,5 +1,5 @@
 <script lang="ts">
-	import lottie from 'lottie-web'
+	import type lottie from 'lottie-web'
 	import { onMount } from 'svelte'
 
 	let animation_container: HTMLDivElement
@@ -13,7 +13,8 @@
 	let { class: classes, animation, options }: Props = $props()
 	let animation_item: ReturnType<typeof lottie.loadAnimation>
 
-	onMount(() => {
+	onMount(async () => {
+		const { default: lottie } = await import('lottie-web')
 		animation_item = lottie.loadAnimation({
 			container: animation_container,
 			animationData: animation,

@@ -61,6 +61,9 @@ div:has(> pre) {
 
 pre {
 	background-color: oklch(21.34% 0 0) !important;
+	font-size: var(--font-size-4xl, 2.25rem /* 36px */) !important;
+	line-height: var(--font-size-4xl--line-height, 2.5rem /* 40px */) !important;
+	line-height: var(--line-height-tight, 1.25) !important;
 }
 
 /* view transitions */
