@@ -56,13 +56,13 @@ div:has(> pre) {
 	background-color: oklch(21.34% 0 0);
 	border-top: 1px solid oklch(34% 0 0);
 	border-radius: var(--radius-lg);
-	width: 80vw;
+	width: fit-content;
 }
 
 pre {
 	background-color: oklch(21.34% 0 0) !important;
-	font-size: var(--font-size-4xl, 2.25rem /* 36px */) !important;
-	line-height: var(--font-size-4xl--line-height, 2.5rem /* 40px */) !important;
+	font-size: var(--font-size-4xl, 2.25rem) !important;
+	line-height: var(--font-size-4xl--line-height, 2.5rem) !important;
 	line-height: var(--line-height-tight, 1.25) !important;
 }
 
