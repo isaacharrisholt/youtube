@@ -11,6 +11,7 @@
 		{ href: '/videos/049-you-dont-need-loops', text: "You Don't Need Loops" },
 		{ href: '/videos/050-using-use-in-gleam', text: 'Using use in Gleam' },
 		{ href: '/videos/051-learn-recursion-with-gleam', text: 'Learn recursion with Gleam' },
+		{ href: '/videos/052-phantom-types-in-gleam', text: 'Phantom types in Gleam' },
 	]
 </script>
 
