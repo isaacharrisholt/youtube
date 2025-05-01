@@ -13,6 +13,7 @@
 		{ href: '/videos/051-learn-recursion-with-gleam', text: 'Learn recursion with Gleam' },
 		{ href: '/videos/052-phantom-types-in-gleam', text: 'Phantom types in Gleam' },
 		{ href: '/videos/053-squirrel', text: 'Squirrel' },
+		{ href: '/videos/054-chess-tournament-announcement', text: 'Chess tournament announcement' },
 	]
 </script>
 
