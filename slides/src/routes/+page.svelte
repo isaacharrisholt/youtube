@@ -14,6 +14,7 @@
 		{ href: '/videos/052-phantom-types-in-gleam', text: 'Phantom types in Gleam' },
 		{ href: '/videos/053-squirrel', text: 'Squirrel' },
 		{ href: '/videos/054-chess-tournament-announcement', text: 'Chess tournament announcement' },
+		{ href: '/videos/055-decoders-in-gleam', text: 'Decoders in Gleam' },
 	]
 </script>
 
@@ -21,12 +22,18 @@
 	<Slide class="h-full place-content-center place-items-center gap-4">
 		<h1 class="text-4xl">Isaac Harris-Holt's video slides</h1>
 
-		<ul class="flex list-none flex-col items-start text-base">
+		<ol
+			class="flex max-w-2xl list-none flex-wrap items-start justify-center gap-x-3 gap-y-4 text-base"
+		>
 			{#each links as link}
 				<li>
-					<a href={link.href} class="text-white">{link.text}</a>
+					<a
+						href={link.href}
+						class="rounded-full border bg-blue-800/30 py-0.5 px-2 text-blue-400 no-underline"
+						>{link.text}</a
+					>
 				</li>
 			{/each}
-		</ul>
+		</ol>
 	</Slide>
 </Presentation>
